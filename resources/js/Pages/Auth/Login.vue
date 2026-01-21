@@ -57,7 +57,7 @@ const submit = async () => {
           <div class="auth-card">
 
             <div class="text-center mb-4">
-              <h2 class="auth-title mb-2">Iniciar sesión</h2>
+              <h6 class="auth-title mb-2">Iniciar sesión</h6>
               <p class="auth-subtitle mb-0">
                 Ingrese sus credenciales para acceder al sistema.
               </p>
@@ -192,7 +192,7 @@ const submit = async () => {
 }
 
 .auth-title {
-  font-size: 16px;
+  font-size: 12px;
   font-weight: 600;
 }
 

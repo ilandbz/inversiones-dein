@@ -25,11 +25,9 @@ trait LoginTrait
             'es_activo' => 1
         ];
 
-        // Primero obtenemos el usuario real
         $user = User::where('name', $request->name)
             ->with('roles')
             ->first();
-
 
         if (!$user || !Hash::check($request->password, $user->password)) {
             return response()->json([
@@ -43,25 +41,12 @@ trait LoginTrait
             ], 422);
         }
 
-        // Usuario autenticado y correcto
         $user = auth()->user();
         $user->load('roles');
 
         if (!$user->role_id || !$user->existeRole($user->role_id)) {
             $user->role_id = $user->roles->first()->id ?? 10;
         }
-
-
-        // $rolesRestringidos = Role::whereIn('nombre', [
-        //     'ASESOR', 'COBRANZA', 'COBRANZA HUANUCO', 'GERENTE AGENCIA'
-        // ])->pluck('id');
-
-
-        // $requiereValidacionDispositivo = $rolesRestringidos->contains($user->role_id);
-
-        // if ($requiereValidacionDispositivo && !$this->validarDispositivo($request)) {
-        //     $user->role_id = 10;
-        // }
 
         $user->save();
 

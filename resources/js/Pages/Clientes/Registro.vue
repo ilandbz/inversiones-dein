@@ -1,14 +1,19 @@
 <script setup>
-import { reactive, ref, onBeforeUnmount, onMounted } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
+import useHelper from '@/Helpers'
+import useCliente from '@/Composables/Cliente.js'
 
 const router = useRouter()
+const { Toast, soloNumeros } = useHelper()
+
+const { errors, respuesta, agregarCliente } = useCliente()
 
 onMounted(() => {
   document.title = 'Registro de Clientes'
 })
 
-const form = reactive({
+const form = ref({
   dni: '',
   ruc: '',
   celular: '',
@@ -22,7 +27,7 @@ const form = reactive({
   fecha_nac: '',
   genero: 'M',
   estado_civil: 'SOLTERO',
-  ubigeo_nac: '',
+  ubigeo: '',
 
   profesion: '',
   grado_instr: '',
@@ -34,8 +39,98 @@ const form = reactive({
 
   estado: 'ACTIVO',
   fecha_reg: '',
-  hora_reg: ''
+  hora_reg: '',
+
+  errors: {}
 })
+
+const toArr = (v) => {
+  if (!v) return []
+  if (Array.isArray(v)) return v.map(String)
+  return [String(v)]
+}
+
+const normalizeErrors = (payload) => {
+  const out = {}
+  const src = payload?.errors && typeof payload.errors === 'object' ? payload.errors : payload
+
+  if (src && typeof src === 'object') {
+    for (const k of Object.keys(src)) out[k] = toArr(src[k])
+  }
+
+  if (out.ubigeo && !out.ubigeo) out.ubigeo = out.ubigeo
+
+  return out
+}
+
+const clearErrors = () => {
+  form.value.errors = {}
+}
+
+const setErrorsFromComposable = () => {
+  form.value.errors = normalizeErrors(errors.value)
+}
+
+const hasError = (name) => toArr(form.value?.errors?.[name]).length > 0
+const firstError = (name) => toArr(form.value?.errors?.[name])[0] || ''
+
+const clearFieldError = (name) => {
+  if (form.value?.errors?.[name]) delete form.value.errors[name]
+}
+
+const topErrors = computed(() => {
+  const e = form.value?.errors || {}
+  const set = new Set()
+
+  for (const key of Object.keys(e)) {
+    for (const msg of toArr(e[key])) {
+      const m = String(msg).trim()
+      if (m === '* Dato Obligatorio' || m.toLowerCase().includes('dato obligatorio')) continue
+      set.add(m)
+    }
+  }
+  return [...set]
+})
+
+const showTopAlert = computed(() => {
+  return Object.keys(form.value?.errors || {}).length > 0
+})
+
+const guardar = async () => {
+  clearErrors()
+
+  const formData = new FormData()
+
+  for (const key in form.value) {
+    if (key === 'errors') continue
+
+    const v = form.value[key]
+    if (v === null || v === undefined || v === '') continue
+
+    formData.append(key, v)
+  }
+
+  if (photoFile.value instanceof File) {
+    formData.append('foto', photoFile.value)
+  }
+
+  await agregarCliente(formData)
+
+  if (errors.value) {
+    setErrorsFromComposable()
+    return
+  }
+
+  if (respuesta.value?.ok == 1) {
+    Toast.fire({ icon: 'success', title: respuesta.value.mensaje })
+    clearErrors()
+    resetForm()
+  }
+}
+
+const cancelar = () => {
+  router.push({ name: 'Principal' })
+}
 
 // FOTO
 const photoFile = ref(null)
@@ -76,16 +171,6 @@ const removePhoto = () => {
 onBeforeUnmount(() => {
   if (previewUrl) URL.revokeObjectURL(previewUrl)
 })
-
-const submit = () => {
-  // aquí luego lo conectas a tu API/Laravel con FormData si incluye foto
-  console.log('Enviar', JSON.parse(JSON.stringify(form)), photoFile.value)
-}
-
-const cancelar = () => {
-  // ajusta al nombre real de tu ruta principal
-  router.push({ name: 'Principal' })
-}
 </script>
 
 <template>
@@ -96,7 +181,6 @@ const cancelar = () => {
 
   <div class="page-content">
     <section class="row">
-      <!-- IZQUIERDA: FORM -->
       <div class="col-12 col-lg-8">
         <div class="card">
           <div class="card-header">
@@ -104,51 +188,134 @@ const cancelar = () => {
           </div>
 
           <div class="card-body">
-            <form @submit.prevent="submit">
+
               <div class="row g-3">
+
                 <div class="col-12 col-md-3">
                   <label class="form-label">DNI</label>
-                  <input v-model="form.dni" class="form-control" maxlength="8" placeholder="Ej: 12345678" />
+                  <input
+                    v-model="form.dni"
+                    class="form-control"
+                    :class="{ 'is-invalid': hasError('dni') }"
+                    maxlength="8"
+                    @keypress="soloNumeros"
+                    placeholder="Ej: 12345678"
+                    @input="clearFieldError('dni')"
+                  />
+                  <div class="invalid-feedback" v-if="hasError('dni')">
+                    {{ firstError('dni') }}
+                  </div>
                 </div>
 
                 <div class="col-12 col-md-3">
                   <label class="form-label">RUC (opcional)</label>
-                  <input v-model="form.ruc" class="form-control" maxlength="11" placeholder="Ej: 10456789123" />
+                  <input
+                    v-model="form.ruc"
+                    class="form-control"
+                    :class="{ 'is-invalid': hasError('ruc') }"
+                    maxlength="11"
+                    placeholder="Ej: 10456789123"
+                    @keypress="soloNumeros"
+                    @input="clearFieldError('ruc')"
+                  />
+                  <div class="invalid-feedback" v-if="hasError('ruc')">
+                    {{ firstError('ruc') }}
+                  </div>
                 </div>
 
                 <div class="col-12 col-md-3">
                   <label class="form-label">Celular</label>
-                  <input v-model="form.celular" class="form-control" maxlength="11" placeholder="Ej: 999999999" />
+                  <input
+                    v-model="form.celular"
+                    class="form-control"
+                    :class="{ 'is-invalid': hasError('celular') }"
+                    maxlength="9"
+                    @keypress="soloNumeros"
+                    placeholder="Ej: 999999999"
+                    @input="clearFieldError('celular')"
+                  />
+                  <div class="invalid-feedback" v-if="hasError('celular')">
+                    {{ firstError('celular') }}
+                  </div>
                 </div>
 
                 <div class="col-12 col-md-3">
                   <label class="form-label">Email (opcional)</label>
-                  <input v-model="form.email" type="email" class="form-control" placeholder="correo@dominio.com" />
+                  <input
+                    v-model="form.email"
+                    type="email"
+                    class="form-control"
+                    :class="{ 'is-invalid': hasError('email') }"
+                    placeholder="correo@dominio.com"
+                    @input="clearFieldError('email')"
+                  />
+                  <div class="invalid-feedback" v-if="hasError('email')">
+                    {{ firstError('email') }}
+                  </div>
                 </div>
 
                 <div class="col-12 col-md-3">
                   <label class="form-label">Apellido paterno</label>
-                  <input v-model="form.ape_pat" class="form-control" placeholder="Ej: Pérez" />
+                  <input
+                    v-model="form.ape_pat"
+                    class="form-control"
+                    :class="{ 'is-invalid': hasError('ape_pat') }"
+                    placeholder="Ej: Pérez"
+                    @input="clearFieldError('ape_pat')"
+                  />
+                  <div class="invalid-feedback" v-if="hasError('ape_pat')">
+                    {{ firstError('ape_pat') }}
+                  </div>
                 </div>
 
                 <div class="col-12 col-md-3">
                   <label class="form-label">Apellido materno</label>
-                  <input v-model="form.ape_mat" class="form-control" placeholder="Ej: Gómez" />
+                  <input
+                    v-model="form.ape_mat"
+                    class="form-control"
+                    :class="{ 'is-invalid': hasError('ape_mat') }"
+                    placeholder="Ej: Gómez"
+                    @input="clearFieldError('ape_mat')"
+                  />
+                  <div class="invalid-feedback" v-if="hasError('ape_mat')">
+                    {{ firstError('ape_mat') }}
+                  </div>
                 </div>
 
                 <div class="col-12 col-md-3">
                   <label class="form-label">Primer nombre</label>
-                  <input v-model="form.primernombre" class="form-control" placeholder="Ej: Juan" />
+                  <input
+                    v-model="form.primernombre"
+                    class="form-control"
+                    :class="{ 'is-invalid': hasError('primernombre') }"
+                    placeholder="Ej: Juan"
+                    @input="clearFieldError('primernombre')"
+                  />
+                  <div class="invalid-feedback" v-if="hasError('primernombre')">
+                    {{ firstError('primernombre') }}
+                  </div>
                 </div>
 
                 <div class="col-12 col-md-3">
                   <label class="form-label">Otros nombres</label>
                   <input v-model="form.otrosnombres" class="form-control" placeholder="Ej: Carlos Alberto" />
+                  <div class="invalid-feedback" v-if="hasError('otrosnombres')">
+                    {{ firstError('otrosnombres') }}
+                  </div>
                 </div>
 
                 <div class="col-12 col-md-3">
                   <label class="form-label">Fecha de nacimiento</label>
-                  <input v-model="form.fecha_nac" type="date" class="form-control" />
+                  <input
+                    v-model="form.fecha_nac"
+                    type="date"
+                    class="form-control"
+                    :class="{ 'is-invalid': hasError('fecha_nac') }"
+                    @input="clearFieldError('fecha_nac')"
+                  />
+                  <div class="invalid-feedback" v-if="hasError('fecha_nac')">
+                    {{ firstError('fecha_nac') }}
+                  </div>
                 </div>
 
                 <div class="col-12 col-md-3">
@@ -172,40 +339,105 @@ const cancelar = () => {
 
                 <div class="col-12 col-md-3">
                   <label class="form-label">Ubigeo Nacimiento (opcional)</label>
-                  <input v-model="form.ubigeo_nac" class="form-control" maxlength="6" placeholder="Ej: 090101" />
+                  <input
+                    v-model="form.ubigeo"
+                    class="form-control"
+                    :class="{ 'is-invalid': hasError('ubigeo') }"
+                    maxlength="6"
+                    @keypress="soloNumeros"
+                    placeholder="Ej: 090101"
+                    @input="clearFieldError('ubigeo')"
+                  />
+                  <div class="invalid-feedback" v-if="hasError('ubigeo')">
+                    {{ firstError('ubigeo') }}
+                  </div>
                 </div>
 
                 <div class="col-12 col-md-4">
                   <label class="form-label">Profesión</label>
-                  <input v-model="form.profesion" class="form-control" placeholder="Ej: Comerciante" />
+                  <input
+                    v-model="form.profesion"
+                    class="form-control"
+                    :class="{ 'is-invalid': hasError('profesion') }"
+                    placeholder="Ej: Comerciante"
+                    @input="clearFieldError('profesion')"
+                  />
+                  <div class="invalid-feedback" v-if="hasError('profesion')">
+                    {{ firstError('profesion') }}
+                  </div>
                 </div>
 
                 <div class="col-12 col-md-4">
                   <label class="form-label">Grado de instrucción</label>
-                  <input v-model="form.grado_instr" class="form-control" placeholder="Ej: Secundaria / Superior" />
+                  <input
+                    v-model="form.grado_instr"
+                    class="form-control"
+                    :class="{ 'is-invalid': hasError('grado_instr') }"
+                    placeholder="Ej: Secundaria / Superior"
+                    @input="clearFieldError('grado_instr')"
+                  />
+                  <div class="invalid-feedback" v-if="hasError('grado_instr')">
+                    {{ firstError('grado_instr') }}
+                  </div>
                 </div>
 
                 <div class="col-12 col-md-4">
                   <label class="form-label">Origen laboral</label>
-                  <select v-model="form.origen_labor" class="form-select">
+                  <select
+                    v-model="form.origen_labor"
+                    class="form-select"
+                    :class="{ 'is-invalid': hasError('origen_labor') }"
+                    @change="clearFieldError('origen_labor')"
+                  >
                     <option>INDEPENDIENTE</option>
                     <option>DEPENDIENTE</option>
                   </select>
+                  <div class="invalid-feedback" v-if="hasError('origen_labor')">
+                    {{ firstError('origen_labor') }}
+                  </div>
                 </div>
 
                 <div class="col-12 col-md-6">
                   <label class="form-label">Ocupación</label>
-                  <input v-model="form.ocupacion" class="form-control" placeholder="Ej: Vendedor" />
+                  <input
+                    v-model="form.ocupacion"
+                    class="form-control"
+                    :class="{ 'is-invalid': hasError('ocupacion') }"
+                    placeholder="Ej: Vendedor"
+                    @input="clearFieldError('ocupacion')"
+                  />
+                  <div class="invalid-feedback" v-if="hasError('ocupacion')">
+                    {{ firstError('ocupacion') }}
+                  </div>
                 </div>
 
                 <div class="col-12 col-md-6">
                   <label class="form-label">Institución laboral</label>
-                  <input v-model="form.institucion_lab" class="form-control" placeholder="Ej: NINGUNO / Empresa" />
+                  <input
+                    v-model="form.institucion_lab"
+                    class="form-control"
+                    :class="{ 'is-invalid': hasError('institucion_lab') }"
+                    placeholder="Ej: NINGUNO / Empresa"
+                    @input="clearFieldError('institucion_lab')"
+                  />
+                  <div class="invalid-feedback" v-if="hasError('institucion_lab')">
+                    {{ firstError('institucion_lab') }}
+                  </div>
                 </div>
 
                 <div class="col-12">
                   <label class="form-label">Dirección</label>
-                  <textarea v-model="form.direccion" class="form-control" rows="2" placeholder="Av / Jr / Mz / Lt..."></textarea>
+                  <textarea
+                    v-model="form.direccion"
+                    class="form-control"
+                    rows="2"
+                    :class="{ 'is-invalid': hasError('direccion') }"
+                    placeholder="Av / Jr / Mz / Lt..."
+                    @input="clearFieldError('direccion')"
+                  ></textarea>
+                  <div class="invalid-feedback" v-if="hasError('direccion')">
+                    {{ firstError('direccion') }}
+                  </div>
                 </div>
 
                 <div class="col-12 col-md-4">
@@ -225,7 +457,7 @@ const cancelar = () => {
               </div>
 
               <div class="d-flex gap-2 mt-4">
-                <button type="submit" class="btn btn-primary">
+                <button type="button" @click="guardar()" class="btn btn-primary">
                   <i class="bi bi-save me-1"></i> Guardar
                 </button>
 
@@ -233,7 +465,6 @@ const cancelar = () => {
                   Cancelar
                 </button>
               </div>
-            </form>
           </div>
         </div>
       </div>

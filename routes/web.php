@@ -19,6 +19,6 @@ Route::group(['middleware' => ['auth:sanctum']],function(){
 
 
 
-
+require __DIR__."/entidades.php";
 require __DIR__.'/settings.php';
 Route::get('/{path}',function(){   return view('app'); })->where('path','.*');

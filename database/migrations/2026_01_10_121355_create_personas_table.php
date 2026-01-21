@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('ape_pat', 60);
             $table->string('ape_mat', 60);
             $table->string('primernombre', 70);
-            $table->string('otrosnombres', 70);
+            $table->string('otrosnombres', 70)->nullable();
             $table->date('fecha_nac')->default('2000-01-01');
             $table->char('ubigeo_nac',6)->nullable()->default('090101');
             $table->char('genero', 1)->default('M');
