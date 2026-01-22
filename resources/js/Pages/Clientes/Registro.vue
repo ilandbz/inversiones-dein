@@ -1,22 +1,24 @@
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import useHelper from '@/Helpers'
 import useCliente from '@/Composables/Cliente.js'
+import useActividadNegocio from '@/Composables/ActividadNegocio.js'
 
 const router = useRouter()
 const { Toast, soloNumeros } = useHelper()
-
 const { errors, respuesta, agregarCliente } = useCliente()
-
+const { actividadNegocios, listaActividadNegocios, listaDetalleActividadNegocios, detalleActividadNegocios} = useActividadNegocio()
 onMounted(() => {
   document.title = 'Registro de Clientes'
+  listaActividadNegocios()
 })
 
 const form = ref({
   dni: '',
   ruc: '',
   celular: '',
+  celular2: '',
   email: '',
 
   ape_pat: '',
@@ -37,6 +39,31 @@ const form = ref({
 
   direccion: '',
 
+  // --- NEGOCIO (solo si INDEPENDIENTE) ---
+  negocio: {
+    razonsocial: '',
+    ruc: '',
+    tel_cel: '',
+    tel_cel_referido: '',
+    tipo_actividad_id: '',
+    detalle_actividad_id: '',
+    inicioactividad: '',
+    direccion: ''
+  },
+
+  referente: {
+    primernombre: '',
+    otrosnombres: '',
+    ape_pat: '',
+    ape_mat: '',
+    dni: '',
+    celular: '',
+    parentesco: '',
+    email: '',
+    direccion: ''
+  },
+
+
   estado: 'ACTIVO',
   fecha_reg: '',
   hora_reg: '',
@@ -44,6 +71,7 @@ const form = ref({
   errors: {}
 })
 
+/* ----------------- Errores (soporta: negocio.razonsocial o negocio[razonsocial]) ----------------- */
 const toArr = (v) => {
   if (!v) return []
   if (Array.isArray(v)) return v.map(String)
@@ -58,7 +86,14 @@ const normalizeErrors = (payload) => {
     for (const k of Object.keys(src)) out[k] = toArr(src[k])
   }
 
-  if (out.ubigeo && !out.ubigeo) out.ubigeo = out.ubigeo
+  // si backend devolviera negocio[razonsocial], también lo mapeamos a negocio.razonsocial
+  for (const k of Object.keys(out)) {
+    const m = k.match(/^negocio\[(.+)\]$/)
+    if (m?.[1]) {
+      const dotKey = `negocio.${m[1]}`
+      if (!out[dotKey]) out[dotKey] = out[k]
+    }
+  }
 
   return out
 }
@@ -92,17 +127,48 @@ const topErrors = computed(() => {
   return [...set]
 })
 
-const showTopAlert = computed(() => {
-  return Object.keys(form.value?.errors || {}).length > 0
-})
+const showTopAlert = computed(() => Object.keys(form.value?.errors || {}).length > 0)
 
+/* ----------------- Negocio: mostrar/limpiar según origen ----------------- */
+const esIndependiente = computed(() => form.value.origen_labor === 'INDEPENDIENTE')
+
+const resetNegocio = () => {
+  form.value.negocio = {
+    razonsocial: '',
+    ruc: '',
+    tel_cel: '',
+    tel_cel_referido: '',
+    tipo_actividad_id: '',
+    descripcion: '',
+    inicioactividad: '',
+    direccion: ''
+  }
+}
+
+watch(
+  () => form.value.origen_labor,
+  (v) => {
+    // si cambia a dependiente, limpia negocio + quita errores de negocio
+    if (v !== 'INDEPENDIENTE') {
+      resetNegocio()
+      // borrar errores anidados
+      const e = form.value.errors || {}
+      for (const k of Object.keys(e)) {
+        if (k.startsWith('negocio.') || k.startsWith('negocio[')) delete e[k]
+      }
+    }
+  }
+)
+
+/* ----------------- Guardar ----------------- */
 const guardar = async () => {
   clearErrors()
 
   const formData = new FormData()
 
+  // campos simples
   for (const key in form.value) {
-    if (key === 'errors') continue
+    if (key === 'errors' || key === 'negocio') continue
 
     const v = form.value[key]
     if (v === null || v === undefined || v === '') continue
@@ -110,6 +176,18 @@ const guardar = async () => {
     formData.append(key, v)
   }
 
+  // negocio SOLO si independiente
+  if (esIndependiente.value) {
+    const n = form.value.negocio || {}
+    for (const nk in n) {
+      const v = n[nk]
+      if (v === null || v === undefined || v === '') continue
+      // enviado como arreglo: negocio[razonsocial]
+      formData.append(`negocio[${nk}]`, v)
+    }
+  }
+
+  // foto
   if (photoFile.value instanceof File) {
     formData.append('foto', photoFile.value)
   }
@@ -132,7 +210,26 @@ const cancelar = () => {
   router.push({ name: 'Principal' })
 }
 
-// FOTO
+/* ----------------- Reset formulario ----------------- */
+const resetForm = () => {
+  const keep = {
+    genero: 'M',
+    estado_civil: 'SOLTERO',
+    origen_labor: 'INDEPENDIENTE',
+    estado: 'ACTIVO'
+  }
+
+  for (const k of Object.keys(form.value)) {
+    if (k === 'errors') continue
+    if (k === 'negocio') continue
+    form.value[k] = keep[k] ?? ''
+  }
+
+  resetNegocio()
+  removePhoto()
+}
+
+/* ----------------- FOTO ----------------- */
 const photoFile = ref(null)
 const photoPreview = ref(null)
 let previewUrl = null
@@ -171,12 +268,31 @@ const removePhoto = () => {
 onBeforeUnmount(() => {
   if (previewUrl) URL.revokeObjectURL(previewUrl)
 })
+
+
+
+const onChangeTipoActividad = async () => {
+  const id = form.value.negocio.tipo_actividad_id
+
+  // limpia error del campo
+  clearFieldError('negocio.tipo_actividad_id')
+
+  if (!id) {
+    detalleActividadNegocios.value = []
+    return
+  }
+
+  // llama al backend
+  await listaDetalleActividadNegocios(id)
+}
+
 </script>
+
 
 <template>
   <div class="page-heading">
-    <h3>Clientes</h3>
-    <p class="text-subtitle text-muted">Registro de clientes</p>
+
+    <h4 class="card-title">Formulario de Registro</h4>
   </div>
 
   <div class="page-content">
@@ -184,73 +300,34 @@ onBeforeUnmount(() => {
       <div class="col-12 col-lg-8">
         <div class="card">
           <div class="card-header">
-            <h4 class="card-title">Formulario de Registro</h4>
+                <h3>Clientes</h3>
+            <p class="text-subtitle text-muted">Registro de clientes Nuevo</p>
           </div>
 
           <div class="card-body">
 
               <div class="row g-3">
 
+
                 <div class="col-12 col-md-3">
-                  <label class="form-label">DNI</label>
+                  <label class="form-label">Primer nombre</label>
                   <input
-                    v-model="form.dni"
+                    v-model="form.primernombre"
                     class="form-control"
-                    :class="{ 'is-invalid': hasError('dni') }"
-                    maxlength="8"
-                    @keypress="soloNumeros"
-                    placeholder="Ej: 12345678"
-                    @input="clearFieldError('dni')"
+                    :class="{ 'is-invalid': hasError('primernombre') }"
+                    placeholder="Ej: Juan"
+                    @input="clearFieldError('primernombre')"
                   />
-                  <div class="invalid-feedback" v-if="hasError('dni')">
-                    {{ firstError('dni') }}
+                  <div class="invalid-feedback" v-if="hasError('primernombre')">
+                    {{ firstError('primernombre') }}
                   </div>
                 </div>
 
                 <div class="col-12 col-md-3">
-                  <label class="form-label">RUC (opcional)</label>
-                  <input
-                    v-model="form.ruc"
-                    class="form-control"
-                    :class="{ 'is-invalid': hasError('ruc') }"
-                    maxlength="11"
-                    placeholder="Ej: 10456789123"
-                    @keypress="soloNumeros"
-                    @input="clearFieldError('ruc')"
-                  />
-                  <div class="invalid-feedback" v-if="hasError('ruc')">
-                    {{ firstError('ruc') }}
-                  </div>
-                </div>
-
-                <div class="col-12 col-md-3">
-                  <label class="form-label">Celular</label>
-                  <input
-                    v-model="form.celular"
-                    class="form-control"
-                    :class="{ 'is-invalid': hasError('celular') }"
-                    maxlength="9"
-                    @keypress="soloNumeros"
-                    placeholder="Ej: 999999999"
-                    @input="clearFieldError('celular')"
-                  />
-                  <div class="invalid-feedback" v-if="hasError('celular')">
-                    {{ firstError('celular') }}
-                  </div>
-                </div>
-
-                <div class="col-12 col-md-3">
-                  <label class="form-label">Email (opcional)</label>
-                  <input
-                    v-model="form.email"
-                    type="email"
-                    class="form-control"
-                    :class="{ 'is-invalid': hasError('email') }"
-                    placeholder="correo@dominio.com"
-                    @input="clearFieldError('email')"
-                  />
-                  <div class="invalid-feedback" v-if="hasError('email')">
-                    {{ firstError('email') }}
+                  <label class="form-label">Segundo Nombre</label>
+                  <input v-model="form.otrosnombres" class="form-control" placeholder="Ej: Carlos Alberto" />
+                  <div class="invalid-feedback" v-if="hasError('otrosnombres')">
+                    {{ firstError('otrosnombres') }}
                   </div>
                 </div>
 
@@ -282,61 +359,23 @@ onBeforeUnmount(() => {
                   </div>
                 </div>
 
+
+
                 <div class="col-12 col-md-3">
-                  <label class="form-label">Primer nombre</label>
+                  <label class="form-label">DNI</label>
                   <input
-                    v-model="form.primernombre"
+                    v-model="form.dni"
                     class="form-control"
-                    :class="{ 'is-invalid': hasError('primernombre') }"
-                    placeholder="Ej: Juan"
-                    @input="clearFieldError('primernombre')"
+                    :class="{ 'is-invalid': hasError('dni') }"
+                    maxlength="8"
+                    @keypress="soloNumeros"
+                    placeholder="Ej: 12345678"
+                    @input="clearFieldError('dni')"
                   />
-                  <div class="invalid-feedback" v-if="hasError('primernombre')">
-                    {{ firstError('primernombre') }}
+                  <div class="invalid-feedback" v-if="hasError('dni')">
+                    {{ firstError('dni') }}
                   </div>
                 </div>
-
-                <div class="col-12 col-md-3">
-                  <label class="form-label">Otros nombres</label>
-                  <input v-model="form.otrosnombres" class="form-control" placeholder="Ej: Carlos Alberto" />
-                  <div class="invalid-feedback" v-if="hasError('otrosnombres')">
-                    {{ firstError('otrosnombres') }}
-                  </div>
-                </div>
-
-                <div class="col-12 col-md-3">
-                  <label class="form-label">Fecha de nacimiento</label>
-                  <input
-                    v-model="form.fecha_nac"
-                    type="date"
-                    class="form-control"
-                    :class="{ 'is-invalid': hasError('fecha_nac') }"
-                    @input="clearFieldError('fecha_nac')"
-                  />
-                  <div class="invalid-feedback" v-if="hasError('fecha_nac')">
-                    {{ firstError('fecha_nac') }}
-                  </div>
-                </div>
-
-                <div class="col-12 col-md-3">
-                  <label class="form-label">Género</label>
-                  <select v-model="form.genero" class="form-select">
-                    <option value="M">Masculino</option>
-                    <option value="F">Femenino</option>
-                  </select>
-                </div>
-
-                <div class="col-12 col-md-3">
-                  <label class="form-label">Estado civil</label>
-                  <select v-model="form.estado_civil" class="form-select">
-                    <option>SOLTERO</option>
-                    <option>CASADO</option>
-                    <option>CONVIVIENTE</option>
-                    <option>DIVORCIADO</option>
-                    <option>VIUDO</option>
-                  </select>
-                </div>
-
                 <div class="col-12 col-md-3">
                   <label class="form-label">Ubigeo Nacimiento (opcional)</label>
                   <input
@@ -353,7 +392,51 @@ onBeforeUnmount(() => {
                   </div>
                 </div>
 
-                <div class="col-12 col-md-4">
+
+                <div class="col-12 col-md-3">
+                  <label class="form-label">Fecha de nacimiento</label>
+                  <input
+                    v-model="form.fecha_nac"
+                    type="date"
+                    class="form-control"
+                    :class="{ 'is-invalid': hasError('fecha_nac') }"
+                    @input="clearFieldError('fecha_nac')"
+                  />
+                  <div class="invalid-feedback" v-if="hasError('fecha_nac')">
+                    {{ firstError('fecha_nac') }}
+                  </div>
+                </div>
+                <div class="col-12 col-md-3">
+                  <label class="form-label">Género</label>
+                  <select v-model="form.genero" class="form-select">
+                    <option value="M">Masculino</option>
+                    <option value="F">Femenino</option>
+                  </select>
+                </div>
+                <div class="col-12 col-md-3">
+                  <label class="form-label">Estado civil</label>
+                  <select v-model="form.estado_civil" class="form-select">
+                    <option>SOLTERO</option>
+                    <option>CASADO</option>
+                    <option>CONVIVIENTE</option>
+                    <option>DIVORCIADO</option>
+                    <option>VIUDO</option>
+                  </select>
+                </div>
+                <div class="col-12 col-md-3">
+                  <label class="form-label">Grado de instrucción</label>
+                  <input
+                    v-model="form.grado_instr"
+                    class="form-control"
+                    :class="{ 'is-invalid': hasError('grado_instr') }"
+                    placeholder="Ej: Secundaria / Superior"
+                    @input="clearFieldError('grado_instr')"
+                  />
+                  <div class="invalid-feedback" v-if="hasError('grado_instr')">
+                    {{ firstError('grado_instr') }}
+                  </div>
+                </div>
+                <div class="col-12 col-md-3">
                   <label class="form-label">Profesión</label>
                   <input
                     v-model="form.profesion"
@@ -367,21 +450,7 @@ onBeforeUnmount(() => {
                   </div>
                 </div>
 
-                <div class="col-12 col-md-4">
-                  <label class="form-label">Grado de instrucción</label>
-                  <input
-                    v-model="form.grado_instr"
-                    class="form-control"
-                    :class="{ 'is-invalid': hasError('grado_instr') }"
-                    placeholder="Ej: Secundaria / Superior"
-                    @input="clearFieldError('grado_instr')"
-                  />
-                  <div class="invalid-feedback" v-if="hasError('grado_instr')">
-                    {{ firstError('grado_instr') }}
-                  </div>
-                </div>
-
-                <div class="col-12 col-md-4">
+                <div class="col-12 col-md-3">
                   <label class="form-label">Origen laboral</label>
                   <select
                     v-model="form.origen_labor"
@@ -396,6 +465,191 @@ onBeforeUnmount(() => {
                     {{ firstError('origen_labor') }}
                   </div>
                 </div>
+                <div class="col-12 col-md-3">
+                  <label class="form-label">Celular</label>
+                  <input
+                    v-model="form.celular"
+                    class="form-control"
+                    :class="{ 'is-invalid': hasError('celular') }"
+                    maxlength="9"
+                    @keypress="soloNumeros"
+                    placeholder="Ej: 999999999"
+                    @input="clearFieldError('celular')"
+                  />
+                  <div class="invalid-feedback" v-if="hasError('celular')">
+                    {{ firstError('celular') }}
+                  </div>
+                </div>
+                <div class="col-12 col-md-3">
+                  <label class="form-label">Celular 2</label>
+                  <input
+                    v-model="form.celular2"
+                    class="form-control"
+                    :class="{ 'is-invalid': hasError('celular2') }"
+                    maxlength="9"
+                    @keypress="soloNumeros"
+                    placeholder="Ej: 999999999"
+                    @input="clearFieldError('celular2')"
+                  />
+                  <div class="invalid-feedback" v-if="hasError('celular2')">
+                    {{ firstError('celular2') }}
+                  </div>
+                </div>
+
+                <div class="col-12 col-md-3">
+                  <label class="form-label">Email (opcional)</label>
+                  <input
+                    v-model="form.email"
+                    type="email"
+                    class="form-control"
+                    :class="{ 'is-invalid': hasError('email') }"
+                    placeholder="correo@dominio.com"
+                    @input="clearFieldError('email')"
+                  />
+                  <div class="invalid-feedback" v-if="hasError('email')">
+                    {{ firstError('email') }}
+                  </div>
+                </div>
+
+                
+
+
+
+                <div class="col-12 col-md-3">
+                  <label class="form-label">RUC (opcional)</label>
+                  <input
+                    v-model="form.ruc"
+                    class="form-control"
+                    :class="{ 'is-invalid': hasError('ruc') }"
+                    maxlength="11"
+                    placeholder="Ej: 10456789123"
+                    @keypress="soloNumeros"
+                    @input="clearFieldError('ruc')"
+                  />
+                  <div class="invalid-feedback" v-if="hasError('ruc')">
+                    {{ firstError('ruc') }}
+                  </div>
+                </div>
+
+
+
+                <div v-if="esIndependiente" class="mt-3">
+                  <div class="border rounded p-3">
+                    <h6 class="mb-3">Datos del Negocio</h6>
+
+                    <div class="row mb-3">
+                      <div class="col-12 col-md-3">
+                        <label class="form-label">Tipo actividad (opcional)</label>
+                        <select
+                          v-model="form.negocio.tipo_actividad_id"
+                          class="form-select"
+                          :class="{ 'is-invalid': hasError('negocio.tipo_actividad_id') }"
+                          @change="onChangeTipoActividad"
+                        >
+                          <option value="">-- Seleccione --</option>
+                          <option v-for="value in actividadNegocios" :key="value.id" :value="value.id">{{ value.nombre }}</option>
+                        </select>
+
+                        <div class="invalid-feedback" v-if="hasError('negocio.tipo_actividad_id')">
+                          {{ firstError('negocio.tipo_actividad_id') }}
+                        </div>
+                      </div>
+
+                      <div class="col-12 col-md-6">
+                        <label class="form-label">Detalle ACtividad</label>
+                        <select
+                          v-model="form.negocio.detalle_actividad_id"
+                          class="form-select"
+                          :class="{ 'is-invalid': hasError('negocio.tipo_actividad_id') }"
+                          @change="clearFieldError('negocio.tipo_actividad_id')"
+                        >
+                          <option value="">-- Seleccione --</option>
+                          <option v-for="value in detalleActividadNegocios" :key="value.id">{{ value.nombre }}</option>
+                        </select>
+                        
+                        <div class="invalid-feedback" v-if="hasError('negocio.descripcion')">
+                          {{ firstError('negocio.descripcion') }}
+                        </div>
+                      </div>
+                      <div class="col-12 col-md-3">
+                        <label class="form-label">Celular Negocio (opcional)</label>
+                        <input
+                          v-model="form.negocio.tel_cel"
+                          class="form-control"
+                          maxlength="9"
+                          @keypress="soloNumeros"
+                          :class="{ 'is-invalid': hasError('negocio.tel_cel') }"
+                          @input="clearFieldError('negocio.tel_cel')"
+                          placeholder="Ej: 999999999"
+                        />
+                        <div class="invalid-feedback" v-if="hasError('negocio.tel_cel')">
+                          {{ firstError('negocio.tel_cel') }}
+                        </div>
+                      </div>
+                    </div>
+                    <div class="row g-3">
+                      <div class="col-12 col-md-6">
+                        <label class="form-label">Razón social</label>
+                        <input
+                          v-model="form.negocio.razonsocial"
+                          class="form-control"
+                          :class="{ 'is-invalid': hasError('negocio.razonsocial') }"
+                          @input="clearFieldError('negocio.razonsocial')"
+                          placeholder="Ej: Bodega San Martín"
+                        />
+                        <div class="invalid-feedback" v-if="hasError('negocio.razonsocial')">
+                          {{ firstError('negocio.razonsocial') }}
+                        </div>
+                      </div>
+
+                      <div class="col-12 col-md-3">
+                        <label class="form-label">RUC (opcional)</label>
+                        <input
+                          v-model="form.negocio.ruc"
+                          class="form-control"
+                          maxlength="11"
+                          @keypress="soloNumeros"
+                          :class="{ 'is-invalid': hasError('negocio.ruc') }"
+                          @input="clearFieldError('negocio.ruc')"
+                          placeholder="Ej: 10456789123"
+                        />
+                        <div class="invalid-feedback" v-if="hasError('negocio.ruc')">
+                          {{ firstError('negocio.ruc') }}
+                        </div>
+                      </div>
+
+
+                      <div class="col-12 col-md-3">
+                        <label class="form-label">Inicio actividad (opcional)</label>
+                        <input
+                          v-model="form.negocio.inicioactividad"
+                          type="date"
+                          class="form-control"
+                          :class="{ 'is-invalid': hasError('negocio.inicioactividad') }"
+                          @input="clearFieldError('negocio.inicioactividad')"
+                        />
+                        <div class="invalid-feedback" v-if="hasError('negocio.inicioactividad')">
+                          {{ firstError('negocio.inicioactividad') }}
+                        </div>
+                      </div>
+                      <div class="col-12">
+                        <label class="form-label">Dirección del negocio (opcional)</label>
+                        <textarea
+                          v-model="form.negocio.direccion"
+                          class="form-control"
+                          rows="2"
+                          :class="{ 'is-invalid': hasError('negocio.direccion') }"
+                          @input="clearFieldError('negocio.direccion')"
+                          placeholder="Av / Jr / Mz / Lt..."
+                        ></textarea>
+                        <div class="invalid-feedback" v-if="hasError('negocio.direccion')">
+                          {{ firstError('negocio.direccion') }}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
 
                 <div class="col-12 col-md-6">
                   <label class="form-label">Ocupación</label>
@@ -440,6 +694,148 @@ onBeforeUnmount(() => {
                   </div>
                 </div>
 
+                <div class="mt-3">
+                  <div class="border rounded p-3">
+                    <h6 class="mb-3">Datos del Referente</h6>
+
+                    <div class="row g-3">
+                      <div class="col-12 col-md-3">
+                        <label class="form-label">Primer nombre</label>
+                        <input
+                          v-model="form.referente.primernombre"
+                          class="form-control"
+                          :class="{ 'is-invalid': hasError('referente.primernombre') }"
+                          placeholder="Ej: Juan"
+                          @input="clearFieldError('referente.primernombre')"
+                        />
+                        <div class="invalid-feedback" v-if="hasError('referente.primernombre')">
+                          {{ firstError('referente.primernombre') }}
+                        </div>
+                      </div>
+
+                      <div class="col-12 col-md-3">
+                        <label class="form-label">Segundo nombre</label>
+                        <input
+                          v-model="form.referente.otrosnombres"
+                          class="form-control"
+                          :class="{ 'is-invalid': hasError('referente.otrosnombres') }"
+                          placeholder="Ej: Carlos Alberto"
+                          @input="clearFieldError('referente.otrosnombres')"
+                        />
+                        <div class="invalid-feedback" v-if="hasError('referente.otrosnombres')">
+                          {{ firstError('referente.otrosnombres') }}
+                        </div>
+                      </div>
+
+                      <div class="col-12 col-md-3">
+                        <label class="form-label">Apellido paterno</label>
+                        <input
+                          v-model="form.referente.ape_pat"
+                          class="form-control"
+                          :class="{ 'is-invalid': hasError('referente.ape_pat') }"
+                          placeholder="Ej: Pérez"
+                          @input="clearFieldError('referente.ape_pat')"
+                        />
+                        <div class="invalid-feedback" v-if="hasError('referente.ape_pat')">
+                          {{ firstError('referente.ape_pat') }}
+                        </div>
+                      </div>
+
+                      <div class="col-12 col-md-3">
+                        <label class="form-label">Apellido materno</label>
+                        <input
+                          v-model="form.referente.ape_mat"
+                          class="form-control"
+                          :class="{ 'is-invalid': hasError('referente.ape_mat') }"
+                          placeholder="Ej: Gómez"
+                          @input="clearFieldError('referente.ape_mat')"
+                        />
+                        <div class="invalid-feedback" v-if="hasError('referente.ape_mat')">
+                          {{ firstError('referente.ape_mat') }}
+                        </div>
+                      </div>
+
+                      <div class="col-12 col-md-3">
+                        <label class="form-label">DNI</label>
+                        <input
+                          v-model="form.referente.dni"
+                          class="form-control"
+                          :class="{ 'is-invalid': hasError('referente.dni') }"
+                          maxlength="8"
+                          @keypress="soloNumeros"
+                          placeholder="Ej: 12345678"
+                          @input="clearFieldError('referente.dni')"
+                        />
+                        <div class="invalid-feedback" v-if="hasError('referente.dni')">
+                          {{ firstError('referente.dni') }}
+                        </div>
+                      </div>
+
+                      <div class="col-12 col-md-3">
+                        <label class="form-label">Celular</label>
+                        <input
+                          v-model="form.referente.celular"
+                          class="form-control"
+                          :class="{ 'is-invalid': hasError('referente.celular') }"
+                          maxlength="9"
+                          @keypress="soloNumeros"
+                          placeholder="Ej: 999999999"
+                          @input="clearFieldError('referente.celular')"
+                        />
+                        <div class="invalid-feedback" v-if="hasError('referente.celular')">
+                          {{ firstError('referente.celular') }}
+                        </div>
+                      </div>
+
+                      <div class="col-12 col-md-3">
+                        <label class="form-label">Parentesco / Relación</label>
+                        <input
+                          v-model="form.referente.parentesco"
+                          class="form-control"
+                          :class="{ 'is-invalid': hasError('referente.parentesco') }"
+                          placeholder="Ej: Hermano / Vecino / Amigo"
+                          @input="clearFieldError('referente.parentesco')"
+                        />
+                        <div class="invalid-feedback" v-if="hasError('referente.parentesco')">
+                          {{ firstError('referente.parentesco') }}
+                        </div>
+                      </div>
+
+                      <div class="col-12 col-md-3">
+                        <label class="form-label">Email (opcional)</label>
+                        <input
+                          v-model="form.referente.email"
+                          type="email"
+                          class="form-control"
+                          :class="{ 'is-invalid': hasError('referente.email') }"
+                          placeholder="correo@dominio.com"
+                          @input="clearFieldError('referente.email')"
+                        />
+                        <div class="invalid-feedback" v-if="hasError('referente.email')">
+                          {{ firstError('referente.email') }}
+                        </div>
+                      </div>
+
+                      <div class="col-12">
+                        <label class="form-label">Dirección (opcional)</label>
+                        <textarea
+                          v-model="form.referente.direccion"
+                          class="form-control"
+                          rows="2"
+                          :class="{ 'is-invalid': hasError('referente.direccion') }"
+                          placeholder="Av / Jr / Mz / Lt..."
+                          @input="clearFieldError('referente.direccion')"
+                        ></textarea>
+                        <div class="invalid-feedback" v-if="hasError('referente.direccion')">
+                          {{ firstError('referente.direccion') }}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+
+
                 <div class="col-12 col-md-4">
                   <label class="form-label">Estado (cliente)</label>
                   <input v-model="form.estado" class="form-control" disabled />
@@ -475,7 +871,6 @@ onBeforeUnmount(() => {
           <div class="card-header">
             <h4 class="card-title">Foto del cliente</h4>
           </div>
-
           <div class="card-body">
             <div class="d-flex flex-column align-items-center gap-3">
               <div class="rounded-circle d-flex align-items-center justify-content-center border"

@@ -22,6 +22,7 @@ return new class extends Migration
             $table->char('ubigeo_nac',6)->nullable()->default('090101');
             $table->char('genero', 1)->default('M');
             $table->char('celular', 11)->nullable();
+            $table->char('celular2', 11)->nullable();
             $table->string('email', 70)->nullable();
             $table->char('ruc', 11)->nullable();
             $table->string('estado_civil', 35)->default('SOLTERO');

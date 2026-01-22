@@ -20,6 +20,8 @@ class DatabaseSeeder extends Seeder
             OrigenFinanciamientoSeeder::class,
             MenuSeeder::class,
             DistritoSeeder::class,
+            ActividadNegocioSeeder::class,
+            DetalleActividadNegocioSeeder::class,
         ]);
     }
 }

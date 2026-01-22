@@ -95,6 +95,12 @@ DB::transaction(function () {
                                 ["name" => "Historial del Cliente", "key" => "historial-del-cliente", "url" => "/clientes/historial-del-cliente"],
                             ],
                         ],
+                        [
+                            "name" => "Actividad de Negocio",
+                            "key" => "actividad-de-negocio",
+                            "icon" => "person-badge-fill",
+                            "url" => "/actividadnegocio",
+                        ],
                     ],
                 ],
                 [

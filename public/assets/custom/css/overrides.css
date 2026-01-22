@@ -1,0 +1,117 @@
+/* ================================
+   AJUSTE GLOBAL DE ESCALA VISUAL
+================================ */
+html {
+  font-size: 14px; /* antes ~16px */
+}
+
+body {
+  font-size: 0.9rem;
+}
+
+/* ================================
+   SIDEBAR MÁS COMPACTO
+================================ */
+#sidebar {
+  width: 230px !important; /* antes ~260+ */
+}
+
+#sidebar .sidebar-wrapper {
+  padding: 0.6rem !important;
+}
+
+#sidebar .menu .sidebar-title {
+  font-size: 0.7rem !important;
+  margin: 0.6rem 0 0.3rem !important;
+}
+
+#sidebar .menu .sidebar-link {
+  padding: 0.5rem 0.7rem !important;
+  font-size: 0.85rem !important;
+}
+
+#sidebar .menu .sidebar-link i,
+#sidebar .menu .sidebar-link svg {
+  width: 16px !important;
+  height: 16px !important;
+}
+
+/* ================================
+   HEADER / TOPBAR MÁS BAJO
+================================ */
+#main > header {
+  padding: 0.6rem 1rem !important;
+}
+
+/* ================================
+   CARDS MÁS COMPACTAS
+================================ */
+.card {
+  border-radius: 0.6rem !important;
+}
+
+.card-header {
+  padding: 0.6rem 1rem !important;
+}
+
+.card-title {
+  font-size: 0.95rem !important;
+}
+
+.card-body {
+  padding: 0.8rem 1rem !important;
+}
+
+/* ================================
+   TABLAS MÁS COMPACTAS
+================================ */
+.table {
+  font-size: 0.85rem !important;
+}
+
+.table th,
+.table td {
+  padding: 0.45rem 0.6rem !important;
+  vertical-align: middle !important;
+}
+
+/* ================================
+   BOTONES MÁS PEQUEÑOS
+================================ */
+.btn {
+  padding: 0.35rem 0.6rem !important;
+  font-size: 0.8rem !important;
+  border-radius: 0.4rem !important;
+}
+
+.btn-xs {
+  padding: 0.25rem 0.45rem !important;
+  font-size: 0.75rem !important;
+}
+
+/* ================================
+   INPUTS MÁS FINOS
+================================ */
+.form-control,
+.form-select {
+  padding: 0.35rem 0.6rem !important;
+  font-size: 0.85rem !important;
+  border-radius: 0.4rem !important;
+}
+
+/* ================================
+   MODALES MÁS COMPACTOS
+================================ */
+.modal-header,
+.modal-body,
+.modal-footer {
+  padding: 0.8rem 1rem !important;
+}
+
+/* ================================
+   ESPACIADO GENERAL
+================================ */
+.row {
+  --bs-gutter-x: 0.8rem !important;
+  --bs-gutter-y: 0.6rem !important;
+}

@@ -12,7 +12,8 @@
     <link rel="stylesheet" href="/assets/compiled/css/iconly.css">
     <link rel="stylesheet" href="/assets/compiled/css/auth.css">
 
-
+    <link rel="stylesheet" href="/assets/custom/css/overrides.css">
+    
 <style>
 
 

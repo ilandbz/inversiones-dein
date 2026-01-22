@@ -8,6 +8,7 @@ import RegistroClientes from '@/Pages/Clientes/Registro.vue'
 import Login from '@/Pages/Auth/Login.vue'
 import Perfil from '@/Pages/Usuario/Perfil.vue'
 import CambiarClave from '@/Pages/Usuario/CambiarClave.vue'
+import ActividadDeNegocio from '@/Pages/ActividadNegocio/Inicio.vue'
 
 const routes = [
   {
@@ -31,6 +32,13 @@ const routes = [
     alias: '/cambiar-clave',
     name: 'CambiarClave',
     component: CambiarClave,
+    meta: { layout: LayoutDefault, requiresAuth: true }
+  },
+  {
+    path: '/',
+    alias: '/actividad-de-negocio',
+    name: 'ActividadDeNegocio',
+    component: ActividadDeNegocio,
     meta: { layout: LayoutDefault, requiresAuth: true }
   },
 

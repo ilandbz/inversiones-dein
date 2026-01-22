@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('usuario_id')->constrained('users','id')->onDelete('cascade')->onUpdate('cascade');
             $table->foreignId('persona_id')->constrained('personas','id')->onDelete('cascade')->onUpdate('cascade');
             $table->foreignId('aval_id')->nullable()->constrained('personas','id')->onDelete('cascade')->onUpdate('cascade');
+            $table->foreignId('referente_id')->nullable()->constrained('personas','id')->onDelete('cascade')->onUpdate('cascade');
             $table->string('estado', 25)->default('REGISTRADO');
             $table->date('fecha_reg');
             $table->time('hora_reg');

@@ -67,6 +67,7 @@ class ClienteController extends Controller
                 'ubigeo_nac' => $request->ubigeo,
                 'genero' => $request->genero,
                 'celular' => $request->celular,
+                'celular2' => $request->celular2,
                 'email' => $request->email,
                 'ruc' => $request->ruc,
                 'estado_civil' => $request->estado_civil,

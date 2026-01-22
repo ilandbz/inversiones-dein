@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ActividadNegocioController;
 use App\Http\Controllers\ClienteController;
 
 use Illuminate\Support\Facades\Route;
@@ -15,4 +16,14 @@ Route::group(['prefix' => 'cliente', 'middleware' => 'auth'], function () {
     Route::get('mostrar-con-registros-dni', [ClienteController::class, 'datosCreditoJuntaPorDni']);
     Route::get('mostrar-dni-nuevo-credito', [ClienteController::class, 'getDatosParaNuevoCredito']);
     Route::post('asignar-asesor-masivo', [ClienteController::class, 'asignarAsesorMasivo']);
+});
+
+Route::group(['prefix' => 'actividadnegocio', 'middleware' => 'auth'], function () {
+    Route::get('listar', [ActividadNegocioController::class, 'listar']);
+    Route::get('mostrar', [ActividadNegocioController::class, 'show']);
+    Route::post('actualizar', [ActividadNegocioController::class, 'update']);
+    Route::post('eliminar', [ActividadNegocioController::class, 'destroy']);
+    Route::post('guardar', [ActividadNegocioController::class, 'store']);
+    Route::get('todos', [ActividadNegocioController::class, 'todos']);
+    Route::get('detalleactividadnegocio', [ActividadNegocioController::class, 'todosPorActividad'] );
 });

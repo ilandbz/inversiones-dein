@@ -21,6 +21,7 @@ class Persona extends Model
         'ubigeo_nac',
         'genero',
         'celular',
+        'celular2',
         'email',
         'ruc',
         'estado_civil',
