@@ -31,8 +31,8 @@ class StoreClienteRequest extends FormRequest
             'otrosnombres'      => 'nullable|string|max:70',
 
             'fecha_nac'         => 'required|date|after_or_equal:1900-01-01|before_or_equal:' . now()->subYears(18)->format('Y-m-d'),
-            'ubigeo_nac' => 'required|digits:6|exists:distritos,ubigeo',
-            'ubigeo_dom' => 'required|digits:6|exists:distritos,ubigeo',
+            'ubigeo_nac'        => 'required|digits:6|exists:distritos,ubigeo',
+            'ubigeo_dom'        => 'required|digits:6|exists:distritos,ubigeo',
 
             'email'             => 'nullable|email|max:120',
             'celular'           => 'required|digits:9',

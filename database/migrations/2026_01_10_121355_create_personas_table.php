@@ -34,6 +34,7 @@ return new class extends Migration
             $table->string('institucion_lab', 90)->nullable()->default('NINGUNO');
             $table->foreignId('conyugue')->nullable()->constrained('personas')->onUpdate('restrict')->onDelete('restrict');
             $table->text('direccion')->nullable();
+            $table->text('latitud_longitud')->nullable();
             $table->timestamps();
         });
     }

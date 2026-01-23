@@ -7,6 +7,7 @@ use App\Http\Requests\Cliente\UpdateClienteRequest;
 use App\Http\Traits\UserFilters;
 use App\Models\Cliente;
 use App\Models\Credito;
+use App\Models\Negocio;
 use App\Models\Persona;
 use Illuminate\Http\Request;
 use Intervention\Image\ImageManager;
@@ -49,22 +50,16 @@ class ClienteController extends Controller
                     (string) $image->toWebp(80)
                 );
             }
-            $esconyugue = trim($request->estado_civil) === 'Casado' || trim($request->estado_civil) === 'Conviviente';
-            if ($esconyugue && empty($request->conyugue_id)) {
-                return response()->json([
-                    'errors' => [
-                        'dniconyugue' => ['DNI conyugue es necesario']
-                    ]
-                ], 422);
-            }        
-            $persona = Persona::firstOrCreate(['dni' => $request->dni],
+   
+            $personaCliente = Persona::firstOrCreate(['dni' => $request->dni],
             [
                 'ape_pat' => $request->ape_pat,
                 'ape_mat' => $request->ape_mat,
                 'primernombre' => $request->primernombre,
                 'otrosnombres' => $request->otrosnombres,
                 'fecha_nac' => $request->fecha_nac,
-                'ubigeo_nac' => $request->ubigeo,
+                'ubigeo_nac' => $request->ubigeo_nac,
+                'ubigeo_dom' => $request->ubigeo_dom,
                 'genero' => $request->genero,
                 'celular' => $request->celular,
                 'celular2' => $request->celular2,
@@ -72,21 +67,61 @@ class ClienteController extends Controller
                 'ruc' => $request->ruc,
                 'estado_civil' => $request->estado_civil,
                 'profesion' => $request->profesion,
-                'nacionalidad' => $request->nacionalidad,
                 'grado_instr' => $request->grado_instr,
                 'origen_labor' => $request->origen_labor,
                 'ocupacion' => $request->ocupacion,
                 'institucion_lab' => $request->institucion_lab,
+                'latitud_longitud' => $request->latitud_longitud,
                 'direccion' => $request->direccion,
             ]);
+
+            $ref = $request->input('referente');
+
+            $personaReferente = Persona::firstOrCreate(
+                ['dni' => $ref['dni']],
+                [
+                    'ape_pat'      => $ref['ape_pat'],
+                    'ape_mat'      => $ref['ape_mat'],
+                    'primernombre' => $ref['primernombre'],
+                    'otrosnombres' => $ref['otrosnombres'] ?? null,
+                    'celular'      => $ref['celular'],
+                    'email'        => $ref['email'] ?? null,
+                    'direccion'    => $ref['direccion'], // required en tu rules
+                    // puedes setear defaults para campos no enviados:
+                    'fecha_nac'    => '2000-01-01',
+                    'genero'       => 'M',
+                    'estado_civil' => 'SOLTERO',
+                    'origen_labor' => 'INDEPENDIENTE',
+                ]
+            );
+
             $cliente = Cliente::create([
                 'id'          => $request->id,
                 'usuario_id'  => $filters['user_id'],
-                'persona_id'  => $persona->id,
-                'aval_id'     => $request->aval_id,
+                'persona_id'  => $personaCliente->id,
+                'referente_id'     => $personaReferente->id,
+                'referente_parentesco' => $ref['parentesco'],
                 'fecha_reg'   => now()->toDateString(), // Asigna la fecha actual
                 'hora_reg'    => now()->toTimeString(), // Asigna la hora actual
             ]);
+
+            if ($request->origen_labor === 'INDEPENDIENTE') {
+                $neg = $request->input('negocio', []);
+
+                // OJO: tu tabla negocios exige tel_cel y tel_cel_referido NO NULL
+                // Si quieres que sean opcionales, cambia tu migración a nullable().
+                Negocio::create([
+                    'cliente_id'         => $cliente->id,
+                    'razonsocial'        => $neg['razonsocial'],
+                    'ruc'               => $neg['ruc'] ?? null,
+                    'celular'           => $neg['celular'] ?? null,
+                    'detalle_actividad_id' => $neg['detalle_actividad_id'] ?? null,
+                    'inicioactividad'   => $neg['inicioactividad'] ?? null,
+                    'direccion'         => $neg['direccion'] ?? null,
+                ]);
+            }
+
+
             DB::commit();
             return response()->json([
                 'ok' => 1,

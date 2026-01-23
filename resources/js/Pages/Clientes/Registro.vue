@@ -24,8 +24,7 @@ onMounted(() => {
 const NEGOCIO_DEFAULT = () => ({
   razonsocial: '',
   ruc: '',
-  tel_cel: '',
-  tel_cel_referido: '',
+  celular: '',
   tipo_actividad_id: '',
   detalle_actividad_id: '',
   inicioactividad: '',
@@ -720,18 +719,18 @@ const cancelar = () => router.push({ name: 'Principal' })
                     </div>
 
                     <div class="col-12 col-md-3">
-                      <label class="form-label">Celular Negocio (opcional)</label>
+                      <label class="form-label">Celular / Telefono</label>
                       <input
-                        v-model="form.negocio.tel_cel"
+                        v-model="form.negocio.celular"
                         class="form-control"
                         maxlength="9"
                         @keypress="soloNumeros"
-                        :class="{ 'is-invalid': hasError('negocio.tel_cel') }"
-                        @input="clearFieldError('negocio.tel_cel')"
+                        :class="{ 'is-invalid': hasError('negocio.celular') }"
+                        @input="clearFieldError('negocio.celular')"
                         placeholder="Ej: 999999999"
                       />
-                      <div class="invalid-feedback" v-if="hasError('negocio.tel_cel')">
-                        {{ firstError('negocio.tel_cel') }}
+                      <div class="invalid-feedback" v-if="hasError('negocio.celular')">
+                        {{ firstError('negocio.celular') }}
                       </div>
                     </div>
                   </div>

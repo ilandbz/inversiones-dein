@@ -11,10 +11,11 @@ class Cliente extends Model
     protected $fillable = [
         'usuario_id',
         'persona_id',
-        'aval_id',
         'estado',
         'fecha_reg',
         'hora_reg',
+        'referente_id',
+        'referente_parentesco',
     ];
     public function persona(): BelongsTo
     {
