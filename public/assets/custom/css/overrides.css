@@ -1,76 +1,56 @@
+/* ==========================================================
+   OVERRIDES - MAZER (INVERSIONES DEIN)
+   - Compact UI
+   - Light theme basado en tu login (#auth-right)
+   - Topbar minimal (solo usuario)
+   - Sin "rectángulo" en el contenido
+========================================================== */
+
 /* ================================
    AJUSTE GLOBAL DE ESCALA VISUAL
 ================================ */
-html {
-  font-size: 14px; /* antes ~16px */
-}
-
-body {
-  font-size: 0.9rem;
-}
+html { font-size: 14px; }
+body { font-size: 0.9rem; }
 
 /* ================================
    SIDEBAR MÁS COMPACTO
 ================================ */
-#sidebar {
-  width: 230px !important; /* antes ~260+ */
-}
+#sidebar { width: 230px !important; }
+#sidebar .sidebar-wrapper { padding: 0.6rem !important; }
 
-#sidebar .sidebar-wrapper {
-  padding: 0.6rem !important;
-}
-
-#sidebar .menu .sidebar-title {
+#sidebar .menu .sidebar-title{
   font-size: 0.7rem !important;
   margin: 0.6rem 0 0.3rem !important;
 }
-
-#sidebar .menu .sidebar-link {
+#sidebar .menu .sidebar-link{
   padding: 0.5rem 0.7rem !important;
   font-size: 0.85rem !important;
 }
-
 #sidebar .menu .sidebar-link i,
-#sidebar .menu .sidebar-link svg {
+#sidebar .menu .sidebar-link svg{
   width: 16px !important;
   height: 16px !important;
 }
 
 /* ================================
-   HEADER / TOPBAR MÁS BAJO
+   TOPBAR MÁS BAJO (tu Topbar.vue)
 ================================ */
-#main > header {
-  padding: 0.6rem 1rem !important;
-}
+header.topbar .navbar{ min-height: 44px; }
+header.topbar { padding: 0 !important; }
 
 /* ================================
    CARDS MÁS COMPACTAS
 ================================ */
-.card {
-  border-radius: 0.6rem !important;
-}
-
-.card-header {
-  padding: 0.6rem 1rem !important;
-}
-
-.card-title {
-  font-size: 0.95rem !important;
-}
-
-.card-body {
-  padding: 0.8rem 1rem !important;
-}
+.card{ border-radius: 0.6rem !important; }
+.card-header{ padding: 0.6rem 1rem !important; }
+.card-title{ font-size: 0.95rem !important; }
+.card-body{ padding: 0.8rem 1rem !important; }
 
 /* ================================
    TABLAS MÁS COMPACTAS
 ================================ */
-.table {
-  font-size: 0.85rem !important;
-}
-
-.table th,
-.table td {
+.table{ font-size: 0.85rem !important; }
+.table th, .table td{
   padding: 0.45rem 0.6rem !important;
   vertical-align: middle !important;
 }
@@ -78,13 +58,12 @@ body {
 /* ================================
    BOTONES MÁS PEQUEÑOS
 ================================ */
-.btn {
+.btn{
   padding: 0.35rem 0.6rem !important;
   font-size: 0.8rem !important;
   border-radius: 0.4rem !important;
 }
-
-.btn-xs {
+.btn-xs{
   padding: 0.25rem 0.45rem !important;
   font-size: 0.75rem !important;
 }
@@ -92,8 +71,7 @@ body {
 /* ================================
    INPUTS MÁS FINOS
 ================================ */
-.form-control,
-.form-select {
+.form-control, .form-select{
   padding: 0.35rem 0.6rem !important;
   font-size: 0.85rem !important;
   border-radius: 0.4rem !important;
@@ -102,16 +80,214 @@ body {
 /* ================================
    MODALES MÁS COMPACTOS
 ================================ */
-.modal-header,
-.modal-body,
-.modal-footer {
+.modal-header, .modal-body, .modal-footer{
   padding: 0.8rem 1rem !important;
 }
 
 /* ================================
    ESPACIADO GENERAL
 ================================ */
-.row {
+.row{
   --bs-gutter-x: 0.8rem !important;
   --bs-gutter-y: 0.6rem !important;
+}
+
+/* ==========================================================
+   THEME LIGHT basado en tu login (columna derecha)
+========================================================== */
+html[data-bs-theme="light"]{
+  --inv-blue-900: #1e3c72;
+  --inv-blue-800: #2a5298;
+  --inv-blue-600: #3b82f6;
+
+  --inv-text-dark: #0f172a;
+  --inv-text-soft: rgba(15,23,42,.72);
+
+  --inv-shadow: 0 20px 70px rgba(0,0,0,.20);
+}
+
+/* Fondo general full */
+html[data-bs-theme="light"] body{
+  background: linear-gradient(135deg,
+    var(--inv-blue-900) 0%,
+    var(--inv-blue-800) 50%,
+    var(--inv-blue-600) 100%
+  ) !important;
+  color: #fff;
+}
+
+/* Brillo radial igual al login */
+html[data-bs-theme="light"] body::before{
+  content:"";
+  position: fixed;
+  inset: 0;
+  pointer-events:none;
+  background:
+    radial-gradient(600px 300px at 20% 20%, rgba(255,255,255,.22), transparent 60%),
+    radial-gradient(800px 400px at 80% 80%, rgba(255,255,255,.14), transparent 60%);
+  z-index: 0;
+}
+
+/* Asegura el app encima del brillo */
+html[data-bs-theme="light"] #app,
+html[data-bs-theme="light"] #main{
+  position: relative;
+  z-index: 1;
+}
+
+/* ==========================================================
+   SIDEBAR: azul + separación vertical visible
+========================================================== */
+html[data-bs-theme="light"] #sidebar{
+  position: relative;
+  z-index: 5;
+
+  background: linear-gradient(135deg,
+    rgba(30,60,114,.96) 0%,
+    rgba(42,82,152,.94) 55%,
+    rgba(59,130,246,.90) 100%
+  ) !important;
+
+  /* Separación vertical */
+  border-right: 1px solid rgba(255,255,255,.22) !important;
+  box-shadow:
+    inset -1px 0 0 rgba(0,0,0,.28),
+    12px 0 30px rgba(0,0,0,.10) !important;
+}
+
+html[data-bs-theme="light"] #sidebar::after{
+  content:"";
+  position:absolute;
+  top:0; bottom:0;
+  right:-1px;
+  width:2px;
+  background: linear-gradient(
+    180deg,
+    rgba(255,255,255,.08),
+    rgba(255,255,255,.30),
+    rgba(0,0,0,.22),
+    rgba(255,255,255,.30),
+    rgba(255,255,255,.08)
+  );
+  pointer-events:none;
+}
+
+html[data-bs-theme="light"] #sidebar .sidebar-wrapper{ background: transparent !important; }
+
+html[data-bs-theme="light"] #sidebar .sidebar-title,
+html[data-bs-theme="light"] #sidebar .menu .sidebar-title{
+  color: rgba(255,255,255,.70) !important;
+}
+html[data-bs-theme="light"] #sidebar .sidebar-link,
+html[data-bs-theme="light"] #sidebar .sidebar-link span,
+html[data-bs-theme="light"] #sidebar .sidebar-link i,
+html[data-bs-theme="light"] #sidebar .sidebar-link svg{
+  color: rgba(255,255,255,.92) !important;
+  opacity: 1 !important;
+}
+html[data-bs-theme="light"] #sidebar .sidebar-link:hover{
+  background: rgba(255,255,255,.12) !important;
+}
+html[data-bs-theme="light"] #sidebar .sidebar-item.active > .sidebar-link,
+html[data-bs-theme="light"] #sidebar .active > .sidebar-link{
+  background: rgba(255,255,255,.16) !important;
+  box-shadow: 0 10px 26px rgba(0,0,0,.18);
+  border-radius: 12px;
+}
+
+/* ==========================================================
+   TOPBAR LIGHT MINIMAL: sin barra
+   (solo el botón del usuario a la derecha)
+========================================================== */
+html[data-bs-theme="light"] header.topbar{
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+html[data-bs-theme="light"] header.topbar .navbar{
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+html[data-bs-theme="light"] header.topbar .navbar::after{ content: none !important; }
+
+/* El botón de usuario tipo glass */
+html[data-bs-theme="light"] header.topbar [data-dd="profile"] > button{
+  background: rgba(255,255,255,.10) !important;
+  border: 1px solid rgba(255,255,255,.18) !important;
+  border-radius: 999px !important;
+  padding: .25rem .5rem !important;
+  box-shadow: 0 10px 26px rgba(0,0,0,.15);
+}
+
+/* Textos del usuario blancos */
+html[data-bs-theme="light"] header.topbar .nav-link,
+html[data-bs-theme="light"] header.topbar .nav-link *{
+  color: rgba(255,255,255,.92) !important;
+}
+
+/* Burger blanco si aparece */
+html[data-bs-theme="light"] header.topbar .burger-btn,
+html[data-bs-theme="light"] header.topbar .burger-btn i{
+  color: rgba(255,255,255,.92) !important;
+}
+
+/* Dropdown normal */
+html[data-bs-theme="light"] header.topbar .dropdown-menu{
+  background: #fff !important;
+  color: #0f172a !important;
+}
+html[data-bs-theme="light"] header.topbar .dropdown-menu .dropdown-item{
+  color: #0f172a !important;
+}
+
+/* ==========================================================
+   QUITAR EL "RECTÁNGULO" DEL CONTENIDO (la caja grande)
+   Esto es lo que te queda en la captura.
+========================================================== */
+
+/* Quita fondos/bordes/sombras de wrappers típicos de Mazer */
+html[data-bs-theme="light"] #main,
+html[data-bs-theme="light"] #main > .page-content,
+html[data-bs-theme="light"] #main .page-content,
+html[data-bs-theme="light"] #main .content-wrapper,
+html[data-bs-theme="light"] #main .content,
+html[data-bs-theme="light"] #main .container,
+html[data-bs-theme="light"] #main .container-fluid{
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+/* Si algún wrapper viene con padding y parece "caja", reduce */
+html[data-bs-theme="light"] #main .page-content{
+  padding-top: .25rem !important;
+}
+
+/* ==========================================================
+   CARDS (glass) - solo cuando existan componentes
+========================================================== */
+html[data-bs-theme="light"] .card{
+  background: linear-gradient(135deg,
+    rgba(255,255,255,.16) 0%,
+    rgba(255,255,255,.12) 50%,
+    rgba(255,255,255,.10) 100%
+  ) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,.18) !important;
+  box-shadow: var(--inv-shadow) !important;
+}
+
+/* Dentro de cards, texto oscuro */
+html[data-bs-theme="light"] .card,
+html[data-bs-theme="light"] .card *{
+  color: var(--inv-text-dark);
+}
+html[data-bs-theme="light"] .card .text-muted{
+  color: rgba(15,23,42,.70) !important;
 }

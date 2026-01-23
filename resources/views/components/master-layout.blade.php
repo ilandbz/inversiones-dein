@@ -30,10 +30,6 @@
     <main id="top">
       <App></App>
     </main>
-    <!-- MAZER JS (orden exacto) -->
-    {{-- <script src="/assets/static/js/initTheme.js"></script> --}}
-    {{-- <script src="/assets/compiled/js/app.js"></script> --}}
-    {{-- <script src="/assets/static/js/components/dark.js"></script> --}}
     <script src="https://code.iconify.design/2/2.2.1/iconify.min.js"></script>
 </body>
 </html>

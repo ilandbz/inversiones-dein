@@ -183,8 +183,10 @@ watch(() => props.menus, syncOpenMenuWithRoute, { deep: true })
     <div class="sidebar-header position-relative">
       <div class="d-flex justify-content-between align-items-center">
         <div class="logo">
-          <RouterLink to="/">
-            <img src="/assets/imagenes/logo.png" alt="Logo" />
+          <RouterLink to="/" class="logo-link">
+            <span class="logo-box">
+              <img src="/assets/imagenes/logo.jpeg" alt="Logo" class="app-logo" />
+            </span>
           </RouterLink>
         </div>
 
@@ -299,4 +301,39 @@ watch(() => props.menus, syncOpenMenuWithRoute, { deep: true })
   margin-bottom: .35rem;
   letter-spacing: .9px;
 }
+
+/* El contenedor del header de mazer */
+.sidebar-header .logo{
+  display: flex;
+  align-items: center;
+}
+
+/* Nuestro wrapper */
+.sidebar-header .logo-box{
+  width: 130px !important;
+  height: 130px !important;
+  padding: 4px;          /* un poquito más de aire */
+  border-radius: 18px;
+
+  display: grid;
+  place-items: center;
+
+  background: rgba(255,255,255,.10);
+  border: 1px solid rgba(255,255,255,.18);
+  box-shadow: 0 10px 26px rgba(0,0,0,.25);
+}
+
+/* Forzar a la imagen a ignorar reglas de Mazer */
+.sidebar-header .logo-box img,
+.sidebar-header .logo img.app-logo{
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
+  object-fit: contain !important;
+  border-radius: 12px;
+  display: block;
+}
+
+
 </style>

@@ -51,15 +51,35 @@ const submit = async () => {
   <div id="auth" class="auth-wrapper">
     <div class="row g-0 h-100">
 
-      <!-- COLUMNA IZQUIERDA -->
-      <div class="col-lg-5 col-12">
-        <div id="auth-left" class="h-100 d-flex align-items-center justify-content-center">
+      <!-- COLUMNA IZQUIERDA (solo fondo) -->
+      <div class="col-lg-5 d-none d-lg-block">
+        <div id="auth-left" class="h-100"></div>
+      </div>
+
+      <!-- COLUMNA DERECHA (logo + login) -->
+      <div class="col-lg-7 col-12">
+        <div
+          id="auth-right"
+          class="h-100 d-flex flex-column align-items-center justify-content-center"
+        >
+          <div class="right-content text-center text-white mb-2">
+            <div class="right-logo mb-3">
+              <img src="/assets/imagenes/logo.jpeg" alt="Logo grande" />
+            </div>
+
+            <h1 class="fw-bold mb-2">Bienvenido</h1>
+
+          </div>
+
+          <!-- CARD LOGIN (AHORA DEBAJO DEL LOGO) -->
           <div class="auth-card">
 
             <div class="text-center mb-4">
-              <h6 class="auth-title mb-2">Iniciar sesión</h6>
+              <h6 class="auth-title mb-2">
+                INGRESE DATOS PARA INICIAR SESION
+              </h6>
               <p class="auth-subtitle mb-0">
-                Ingrese sus credenciales para acceder al sistema.
+                
               </p>
             </div>
 
@@ -75,9 +95,9 @@ const submit = async () => {
                   placeholder="Nombre de usuario"
                   autocomplete="username"
                 />
-                <div class="form-control-icon">
+                <!-- <div class="form-control-icon">
                   <i class="bi bi-person"></i>
-                </div>
+                </div> -->
 
                 <small class="text-danger" v-for="err in (errors?.name || [])" :key="err">
                   {{ err }}
@@ -94,9 +114,9 @@ const submit = async () => {
                   placeholder="Contraseña"
                   autocomplete="current-password"
                 />
-                <div class="form-control-icon">
+                <!-- <div class="form-control-icon">
                   <i class="bi bi-shield-lock"></i>
-                </div>
+                </div> -->
 
                 <small class="text-danger" v-for="err in (errors?.password || [])" :key="err">
                   {{ err }}
@@ -116,7 +136,7 @@ const submit = async () => {
                   Ingresar
                 </span>
                 <span v-else class="d-inline-flex align-items-center justify-content-center gap-2">
-                  <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                  <span class="spinner-border spinner-border-sm"></span>
                   Verificando...
                 </span>
               </button>
@@ -131,81 +151,109 @@ const submit = async () => {
         </div>
       </div>
 
-      <!-- COLUMNA DERECHA -->
-      <div class="col-lg-7 d-none d-lg-block">
-        <div id="auth-right" class="h-100 d-flex align-items-center justify-content-center">
-          <div class="right-content text-center text-white">
-            <div class="right-logo mb-4">
-              <img src="/assets/imagenes/logo.jpeg" alt="Logo grande" />
-            </div>
-
-            <h1 class="fw-bold mb-2">Bienvenido</h1>
-            <p class="mb-0 opacity-75">
-              Accede de forma segura a tu panel de gestión.
-            </p>
-          </div>
-        </div>
-      </div>
-
     </div>
   </div>
 </template>
 
+
 <style scoped>
-.auth-wrapper {
-  height: 100vh;
-}
 
-/* Izquierda */
-#auth-left {
-  background: radial-gradient(1200px 600px at 10% 10%, #ffffff 0%, #f5f7fb 55%, #eef2ff 100%);
-  padding: 24px;
-}
+.auth-card{
+  /* mismo degradado (puedes variar opacidades si quieres más suave) */
+  background: linear-gradient(135deg,
+    rgba(30, 60, 114, .92) 0%,
+    rgba(42, 82, 152, .88) 50%,
+    rgba(59, 130, 246, .82) 100%
+  );
 
-.auth-card {
-  background: #fff;
+  /* efecto vidrio */
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+
   width: 100%;
-  max-width: 360px;      /* antes 420px */
-  border-radius: 16px;
-  padding: 28px;         /* antes 36px */
-  border: 1px solid rgba(17, 24, 39, .06);
-  box-shadow: 0 12px 40px rgba(17, 24, 39, .12);
+  max-width: 360px;
+  border-radius: 18px;
+  padding: 28px;
+
+  /* borde y sombra premium */
+  border: 1px solid rgba(255,255,255,.18);
+  box-shadow: 0 20px 70px rgba(0,0,0,.35);
+
+  /* para que no se “coma” el brillo del fondo */
+  position: relative;
+  z-index: 2;
+  overflow: hidden;
 }
 
-.auth-logo {
-  width: 92px;
-  height: 92px;
-  margin: 0 auto 18px auto;
-  border-radius: 999px;
-  padding: 8px;
-  background: #fff;
-  border: 1px solid rgba(17, 24, 39, .08);
-  box-shadow: 0 10px 24px rgba(17, 24, 39, .10);
-  display: grid;
-  place-items: center;
-}
-.auth-logo img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: 999px;
+/* brillo sutil dentro del card (bonito) */
+.auth-card::before{
+  content: "";
+  position: absolute;
+  inset: -40%;
+  background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.18), transparent 55%);
+  transform: rotate(12deg);
+  pointer-events: none;
 }
 
-.auth-title {
+/* Textos del card en blanco */
+.auth-title{
+  color: rgba(255,255,255,.95);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: .4px;
+  text-transform: uppercase;
+}
+
+.auth-subtitle{
+  color: rgba(255,255,255,.75);
+  font-size: 13px;
+}
+
+.auth-footer{
+  color: rgba(255,255,255,.65);
   font-size: 12px;
-  font-weight: 600;
 }
 
-.auth-subtitle {
-  color: #6b7280;
-  font-size: 13px;
+/* Inputs dentro del card: tipo vidrio también */
+.auth-card .form-control{
+  border-radius: 12px;
+  background: rgba(255,255,255,.12);
+  border: 1px solid rgba(255,255,255,.18);
+  color: rgba(255,255,255,.95);
 }
 
-.auth-footer {
-  color: #9aa4b2;
-  font-size: 13px;
+.auth-card .form-control::placeholder{
+  color: rgba(255,255,255,.70);
 }
 
+.auth-card .form-control:focus{
+  background: rgba(255,255,255,.16);
+  border-color: rgba(255,255,255,.35);
+  box-shadow: 0 0 0 .22rem rgba(255,255,255,.12);
+}
+
+/* alert no demasiado “chillón” sobre azul */
+.auth-card .alert-danger{
+  background: rgba(220, 38, 38, .18);
+  border: 1px solid rgba(220, 38, 38, .25);
+  color: rgba(255,255,255,.92);
+}
+
+/* Botón: que combine con el card */
+.auth-card .btn-primary{
+  background: rgba(255,255,255,.18);
+  border: 1px solid rgba(255,255,255,.22);
+  color: #fff;
+}
+
+.auth-card .btn-primary:hover{
+  background: rgba(255,255,255,.25);
+  border-color: rgba(255,255,255,.28);
+}
+
+.auth-card .btn-primary:disabled{
+  opacity: .7;
+}
 /* Inputs: más suaves */
 .form-control {
   border-radius: 12px;
@@ -263,4 +311,50 @@ const submit = async () => {
     font-size: 28px;
   }
 }
+
+
+/* --- LOGO: más grande, cuadrado, premium --- */
+.logo-link{
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+/* Caja del logo (se ve bien con logo cuadrado) */
+.logo-box{
+  width: 62px;              /* tamaño del logo */
+  height: 62px;
+  padding: 8px;             /* “aire” interno */
+  border-radius: 14px;      /* suave, moderno */
+  display: grid;
+  place-items: center;
+
+  /* estilo premium tipo glass */
+  background: rgba(255,255,255,.10);
+  border: 1px solid rgba(255,255,255,.18);
+  box-shadow: 0 10px 26px rgba(0,0,0,.22);
+
+  /* para que no se vea pegado arriba */
+  margin: 4px 0;
+}
+
+/* Imagen del logo: NO se recorta, se ajusta */
+.logo-box img{
+  width: 100%;
+  height: 100%;
+  object-fit: contain;      /* clave para logo cuadrado */
+  border-radius: 10px;      /* leve redondeo dentro */
+  display: block;
+}
+
+/* Si sientes que el toggle se “aprieta”, ajusta el header */
+.sidebar-header .d-flex{
+  gap: 10px;
+}
+
+@media (max-width: 420px){
+  .logo-box{ width: 56px; height: 56px; }
+}
+
+
 </style>
