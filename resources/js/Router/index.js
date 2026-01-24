@@ -2,7 +2,7 @@ import { createRouter, createWebHistory } from "vue-router";
 
 import LayoutLogin from '@/Layouts/AppLayoutLogin.vue'
 import LayoutDefault from '@/Layouts/AppLayoutDefault.vue'
-import Placeholder from '@/Pages/Placeholder.vue'
+import Placeholder from '@/Pages/PlaceHolder.vue'
 import Principal from '@/Pages/Principal.vue'
 import RegistroClientes from '@/Pages/Clientes/Registro.vue'
 import Login from '@/Pages/Auth/Login.vue'
