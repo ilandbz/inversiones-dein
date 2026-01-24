@@ -1,0 +1,15 @@
+/* Quitar inversión/filtros del logo del sidebar */
+.nxl-navigation .b-brand img.logo,
+.nxl-navigation .m-header img.logo {
+    filter: none !important;
+    -webkit-filter: none !important;
+    mix-blend-mode: normal !important;
+    opacity: 1 !important;
+}
+
+.nxl-navigation .b-brand img.logo {
+    background: rgba(255, 255, 255, 0.08);
+    padding: 10px;
+    border-radius: 14px;
+    backdrop-filter: blur(4px);
+}

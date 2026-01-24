@@ -674,6 +674,72 @@ const cancelar = () => router.push({ name: 'Principal' })
                 </div>
               </div>
 
+              <div class="col-12 col-md-3">
+                <label class="form-label">Ubigeo Domicilio</label>
+                <input
+                  v-model="form.ubigeo_dom"
+                  class="form-control"
+                  :class="{ 'is-invalid': hasError('ubigeo_dom') }"
+                  maxlength="6"
+                  @keypress="soloNumeros"
+                  placeholder="Ej: 090101"
+                  @input="clearFieldError('ubigeo_dom')"
+                />
+                <div class="invalid-feedback" v-if="hasError('ubigeo_dom')">
+                  {{ firstError('ubigeo_dom') }}
+                </div>
+              </div>
+
+              <div class="col-6">
+                <label class="form-label">Dirección</label>
+                <textarea
+                  v-model="form.direccion"
+                  class="form-control"
+                  rows="2"
+                  :class="{ 'is-invalid': hasError('direccion') }"
+                  placeholder="Av / Jr / Mz / Lt..."
+                  @input="clearFieldError('direccion')"
+                ></textarea>
+                <div class="invalid-feedback" v-if="hasError('direccion')">
+                  {{ firstError('direccion') }}
+                </div>
+              </div>
+
+              <div class="col-6">
+                <label class="form-label">Ubicación (Latitud, Longitud)</label>
+
+                <div class="input-group">
+                  <input
+                    v-model="form.latitud_longitud"
+                    class="form-control"
+                    :class="{ 'is-invalid': hasError('latitud_longitud') }"
+                    placeholder="Ej: -9.930123,-76.242991"
+                    @input="clearFieldError('latitud_longitud')"
+                  />
+                  <button
+                    class="btn btn-outline-primary"
+                    type="button"
+                    @click="obtenerUbicacion"
+                    :disabled="geoLoading"
+                  >
+                    <span v-if="geoLoading" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                    Obtener mi ubicación
+                  </button>
+                </div>
+
+                <div class="invalid-feedback" v-if="hasError('latitud_longitud')">
+                  {{ firstError('latitud_longitud') }}
+                </div>
+
+                <div class="form-text" v-if="!hasError('latitud_longitud')">
+                  Guarda en formato: <b>lat,lng</b>. Ej: -9.930123,-76.242991
+                </div>
+
+                <div class="text-danger small mt-1" v-if="geoMsg">
+                  {{ geoMsg }}
+                </div>
+              </div>
+
               <!-- NEGOCIO -->
               <div v-if="esIndependiente" class="mt-3">
                 <div class="border rounded p-3">
@@ -829,71 +895,7 @@ const cancelar = () => router.push({ name: 'Principal' })
                 </div>
               </div>
 
-              <div class="col-12 col-md-3">
-                <label class="form-label">Ubigeo Domicilio</label>
-                <input
-                  v-model="form.ubigeo_dom"
-                  class="form-control"
-                  :class="{ 'is-invalid': hasError('ubigeo_dom') }"
-                  maxlength="6"
-                  @keypress="soloNumeros"
-                  placeholder="Ej: 090101"
-                  @input="clearFieldError('ubigeo_dom')"
-                />
-                <div class="invalid-feedback" v-if="hasError('ubigeo_dom')">
-                  {{ firstError('ubigeo_dom') }}
-                </div>
-              </div>
 
-              <div class="col-12">
-                <label class="form-label">Dirección</label>
-                <textarea
-                  v-model="form.direccion"
-                  class="form-control"
-                  rows="2"
-                  :class="{ 'is-invalid': hasError('direccion') }"
-                  placeholder="Av / Jr / Mz / Lt..."
-                  @input="clearFieldError('direccion')"
-                ></textarea>
-                <div class="invalid-feedback" v-if="hasError('direccion')">
-                  {{ firstError('direccion') }}
-                </div>
-              </div>
-
-              <div class="col-12">
-                <label class="form-label">Ubicación (Latitud, Longitud) (opcional)</label>
-
-                <div class="input-group">
-                  <input
-                    v-model="form.latitud_longitud"
-                    class="form-control"
-                    :class="{ 'is-invalid': hasError('latitud_longitud') }"
-                    placeholder="Ej: -9.930123,-76.242991"
-                    @input="clearFieldError('latitud_longitud')"
-                  />
-                  <button
-                    class="btn btn-outline-primary"
-                    type="button"
-                    @click="obtenerUbicacion"
-                    :disabled="geoLoading"
-                  >
-                    <span v-if="geoLoading" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
-                    Obtener mi ubicación
-                  </button>
-                </div>
-
-                <div class="invalid-feedback" v-if="hasError('latitud_longitud')">
-                  {{ firstError('latitud_longitud') }}
-                </div>
-
-                <div class="form-text" v-if="!hasError('latitud_longitud')">
-                  Guarda en formato: <b>lat,lng</b>. Ej: -9.930123,-76.242991
-                </div>
-
-                <div class="text-danger small mt-1" v-if="geoMsg">
-                  {{ geoMsg }}
-                </div>
-              </div>
 
               <!-- REFERENTE -->
               <div class="mt-3">

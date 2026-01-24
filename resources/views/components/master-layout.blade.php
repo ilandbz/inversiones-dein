@@ -1,35 +1,36 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="zxx">
+
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="utf-8" />
+    <meta http-equiv="x-ua-compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="" />
+    <meta name="keyword" content="" />
+    <meta name="author" content="flexilecode" />
+    <title>{{ config('app.name', 'Laravel') }}</title>
+    <link rel="shortcut icon" type="image/x-icon" href="/imagenes/logo_redondo.png" />
+    <link rel="stylesheet" type="text/css" href="/duralux/css/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="/duralux/vendors/css/vendors.min.css" />
+    <!-- <link rel="stylesheet" type="text/css" href="duralux/vendors/css/daterangepicker.min.css" /> -->
+    <link rel="stylesheet" type="text/css" href="/duralux/css/theme.min.css" />
+    <!-- <link rel="stylesheet" type="text/css" href="duralux/css/custom.css" /> -->
 
-    <title inertia>{{ config('app.name', 'Laravel') }}</title>
-
-    <!-- MAZER CSS -->
-    <link rel="stylesheet" href="/assets/compiled/css/app.css">
-    <link rel="stylesheet" href="/assets/compiled/css/app-dark.css">
-    <link rel="stylesheet" href="/assets/compiled/css/iconly.css">
-    <link rel="stylesheet" href="/assets/compiled/css/auth.css">
-
-    <link rel="stylesheet" href="/assets/custom/css/overrides.css">
-    
-<style>
 
 
-    
-</style>
-
-    <!-- Bootstrap Icons (OBLIGATORIO) -->
-    <link rel="stylesheet" href="/assets/extensions/bootstrap-icons/font/bootstrap-icons.css">
 
     @vite('resources/js/app.js')
-
 </head>
 <body>
-    <main id="top">
-      <App></App>
-    </main>
-    <script src="https://code.iconify.design/2/2.2.1/iconify.min.js"></script>
+
+    <main id="top"></main>
+
+
+
+
+
+    <script src="/duralux/vendors/js/vendors.min.js"></script>
+    <script src="/duralux/js/common-init.min.js"></script>
+    <script src="/duralux/js/theme-customizer-init.min.js"></script>
 </body>
 </html>

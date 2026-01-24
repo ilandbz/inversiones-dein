@@ -28,6 +28,46 @@ DB::transaction(function () {
                     ],
                 ],
                 [
+                    "title" => "Gestión Comercial",
+                    "items" => [
+                        [
+                            "name" => "Clientes",
+                            "key" => "clientes",
+                            "icon" => "person-badge-fill",
+                            "submenu" => [
+                                ["name" => "Registro de Clientes", "key" => "registro-de-clientes", "url" => "/clientes/registro-de-clientes"],
+                                ["name" => "Posición del Cliente", "key" => "posicion-del-cliente", "url" => "/clientes/posicion-del-cliente"],
+                                ["name" => "Historial del Cliente", "key" => "historial-del-cliente", "url" => "/clientes/historial-del-cliente"],
+                            ],
+                        ],
+                        [
+                            "name" => "Asesores",
+                            "key" => "asesores",
+                            "icon" => "people-fill",
+                            "submenu" => [
+                                ["name" => "Metas", "key" => "metas", "url" => "/asesores/metas"],
+                                ["name" => "Cartilla de Cobranza", "key" => "cartilla-de-cobranza", "url" => "/asesores/cartilla-de-cobranza"],
+                                ["name" => "Histórico del Asesor", "key" => "historico-del-asesor", "url" => "/asesores/historico-del-asesor"],
+                            ],
+                        ],
+                        [
+                            "name" => "Pagos",
+                            "key" => "pagos",
+                            "icon" => "people-fill",
+                            "submenu" => [
+                                ["name" => "Reportes", "key" => "reportes", "url" => "/pagos/reportes"],
+                                ["name" => "Estadísticas de Ingresos", "key" => "estadisticas-de-ingresos", "url" => "/pagos/estadisticas-de-ingresos"],
+                            ],
+                        ],
+                        [
+                            "name" => "Actividad de Negocio",
+                            "key" => "actividad-de-negocio",
+                            "icon" => "person-badge-fill",
+                            "url" => "/actividadnegocio",
+                        ],
+                    ],
+                ],
+                [
                     "title" => "Operaciones",
                     "items" => [
                         [
@@ -60,46 +100,6 @@ DB::transaction(function () {
                                 ["name" => "Pagos", "key" => "pagos", "url" => "/caja/pagos"],
                                 ["name" => "Cierre de Caja", "key" => "cierre-de-caja", "url" => "/caja/cierre-de-caja"],
                             ],
-                        ],
-                    ],
-                ],
-                [
-                    "title" => "Gestión Comercial",
-                    "items" => [
-                        [
-                            "name" => "Asesores",
-                            "key" => "asesores",
-                            "icon" => "people-fill",
-                            "submenu" => [
-                                ["name" => "Metas", "key" => "metas", "url" => "/asesores/metas"],
-                                ["name" => "Cartilla de Cobranza", "key" => "cartilla-de-cobranza", "url" => "/asesores/cartilla-de-cobranza"],
-                                ["name" => "Histórico del Asesor", "key" => "historico-del-asesor", "url" => "/asesores/historico-del-asesor"],
-                            ],
-                        ],
-                        [
-                            "name" => "Pagos",
-                            "key" => "pagos",
-                            "icon" => "people-fill",
-                            "submenu" => [
-                                ["name" => "Reportes", "key" => "reportes", "url" => "/pagos/reportes"],
-                                ["name" => "Estadísticas de Ingresos", "key" => "estadisticas-de-ingresos", "url" => "/pagos/estadisticas-de-ingresos"],
-                            ],
-                        ],
-                        [
-                            "name" => "Clientes",
-                            "key" => "clientes",
-                            "icon" => "person-badge-fill",
-                            "submenu" => [
-                                ["name" => "Registro de Clientes", "key" => "registro-de-clientes", "url" => "/clientes/registro-de-clientes"],
-                                ["name" => "Posición del Cliente", "key" => "posicion-del-cliente", "url" => "/clientes/posicion-del-cliente"],
-                                ["name" => "Historial del Cliente", "key" => "historial-del-cliente", "url" => "/clientes/historial-del-cliente"],
-                            ],
-                        ],
-                        [
-                            "name" => "Actividad de Negocio",
-                            "key" => "actividad-de-negocio",
-                            "icon" => "person-badge-fill",
-                            "url" => "/actividadnegocio",
                         ],
                     ],
                 ],
