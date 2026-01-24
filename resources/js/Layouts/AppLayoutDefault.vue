@@ -1,27 +1,42 @@
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
+import { RouterLink, useRoute } from 'vue-router'
 import Navbar from '@/Components/Navbar.vue'
 import useDatosSession from '@/Composables/session'
 import Footer from '@/Components/Footer.vue'
 import Topbar from '@/Components/Topbar.vue'
 import { useAutenticacion } from '@/Composables/autenticacion'
 
+const route = useRoute()
 const { logoutUsuario } = useAutenticacion()
 
 const isDark = ref(false)
-
-// ✅ SOLO ESCRITORIO (COLLAPSED)
 const sidebarCollapsed = ref(false)
-
 const { usuario, menus, role } = useDatosSession()
+
+const pageTitle = computed(() => route.meta?.title || String(route.name || ''))
+
+const breadcrumbs = computed(() => {
+  const items = [
+    { text: 'Home', to: '/' }
+  ]
+
+  // si estás en Home, no repitas
+  if (route.path !== '/') {
+    items.push({
+      text: pageTitle.value || 'Página',
+      to: route.fullPath
+    })
+  }
+
+  return items
+})
 
 const isDesktop = () => window.matchMedia('(min-width: 1200px)').matches
 
 const toggleSidebarDesktop = () => {
   if (!isDesktop()) return
   sidebarCollapsed.value = !sidebarCollapsed.value
-
-  // opcional: persistir preferencia
   localStorage.setItem('sidebarCollapsed', sidebarCollapsed.value ? '1' : '0')
 }
 
@@ -34,7 +49,6 @@ onMounted(() => {
   isDark.value = savedTheme === 'dark'
   document.documentElement.setAttribute('data-bs-theme', savedTheme)
 
-  // cargar preferencia collapsed
   sidebarCollapsed.value = localStorage.getItem('sidebarCollapsed') === '1'
 })
 
@@ -57,11 +71,26 @@ watch(isDark, (value) => {
         <div class="page-header">
             <div class="page-header-left d-flex align-items-center">
                 <div class="page-header-title">
-                    <h5 class="m-b-10">Dashboard</h5>
+                    <h5 class="m-b-10">{{ pageTitle }}</h5>
                 </div>
                 <ul class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="index.html">Home</a></li>
-                    <li class="breadcrumb-item">Dashboard</li>
+                  <li
+                    v-for="(bc, idx) in breadcrumbs"
+                    :key="idx"
+                    class="breadcrumb-item"
+                    :class="{ active: idx === breadcrumbs.length - 1 }"
+                    aria-current="page"
+                  >
+                    <!-- si es el último, texto normal -->
+                    <span v-if="idx === breadcrumbs.length - 1">
+                      {{ bc.text }}
+                    </span>
+
+                    <!-- si no es el último, clickeable -->
+                    <RouterLink v-else :to="bc.to">
+                      {{ bc.text }}
+                    </RouterLink>
+                  </li>
                 </ul>
             </div>
             <div class="page-header-right ms-auto">

@@ -2,7 +2,7 @@ import { createRouter, createWebHistory } from "vue-router";
 
 import LayoutLogin from '@/Layouts/AppLayoutLogin.vue'
 import LayoutDefault from '@/Layouts/AppLayoutDefault.vue'
-
+import Placeholder from '@/Pages/Placeholder.vue'
 import Principal from '@/Pages/Principal.vue'
 import RegistroClientes from '@/Pages/Clientes/Registro.vue'
 import Login from '@/Pages/Auth/Login.vue'
@@ -13,37 +13,86 @@ import ActividadDeNegocio from '@/Pages/ActividadNegocio/Inicio.vue'
 const routes = [
   {
     path: '/',
-    alias: '/principal',
     name: 'Principal',
     component: Principal,
-    meta: { layout: LayoutDefault, requiresAuth: true }
+    meta: { layout: LayoutDefault, requiresAuth: true, title: 'Dashboard' }
   },
-  { path: '/clientes/registro-de-clientes', name:'Registro de Clientes', component: RegistroClientes, meta:{ layout: LayoutDefault, requiresAuth: true } },
-  { path: '/login', name:'Login', component: Login, meta:{ layout: LayoutLogin } },
+
   {
-    path: '/',
-    alias: '/perfil',
-    name: 'Perfil',
-    component: Perfil,
-    meta: { layout: LayoutDefault, requiresAuth: true }
+    path: '/clientes/registro-de-clientes',
+    name: 'RegistroClientes',
+    component: RegistroClientes,
+    meta: { layout: LayoutDefault, requiresAuth: true, title: 'Registro de Clientes' }
   },
+
   {
-    path: '/',
-    alias: '/cambiar-clave',
-    name: 'CambiarClave',
-    component: CambiarClave,
-    meta: { layout: LayoutDefault, requiresAuth: true }
-  },
-  {
-    path: '/',
-    alias: '/actividad-de-negocio',
+    path: '/actividad-negocio',
     name: 'ActividadDeNegocio',
     component: ActividadDeNegocio,
-    meta: { layout: LayoutDefault, requiresAuth: true }
+    meta: { layout: LayoutDefault, requiresAuth: true, title: 'Actividad de Negocio' }
   },
 
-]
+  {
+    path: '/perfil',
+    name: 'Perfil',
+    component: Perfil,
+    meta: { layout: LayoutDefault, requiresAuth: true, title: 'Perfil' }
+  },
 
+  {
+    path: '/cambiar-clave',
+    name: 'CambiarClave',
+    component: CambiarClave,
+    meta: { layout: LayoutDefault, requiresAuth: true, title: 'Cambiar clave' }
+  },
+
+  {
+    path: '/login',
+    name: 'Login',
+    component: Login,
+    meta: { layout: LayoutLogin, title: 'Login' }
+  },
+
+  { path: '/clientes/posicion-del-cliente', name: 'ClientesPosicion', component: Placeholder, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Posición del Cliente' } },
+  { path: '/clientes/historial-del-cliente', name: 'ClientesHistorial', component: Placeholder, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Historial del Cliente' } },
+
+  // --- ASESORES ---
+  { path: '/asesores/metas', name: 'AsesoresMetas', component: Placeholder, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Metas' } },
+  { path: '/asesores/cartilla-de-cobranza', name: 'AsesoresCartilla', component: Placeholder, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Cartilla de Cobranza' } },
+  { path: '/asesores/historico-del-asesor', name: 'AsesoresHistorico', component: Placeholder, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Histórico del Asesor' } },
+
+  // --- PAGOS ---
+  { path: '/pagos/reportes', name: 'PagosReportes', component: Placeholder, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Reportes' } },
+  { path: '/pagos/estadisticas-de-ingresos', name: 'PagosEstadisticas', component: Placeholder, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Estadísticas de Ingresos' } },
+
+  // --- ACTIVIDAD NEGOCIO (ojo: en tu log sale /actividad-de-negocio) ---
+  { path: '/actividad-de-negocio', name: 'ActividadNegocio', component: Placeholder, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Actividad de Negocio' } },
+
+  // --- PRESTAMOS ---
+  { path: '/prestamos/registrar-prestamo', name: 'PrestamosRegistrar', component: Placeholder, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Registrar Préstamo' } },
+  { path: '/prestamos/simulacion', name: 'PrestamosSimulacion', component: Placeholder, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Simulación' } },
+  { path: '/prestamos/cronograma-de-pagos', name: 'PrestamosCronograma', component: Placeholder, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Cronograma de Pagos' } },
+  { path: '/prestamos/historial-de-prestamos', name: 'PrestamosHistorial', component: Placeholder, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Historial de Préstamos' } },
+
+  // --- AHORROS ---
+  { path: '/ahorros/apertura-de-cuenta', name: 'AhorrosApertura', component: Placeholder, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Apertura de Cuenta' } },
+  { path: '/ahorros/depositos-retiros', name: 'AhorrosMovimientos', component: Placeholder, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Depósitos / Retiros' } },
+  { path: '/ahorros/estado-de-cuenta', name: 'AhorrosEstado', component: Placeholder, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Estado de Cuenta' } },
+
+  // --- CAJA ---
+  { path: '/caja/cobros', name: 'CajaCobros', component: Placeholder, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Cobros' } },
+  { path: '/caja/pagos', name: 'CajaPagos', component: Placeholder, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Pagos' } },
+  { path: '/caja/cierre-de-caja', name: 'CajaCierre', component: Placeholder, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Cierre de Caja' } },
+
+  // --- RIESGOS ---
+  { path: '/riesgos/mora-y-castigos', name: 'RiesgosMora', component: Placeholder, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Mora y Castigos' } },
+  { path: '/riesgos/bloqueo-de-pagos', name: 'RiesgosBloqueo', component: Placeholder, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Bloqueo de Pagos' } },
+
+  // --- GERENCIA ---
+  { path: '/gerencia/reportes-gerenciales', name: 'GerenciaReportes', component: Placeholder, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Reportes Gerenciales' } },
+  { path: '/gerencia/autorizaciones', name: 'GerenciaAutorizaciones', component: Placeholder, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Autorizaciones' } },
+
+]
 const router = createRouter({
   history: createWebHistory(),
   routes

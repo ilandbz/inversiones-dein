@@ -1,13 +1,14 @@
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import useHelper from '@/Helpers'
 import useCliente from '@/Composables/Cliente.js'
 import useActividadNegocio from '@/Composables/ActividadNegocio.js'
 
 const router = useRouter()
-const { Toast, soloNumeros } = useHelper()
+const { Toast, soloNumeros, Swal } = useHelper()
 const { errors, respuesta, agregarCliente } = useCliente()
+
 const {
   actividadNegocios,
   listaActividadNegocios,
@@ -68,7 +69,6 @@ const form = ref({
   institucion_lab: '',
 
   direccion: '',
-
   latitud_longitud: '',
 
   negocio: NEGOCIO_DEFAULT(),
@@ -81,12 +81,16 @@ const form = ref({
   errors: {}
 })
 
+/* ----------------- UI State ----------------- */
+const isSaving = ref(false)
+const lastCreated = ref(null) // aquí guardamos el último registro (lo que devuelva backend)
+const lastPdfUrl = ref('')
 
+/* ----------------- GEO ----------------- */
 const geoLoading = ref(false)
 const geoMsg = ref('')
 
 const setLatLng = (lat, lng) => {
-  // 6 decimales aprox. (buen equilibrio)
   const latF = Number(lat).toFixed(6)
   const lngF = Number(lng).toFixed(6)
   form.value.latitud_longitud = `${latF},${lngF}`
@@ -94,7 +98,6 @@ const setLatLng = (lat, lng) => {
 }
 
 const parseLatLng = (s) => {
-  // acepta "lat,lng" con espacios
   const parts = String(s || '').split(',').map(x => x.trim())
   if (parts.length !== 2) return null
   const lat = Number(parts[0])
@@ -122,118 +125,60 @@ const obtenerUbicacion = () => {
     },
     (err) => {
       geoLoading.value = false
-      // mensajes amigables
       if (err.code === 1) geoMsg.value = 'Permiso denegado para acceder a la ubicación.'
       else if (err.code === 2) geoMsg.value = 'No se pudo determinar la ubicación (señal/GPS).'
       else geoMsg.value = 'Error al obtener la ubicación.'
     },
-    {
-      enableHighAccuracy: true,
-      timeout: 12000,
-      maximumAge: 0
-    }
+    { enableHighAccuracy: true, timeout: 12000, maximumAge: 0 }
   )
 }
 
-// opcional: valida cuando escriben manualmente "lat,lng"
 watch(
   () => form.value.latitud_longitud,
   (v) => {
     if (!v) return
     const ok = parseLatLng(v)
-    if (!ok) {
-      // No bloquea, solo aviso (Laravel validará si quieres)
-      geoMsg.value = 'Formato sugerido: -9.930123,-76.242991'
-    } else {
-      geoMsg.value = ''
-    }
+    geoMsg.value = ok ? '' : 'Formato sugerido: -9.930123,-76.242991'
   }
 )
 
-
+/* ----------------- LISTAS ----------------- */
 const parentescos = [
-  'PADRE',
-  'MADRE',
-  'HIJO(A)',
-  'HERMANO(A)',
-  'ABUELO(A)',
-  'NIETO(A)',
-  'TÍO(A)',
-  'SOBRINO(A)',
-  'PRIMO(A)',
-  'CUÑADO(A)',
-  'SUEGRO(A)',
-  'YERNO',
-  'NUERA',
-  'ESPOSO(A)',
-  'CONVIVIENTE',
-  'PAREJA',
-  'FAMILIAR',
-  'AMIGO(A)',
-  'VECINO(A)',
-  'COMPAÑERO(A) DE TRABAJO',
-  'JEFE(A)',
-  'OTRO'
+  'PADRE','MADRE','HIJO(A)','HERMANO(A)','ABUELO(A)','NIETO(A)','TÍO(A)','SOBRINO(A)','PRIMO(A)',
+  'CUÑADO(A)','SUEGRO(A)','YERNO','NUERA','ESPOSO(A)','CONVIVIENTE','PAREJA','FAMILIAR','AMIGO(A)',
+  'VECINO(A)','COMPAÑERO(A) DE TRABAJO','JEFE(A)','OTRO'
 ]
 
 const gradosInstruccion = [
-  'SIN INSTRUCCION',
-  'INICIAL',
-  'PRIMARIA',
-  'SECUNDARIA',
-  'SUPERIOR TECNICO',
-  'SUPERIOR UNIVERSITARIO',
-  'POSTGRADO'
+  'SIN INSTRUCCION','INICIAL','PRIMARIA','SECUNDARIA','SUPERIOR TECNICO','SUPERIOR UNIVERSITARIO','POSTGRADO'
 ]
 
 const profesionesPeru = [
-  'ADMINISTRACIÓN',
-  'ADMINISTRACIÓN DE EMPRESAS',
-  'AGRONOMÍA',
-  'ARQUITECTURA',
-  'BIOLOGÍA',
-  'CIENCIAS DE LA COMUNICACIÓN',
-  'CIENCIAS CONTABLES',
-  'CONTABILIDAD',
-  'DERECHO',
-  'DISEÑO GRÁFICO',
-  'ECONOMÍA',
-  'EDUCACIÓN INICIAL',
-  'EDUCACIÓN PRIMARIA',
-  'EDUCACIÓN SECUNDARIA',
-  'ENFERMERÍA',
-  'ESTADÍSTICA',
-  'FARMACIA Y BIOQUÍMICA',
-  'GASTRONOMÍA',
-  'INGENIERÍA AGRÍCOLA',
-  'INGENIERÍA AGROINDUSTRIAL',
-  'INGENIERÍA AMBIENTAL',
-  'INGENIERÍA CIVIL',
-  'INGENIERÍA DE MINAS',
-  'INGENIERÍA DE SISTEMAS',
-  'INGENIERÍA ELECTRÓNICA',
-  'INGENIERÍA INDUSTRIAL',
-  'INGENIERÍA MECÁNICA',
-  'INGENIERÍA PESQUERA',
-  'INGENIERÍA QUÍMICA',
-  'MARKETING',
-  'MEDICINA HUMANA',
-  'MEDICINA VETERINARIA',
-  'NUTRICIÓN',
-  'OBSTETRICIA',
-  'ODONTOLOGÍA',
-  'PSICOLOGÍA',
-  'SOCIOLOGÍA',
-  'TRABAJO SOCIAL',
-  'TURISMO Y HOTELERÍA'
+  'ADMINISTRACIÓN','ADMINISTRACIÓN DE EMPRESAS','AGRONOMÍA','ARQUITECTURA','BIOLOGÍA','CIENCIAS DE LA COMUNICACIÓN',
+  'CIENCIAS CONTABLES','CONTABILIDAD','DERECHO','DISEÑO GRÁFICO','ECONOMÍA','EDUCACIÓN INICIAL','EDUCACIÓN PRIMARIA',
+  'EDUCACIÓN SECUNDARIA','ENFERMERÍA','ESTADÍSTICA','FARMACIA Y BIOQUÍMICA','GASTRONOMÍA','INGENIERÍA AGRÍCOLA',
+  'INGENIERÍA AGROINDUSTRIAL','INGENIERÍA AMBIENTAL','INGENIERÍA CIVIL','INGENIERÍA DE MINAS','INGENIERÍA DE SISTEMAS',
+  'INGENIERÍA ELECTRÓNICA','INGENIERÍA INDUSTRIAL','INGENIERÍA MECÁNICA','INGENIERÍA PESQUERA','INGENIERÍA QUÍMICA',
+  'MARKETING','MEDICINA HUMANA','MEDICINA VETERINARIA','NUTRICIÓN','OBSTETRICIA','ODONTOLOGÍA','PSICOLOGÍA','SOCIOLOGÍA',
+  'TRABAJO SOCIAL','TURISMO Y HOTELERÍA'
 ]
-
 
 const esSuperior = computed(() => {
   const g = String(form.value.grado_instr || '').toUpperCase()
   return g.includes('SUPERIOR') || g.includes('POSTGRADO')
 })
 
+watch(
+  () => form.value.grado_instr,
+  () => {
+    if (!esSuperior.value) {
+      form.value.profesion = ''
+      clearFieldError('profesion')
+    }
+  }
+)
+
+/* ----------------- ERRORS ----------------- */
 const toArr = (v) => (Array.isArray(v) ? v.map(String) : v ? [String(v)] : [])
 
 const normalizeErrors = (payload) => {
@@ -248,6 +193,8 @@ const normalizeErrors = (payload) => {
   for (const k of Object.keys(out)) {
     const m = k.match(/^negocio\[(.+)\]$/)
     if (m?.[1]) out[`negocio.${m[1]}`] ||= out[k]
+    const r = k.match(/^referente\[(.+)\]$/)
+    if (r?.[1]) out[`referente.${r[1]}`] ||= out[k]
   }
 
   return out
@@ -256,13 +203,22 @@ const normalizeErrors = (payload) => {
 const setErrorsFromComposable = () => {
   form.value.errors = normalizeErrors(errors.value)
 }
+
 const clearErrors = () => {
   form.value.errors = {}
 }
+
 const hasError = (name) => toArr(form.value.errors?.[name]).length > 0
 const firstError = (name) => toArr(form.value.errors?.[name])[0] || ''
 const clearFieldError = (name) => {
   if (form.value.errors?.[name]) delete form.value.errors[name]
+}
+
+// scroll a primer error
+const scrollToFirstInvalid = async () => {
+  await nextTick()
+  const el = document.querySelector('.is-invalid')
+  if (el?.scrollIntoView) el.scrollIntoView({ behavior: 'smooth', block: 'center' })
 }
 
 /* ----------------- INDEPENDIENTE / NEGOCIO ----------------- */
@@ -277,11 +233,9 @@ watch(
   (v) => {
     if (v !== 'INDEPENDIENTE') {
       resetNegocio()
-      // limpia errores de negocio
       for (const k of Object.keys(form.value.errors || {})) {
         if (k.startsWith('negocio.') || k.startsWith('negocio[')) delete form.value.errors[k]
       }
-      // opcional: limpia combos
       detalleActividadNegocios.value = []
     }
   }
@@ -289,14 +243,12 @@ watch(
 
 const onChangeTipoActividad = async () => {
   clearFieldError('negocio.tipo_actividad_id')
-
   const id = form.value.negocio.tipo_actividad_id
   if (!id) {
     detalleActividadNegocios.value = []
     form.value.negocio.detalle_actividad_id = ''
     return
   }
-
   form.value.negocio.detalle_actividad_id = ''
   await listaDetalleActividadNegocios(id)
 }
@@ -311,14 +263,14 @@ const handlePhotoChange = (e) => {
   if (!file) return
 
   if (!file.type.startsWith('image/')) {
-    alert('Selecciona una imagen válida.')
+    Swal.fire({ icon: 'warning', title: 'Archivo inválido', text: 'Selecciona una imagen válida.' })
     e.target.value = ''
     return
   }
 
   const maxMB = 4
   if (file.size > maxMB * 1024 * 1024) {
-    alert(`La imagen no debe superar ${maxMB}MB.`)
+    Swal.fire({ icon: 'warning', title: 'Imagen muy grande', text: `La imagen no debe superar ${maxMB}MB.` })
     e.target.value = ''
     return
   }
@@ -340,61 +292,118 @@ onBeforeUnmount(() => {
   if (previewUrl) URL.revokeObjectURL(previewUrl)
 })
 
-
-watch(
-  () => form.value.grado_instr,
-  () => {
-    if (!esSuperior.value) {
-      form.value.profesion = ''
-      clearFieldError('profesion')
-    }
-  }
-)
-
-
+/* ----------------- HELPERS ----------------- */
 const appendIfFilled = (fd, key, value) => {
   if (value === null || value === undefined || value === '') return
   fd.append(key, value)
 }
 
-const guardar = async () => {
-  clearErrors()
+const fullName = computed(() => {
+  const p = form.value
+  return [p.ape_pat, p.ape_mat, p.primernombre, p.otrosnombres].filter(Boolean).join(' ').replace(/\s+/g, ' ').trim()
+})
 
-  const fd = new FormData()
+const buildPdfUrl = (payload) => {
+  // prioridad: pdf_url del backend
+  const direct = payload?.pdf_url
+  if (direct) return direct
 
-  // campos simples (excluye objetos y errors)
-  const {
-    negocio, referente, errors: _errors, // eslint-disable-line no-unused-vars
-    ...plain
-  } = form.value
+  // alternativa: si devuelves data.id
+  const id = payload?.data?.id ?? payload?.cliente?.id ?? payload?.id
+  if (id) return `/clientes/${id}/pdf`
 
-  for (const [k, v] of Object.entries(plain)) appendIfFilled(fd, k, v)
+  return ''
+}
 
-  // negocio solo si es independiente
-  if (esIndependiente.value) {
-    for (const [k, v] of Object.entries(negocio || {})) {
-      appendIfFilled(fd, `negocio[${k}]`, v)
-    }
-  }
-
-  // referente (siempre)
-  for (const [k, v] of Object.entries(referente || {})) {
-    appendIfFilled(fd, `referente[${k}]`, v)
-  }
-
-  // foto
-  if (photoFile.value instanceof File) fd.append('foto', photoFile.value)
-
-  await agregarCliente(fd)
-
-  if (errors.value) {
-    setErrorsFromComposable()
+const openPdf = (url) => {
+  if (!url) {
+    Swal.fire({ icon: 'info', title: 'PDF no disponible', text: 'Tu backend no devolvió pdf_url ni id para armar la ruta.' })
     return
   }
+  window.open(url, '_blank', 'noopener')
+}
 
-  if (respuesta.value?.ok == 1) {
-    Toast.fire({ icon: 'success', title: respuesta.value.mensaje })
-    resetForm()
+/* ----------------- GUARDAR ----------------- */
+const guardar = async () => {
+  if (isSaving.value) return
+  clearErrors()
+  isSaving.value = true
+
+  try {
+    const fd = new FormData()
+
+    const { negocio, referente, errors: _errors, ...plain } = form.value // eslint-disable-line no-unused-vars
+    for (const [k, v] of Object.entries(plain)) appendIfFilled(fd, k, v)
+
+    if (esIndependiente.value) {
+      for (const [k, v] of Object.entries(negocio || {})) appendIfFilled(fd, `negocio[${k}]`, v)
+    }
+
+    for (const [k, v] of Object.entries(referente || {})) appendIfFilled(fd, `referente[${k}]`, v)
+
+    if (photoFile.value instanceof File) fd.append('foto', photoFile.value)
+
+    await agregarCliente(fd)
+
+    if (errors.value) {
+      setErrorsFromComposable()
+      await scrollToFirstInvalid()
+      return
+    }
+
+    if (respuesta.value?.ok == 1) {
+      // guardamos el “último registro” para mostrar panel superior
+      lastCreated.value = respuesta.value?.data ?? respuesta.value?.cliente ?? {
+        nombre: fullName.value,
+        dni: form.value.dni,
+        celular: form.value.celular
+      }
+      lastPdfUrl.value = buildPdfUrl(respuesta.value)
+
+      // resumen bonito (sin perder el estilo de la plantilla)
+      const html = `
+        <div class="text-start">
+          <div class="mb-2"><b>Cliente:</b> ${fullName.value || '-'}</div>
+          <div class="mb-2"><b>DNI:</b> ${form.value.dni || '-'}</div>
+          <div class="mb-2"><b>Celular:</b> ${form.value.celular || '-'}</div>
+          <div class="mb-2"><b>Origen:</b> ${form.value.origen_labor || '-'}</div>
+          ${esIndependiente.value ? `
+            <hr class="my-2"/>
+            <div class="mb-2"><b>Negocio:</b> ${form.value.negocio.razonsocial || '-'}</div>
+            <div class="mb-2"><b>Cel. negocio:</b> ${form.value.negocio.celular || '-'}</div>
+          ` : `
+            <hr class="my-2"/>
+            <div class="mb-2"><b>Ocupación:</b> ${form.value.ocupacion || '-'}</div>
+            <div class="mb-2"><b>Institución:</b> ${form.value.institucion_lab || '-'}</div>
+          `}
+          <div class="small text-muted mt-2">Puedes ver el resumen en PDF si tu backend devuelve <code>pdf_url</code> o <code>id</code>.</div>
+        </div>
+      `
+
+      const result = await Swal.fire({
+        title: respuesta.value?.mensaje || 'Registro exitoso',
+        icon: 'success',
+        html,
+        showDenyButton: true,
+        showCancelButton: true,
+        confirmButtonText: 'Nuevo registro',
+        denyButtonText: 'Ver PDF',
+        cancelButtonText: 'Cerrar',
+        reverseButtons: true
+      })
+
+      if (result.isDenied) {
+        openPdf(lastPdfUrl.value)
+      }
+
+      if (result.isConfirmed) {
+        resetForm()
+      }
+    }
+  } catch (e) {
+    Toast?.error ? Toast.error('Ocurrió un error al guardar.') : console.error(e)
+  } finally {
+    isSaving.value = false
   }
 }
 
@@ -406,7 +415,6 @@ const resetForm = () => {
     estado: 'ACTIVO'
   }
 
-  // resetea campos planos
   for (const k of Object.keys(form.value)) {
     if (k === 'errors' || k === 'negocio' || k === 'referente') continue
     form.value[k] = keep[k] ?? ''
@@ -416,8 +424,6 @@ const resetForm = () => {
   form.value.referente = REFERENTE_DEFAULT()
   clearErrors()
   removePhoto()
-
-  // opcional: limpia combos
   detalleActividadNegocios.value = []
 }
 
@@ -425,25 +431,56 @@ const cancelar = () => router.push({ name: 'Principal' })
 </script>
 
 <template>
-  <div class="page-heading">
-    <h3 class="card-header">Formulario de Registro</h3>
-  </div>
-
   <div class="page-content">
     <section class="row">
-      <div class="col-12 col-lg-8">
-        <div class="card">
-          <div class="card-header">
-            <h3>Cliente Nuevo</h3>
 
+      <!-- ✅ PANEL SUPERIOR: ÚLTIMO REGISTRO -->
+      <div class="col-12" v-if="lastCreated">
+        <div class="alert alert-success d-flex align-items-start justify-content-between gap-3 shadow-sm">
+          <div>
+            <div class="fw-semibold">Último registro guardado</div>
+            <div class="small">
+              <b>Cliente:</b> {{ fullName || lastCreated?.nombre || '-' }}
+              <span class="mx-2">•</span>
+              <b>DNI:</b> {{ form.dni || lastCreated?.dni || '-' }}
+              <span class="mx-2">•</span>
+              <b>Cel:</b> {{ form.celular || lastCreated?.celular || '-' }}
+            </div>
+          </div>
+
+          <div class="d-flex gap-2">
+            <button type="button" class="btn btn-outline-success btn-sm" @click="openPdf(lastPdfUrl)">
+              <i class="bi bi-filetype-pdf me-1"></i> PDF
+            </button>
+            <button type="button" class="btn btn-success btn-sm" @click="resetForm">
+              <i class="bi bi-plus-circle me-1"></i> Nuevo
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- IZQUIERDA -->
+      <div class="col-12 col-lg-8">
+        <div class="card shadow-sm">
+          <div class="card-header d-flex align-items-center justify-content-between">
+            <div>
+              <h3 class="mb-0">Cliente Nuevo</h3>
+              <div class="text-muted small">Complete los datos principales y del referente.</div>
+            </div>
+            <span class="badge bg-light text-dark border">Registro</span>
           </div>
 
           <div class="card-body">
+            <!-- Sección: Datos del Cliente -->
+            <div class="section-title mb-2">
+              <i class="bi bi-person-lines-fill me-2"></i> Datos del Cliente
+            </div>
+
             <div class="row g-3">
               <div class="col-12 col-md-3">
                 <label class="form-label">Primer nombre</label>
                 <input
-                  v-model="form.primernombre"
+                  v-model.trim="form.primernombre"
                   class="form-control"
                   :class="{ 'is-invalid': hasError('primernombre') }"
                   placeholder="Ej: Juan"
@@ -456,7 +493,13 @@ const cancelar = () => router.push({ name: 'Principal' })
 
               <div class="col-12 col-md-3">
                 <label class="form-label">Segundo Nombre</label>
-                <input v-model="form.otrosnombres" class="form-control" placeholder="Ej: Carlos Alberto" />
+                <input
+                  v-model.trim="form.otrosnombres"
+                  class="form-control"
+                  :class="{ 'is-invalid': hasError('otrosnombres') }"
+                  placeholder="Ej: Carlos Alberto"
+                  @input="clearFieldError('otrosnombres')"
+                />
                 <div class="invalid-feedback" v-if="hasError('otrosnombres')">
                   {{ firstError('otrosnombres') }}
                 </div>
@@ -465,7 +508,7 @@ const cancelar = () => router.push({ name: 'Principal' })
               <div class="col-12 col-md-3">
                 <label class="form-label">Apellido paterno</label>
                 <input
-                  v-model="form.ape_pat"
+                  v-model.trim="form.ape_pat"
                   class="form-control"
                   :class="{ 'is-invalid': hasError('ape_pat') }"
                   placeholder="Ej: Pérez"
@@ -479,7 +522,7 @@ const cancelar = () => router.push({ name: 'Principal' })
               <div class="col-12 col-md-3">
                 <label class="form-label">Apellido materno</label>
                 <input
-                  v-model="form.ape_mat"
+                  v-model.trim="form.ape_mat"
                   class="form-control"
                   :class="{ 'is-invalid': hasError('ape_mat') }"
                   placeholder="Ej: Gómez"
@@ -509,7 +552,7 @@ const cancelar = () => router.push({ name: 'Principal' })
               <div class="col-12 col-md-3">
                 <label class="form-label">Ubigeo Nacimiento</label>
                 <input
-                  v-model="form.ubigeo_nac"
+                  v-model.trim="form.ubigeo_nac"
                   class="form-control"
                   :class="{ 'is-invalid': hasError('ubigeo_nac') }"
                   maxlength="6"
@@ -555,7 +598,6 @@ const cancelar = () => router.push({ name: 'Principal' })
                 </select>
               </div>
 
-              <!-- GRADO INSTRUCCIÓN (select) -->
               <div class="col-12 col-md-3">
                 <label class="form-label">Grado de instrucción</label>
                 <select
@@ -574,7 +616,6 @@ const cancelar = () => router.push({ name: 'Principal' })
                 </div>
               </div>
 
-              <!-- PROFESIÓN (solo si es superior) -->
               <div class="col-12 col-md-3" v-if="esSuperior">
                 <label class="form-label">Profesión</label>
                 <select
@@ -593,7 +634,6 @@ const cancelar = () => router.push({ name: 'Principal' })
                   {{ firstError('profesion') }}
                 </div>
               </div>
-
 
               <div class="col-12 col-md-3">
                 <label class="form-label">Origen laboral</label>
@@ -646,7 +686,7 @@ const cancelar = () => router.push({ name: 'Principal' })
               <div class="col-12 col-md-3">
                 <label class="form-label">Email (opcional)</label>
                 <input
-                  v-model="form.email"
+                  v-model.trim="form.email"
                   type="email"
                   class="form-control"
                   :class="{ 'is-invalid': hasError('email') }"
@@ -677,7 +717,7 @@ const cancelar = () => router.push({ name: 'Principal' })
               <div class="col-12 col-md-3">
                 <label class="form-label">Ubigeo Domicilio</label>
                 <input
-                  v-model="form.ubigeo_dom"
+                  v-model.trim="form.ubigeo_dom"
                   class="form-control"
                   :class="{ 'is-invalid': hasError('ubigeo_dom') }"
                   maxlength="6"
@@ -690,10 +730,10 @@ const cancelar = () => router.push({ name: 'Principal' })
                 </div>
               </div>
 
-              <div class="col-6">
+              <div class="col-12 col-md-6">
                 <label class="form-label">Dirección</label>
                 <textarea
-                  v-model="form.direccion"
+                  v-model.trim="form.direccion"
                   class="form-control"
                   rows="2"
                   :class="{ 'is-invalid': hasError('direccion') }"
@@ -705,12 +745,12 @@ const cancelar = () => router.push({ name: 'Principal' })
                 </div>
               </div>
 
-              <div class="col-6">
+              <div class="col-12 col-md-6">
                 <label class="form-label">Ubicación (Latitud, Longitud)</label>
 
                 <div class="input-group">
                   <input
-                    v-model="form.latitud_longitud"
+                    v-model.trim="form.latitud_longitud"
                     class="form-control"
                     :class="{ 'is-invalid': hasError('latitud_longitud') }"
                     placeholder="Ej: -9.930123,-76.242991"
@@ -742,10 +782,12 @@ const cancelar = () => router.push({ name: 'Principal' })
 
               <!-- NEGOCIO -->
               <div v-if="esIndependiente" class="mt-3">
-                <div class="border rounded p-3">
-                  <h6 class="mb-3">Datos del Negocio</h6>
+                <div class="border rounded-3 p-3 section-box">
+                  <div class="section-title mb-2">
+                    <i class="bi bi-shop me-2"></i> Datos del Negocio
+                  </div>
 
-                  <div class="row mb-3">
+                  <div class="row g-3 mb-1">
                     <div class="col-12 col-md-3">
                       <label class="form-label">Tipo actividad (opcional)</label>
                       <select
@@ -785,7 +827,7 @@ const cancelar = () => router.push({ name: 'Principal' })
                     </div>
 
                     <div class="col-12 col-md-3">
-                      <label class="form-label">Celular / Telefono</label>
+                      <label class="form-label">Celular / Teléfono</label>
                       <input
                         v-model="form.negocio.celular"
                         class="form-control"
@@ -805,7 +847,7 @@ const cancelar = () => router.push({ name: 'Principal' })
                     <div class="col-12 col-md-6">
                       <label class="form-label">Razón social</label>
                       <input
-                        v-model="form.negocio.razonsocial"
+                        v-model.trim="form.negocio.razonsocial"
                         class="form-control"
                         :class="{ 'is-invalid': hasError('negocio.razonsocial') }"
                         @input="clearFieldError('negocio.razonsocial')"
@@ -849,7 +891,7 @@ const cancelar = () => router.push({ name: 'Principal' })
                     <div class="col-12">
                       <label class="form-label">Dirección del negocio (opcional)</label>
                       <textarea
-                        v-model="form.negocio.direccion"
+                        v-model.trim="form.negocio.direccion"
                         class="form-control"
                         rows="2"
                         :class="{ 'is-invalid': hasError('negocio.direccion') }"
@@ -865,48 +907,56 @@ const cancelar = () => router.push({ name: 'Principal' })
               </div>
 
               <!-- DEPENDIENTE -->
-              <div v-else class="row g-3">
-                <div class="col-12 col-md-6">
-                  <label class="form-label">Ocupación</label>
-                  <input
-                    v-model="form.ocupacion"
-                    class="form-control"
-                    :class="{ 'is-invalid': hasError('ocupacion') }"
-                    placeholder="Ej: Vendedor"
-                    @input="clearFieldError('ocupacion')"
-                  />
-                  <div class="invalid-feedback" v-if="hasError('ocupacion')">
-                    {{ firstError('ocupacion') }}
+              <div v-else class="mt-3">
+                <div class="border rounded-3 p-3 section-box">
+                  <div class="section-title mb-2">
+                    <i class="bi bi-briefcase me-2"></i> Datos Laborales (Dependiente)
                   </div>
-                </div>
 
-                <div class="col-12 col-md-6">
-                  <label class="form-label">Institución laboral</label>
-                  <input
-                    v-model="form.institucion_lab"
-                    class="form-control"
-                    :class="{ 'is-invalid': hasError('institucion_lab') }"
-                    placeholder="Ej: NINGUNO / Empresa"
-                    @input="clearFieldError('institucion_lab')"
-                  />
-                  <div class="invalid-feedback" v-if="hasError('institucion_lab')">
-                    {{ firstError('institucion_lab') }}
+                  <div class="row g-3">
+                    <div class="col-12 col-md-6">
+                      <label class="form-label">Ocupación</label>
+                      <input
+                        v-model.trim="form.ocupacion"
+                        class="form-control"
+                        :class="{ 'is-invalid': hasError('ocupacion') }"
+                        placeholder="Ej: Vendedor"
+                        @input="clearFieldError('ocupacion')"
+                      />
+                      <div class="invalid-feedback" v-if="hasError('ocupacion')">
+                        {{ firstError('ocupacion') }}
+                      </div>
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                      <label class="form-label">Institución laboral</label>
+                      <input
+                        v-model.trim="form.institucion_lab"
+                        class="form-control"
+                        :class="{ 'is-invalid': hasError('institucion_lab') }"
+                        placeholder="Ej: NINGUNO / Empresa"
+                        @input="clearFieldError('institucion_lab')"
+                      />
+                      <div class="invalid-feedback" v-if="hasError('institucion_lab')">
+                        {{ firstError('institucion_lab') }}
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
 
-
-
               <!-- REFERENTE -->
               <div class="mt-3">
-                <div class="border rounded p-3">
-                  <h6 class="mb-3">Datos del Referente</h6>
+                <div class="border rounded-3 p-3 section-box">
+                  <div class="section-title mb-2">
+                    <i class="bi bi-people me-2"></i> Datos del Referente
+                  </div>
 
                   <div class="row g-3">
                     <div class="col-12 col-md-3">
                       <label class="form-label">Primer nombre</label>
                       <input
-                        v-model="form.referente.primernombre"
+                        v-model.trim="form.referente.primernombre"
                         class="form-control"
                         :class="{ 'is-invalid': hasError('referente.primernombre') }"
                         placeholder="Ej: Juan"
@@ -920,7 +970,7 @@ const cancelar = () => router.push({ name: 'Principal' })
                     <div class="col-12 col-md-3">
                       <label class="form-label">Segundo nombre</label>
                       <input
-                        v-model="form.referente.otrosnombres"
+                        v-model.trim="form.referente.otrosnombres"
                         class="form-control"
                         :class="{ 'is-invalid': hasError('referente.otrosnombres') }"
                         placeholder="Ej: Carlos Alberto"
@@ -934,7 +984,7 @@ const cancelar = () => router.push({ name: 'Principal' })
                     <div class="col-12 col-md-3">
                       <label class="form-label">Apellido paterno</label>
                       <input
-                        v-model="form.referente.ape_pat"
+                        v-model.trim="form.referente.ape_pat"
                         class="form-control"
                         :class="{ 'is-invalid': hasError('referente.ape_pat') }"
                         placeholder="Ej: Pérez"
@@ -948,7 +998,7 @@ const cancelar = () => router.push({ name: 'Principal' })
                     <div class="col-12 col-md-3">
                       <label class="form-label">Apellido materno</label>
                       <input
-                        v-model="form.referente.ape_mat"
+                        v-model.trim="form.referente.ape_mat"
                         class="form-control"
                         :class="{ 'is-invalid': hasError('referente.ape_mat') }"
                         placeholder="Ej: Gómez"
@@ -993,7 +1043,6 @@ const cancelar = () => router.push({ name: 'Principal' })
 
                     <div class="col-12 col-md-3">
                       <label class="form-label">Parentesco / Relación</label>
-
                       <select
                         v-model="form.referente.parentesco"
                         class="form-select"
@@ -1014,7 +1063,7 @@ const cancelar = () => router.push({ name: 'Principal' })
                     <div class="col-12 col-md-3">
                       <label class="form-label">Email (opcional)</label>
                       <input
-                        v-model="form.referente.email"
+                        v-model.trim="form.referente.email"
                         type="email"
                         class="form-control"
                         :class="{ 'is-invalid': hasError('referente.email') }"
@@ -1029,7 +1078,7 @@ const cancelar = () => router.push({ name: 'Principal' })
                     <div class="col-12">
                       <label class="form-label">Dirección (opcional)</label>
                       <textarea
-                        v-model="form.referente.direccion"
+                        v-model.trim="form.referente.direccion"
                         class="form-control"
                         rows="2"
                         :class="{ 'is-invalid': hasError('referente.direccion') }"
@@ -1044,30 +1093,23 @@ const cancelar = () => router.push({ name: 'Principal' })
                 </div>
               </div>
 
-              <!-- INFO -->
-              <div class="col-12 col-md-4">
-                <label class="form-label">Estado (cliente)</label>
-                <input v-model="form.estado" class="form-control" disabled />
-              </div>
 
-              <div class="col-12 col-md-4">
-                <label class="form-label">Fecha registro</label>
-                <input v-model="form.fecha_reg" type="date" class="form-control" disabled />
-              </div>
-
-              <div class="col-12 col-md-4">
-                <label class="form-label">Hora registro</label>
-                <input v-model="form.hora_reg" type="time" class="form-control" disabled />
-              </div>
             </div>
 
+            <!-- BOTONES -->
             <div class="d-flex gap-2 mt-4">
-              <button type="button" @click="guardar()" class="btn btn-primary">
-                <i class="bi bi-save me-1"></i> Guardar
+              <button type="button" @click="guardar()" class="btn btn-primary" :disabled="isSaving">
+                <span v-if="isSaving" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                <i v-else class="bi bi-save me-1"></i>
+                {{ isSaving ? 'Guardando...' : 'Guardar' }}
               </button>
 
-              <button type="button" class="btn btn-light" @click="cancelar">
+              <button type="button" class="btn btn-light" @click="cancelar" :disabled="isSaving">
                 Cancelar
+              </button>
+
+              <button type="button" class="btn btn-outline-secondary ms-auto" @click="resetForm" :disabled="isSaving">
+                <i class="bi bi-arrow-counterclockwise me-1"></i> Limpiar
               </button>
             </div>
           </div>
@@ -1076,21 +1118,18 @@ const cancelar = () => router.push({ name: 'Principal' })
 
       <!-- DERECHA: FOTO -->
       <div class="col-12 col-lg-4">
-        <div class="card">
+        <div class="card shadow-sm sticky-lg-top" style="top: 1rem;">
           <div class="card-header">
-            <h4 class="card-title">Foto del cliente</h4>
+            <h4 class="card-title mb-0">Foto del cliente</h4>
           </div>
           <div class="card-body">
             <div class="d-flex flex-column align-items-center gap-3">
-              <div
-                class="rounded-circle d-flex align-items-center justify-content-center border"
-                style="width: 160px; height: 160px; overflow: hidden;"
-              >
+              <div class="avatar-box rounded-circle d-flex align-items-center justify-content-center border">
                 <img
                   v-if="photoPreview"
                   :src="photoPreview"
                   alt="Foto"
-                  style="width: 100%; height: 100%; object-fit: cover;"
+                  class="avatar-img"
                 />
                 <div v-else class="text-muted text-center px-3">
                   <i class="bi bi-person-circle" style="font-size: 3rem;"></i>
@@ -1114,10 +1153,43 @@ const cancelar = () => router.push({ name: 'Principal' })
                   <i class="bi bi-trash me-1"></i> Quitar
                 </button>
               </div>
+
+              <div class="w-100 pt-2" v-if="lastPdfUrl">
+                <button type="button" class="btn btn-outline-danger w-100" @click="openPdf(lastPdfUrl)">
+                  <i class="bi bi-filetype-pdf me-1"></i> Ver resumen PDF
+                </button>
+              </div>
             </div>
           </div>
         </div>
       </div>
+
     </section>
   </div>
 </template>
+
+<style scoped>
+.section-title{
+  font-weight: 700;
+  font-size: .95rem;
+  color: rgba(0,0,0,.7);
+  padding: .35rem .5rem;
+  border-left: 4px solid rgba(13,110,253,.35);
+  background: rgba(13,110,253,.05);
+  border-radius: .35rem;
+}
+.section-box{
+  background: rgba(0,0,0,.015);
+}
+.avatar-box{
+  width: 160px;
+  height: 160px;
+  overflow: hidden;
+  background: rgba(0,0,0,.02);
+}
+.avatar-img{
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+</style>
