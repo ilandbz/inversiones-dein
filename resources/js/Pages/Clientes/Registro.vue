@@ -520,9 +520,11 @@ const guardar = async () => {
     }
 
     if (respuesta.value?.ok == 1) {
+      const cliente = respuesta.value?.cliente
       const html = `
         <div class="text-start">
           <div class="mb-2"><b>Cliente:</b> ${fullName.value || '-'}</div>
+          <div class="mb-2"><b>Codigo:</b> ${cliente.id || '-'}</div>
           <div class="mb-2"><b>DNI:</b> ${form.value.dni || '-'}</div>
           <div class="mb-2"><b>Celular:</b> ${form.value.celular || '-'}</div>
           <div class="mb-2"><b>Origen:</b> ${form.value.origen_labor || '-'}</div>
@@ -1429,6 +1431,7 @@ const cancelar = () => router.push({ name: 'Principal' })
 
                   <div class="small">
                     <div class="mb-1">
+                      <b>Codigo : </b> {{ cliente.id }}<br>
                       <b>Nombre:</b>
                       {{ cliente.persona?.ape_pat }} {{ cliente.persona?.ape_mat }}
                       {{ cliente.persona?.primernombre }} {{ cliente.persona?.otrosnombres }}

@@ -112,7 +112,11 @@ class ClienteController extends Controller
             }
 
             DB::commit();
-            return response()->json(['ok' => 1, 'mensaje' => 'Cliente Registrado satisfactoriamente'], 200);
+            return response()->json([
+                'ok' => 1,
+                'mensaje' => 'Cliente Registrado satisfactoriamente',
+                'cliente' => $cliente
+            ], 200);
 
         } catch (\Throwable $e) {
             DB::rollBack();
