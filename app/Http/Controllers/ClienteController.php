@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 use Intervention\Image\ImageManager;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Intervention\Image\Drivers\Gd\Driver;
 class ClienteController extends Controller
 {
@@ -221,7 +222,6 @@ class ClienteController extends Controller
     }
     public function update(UpdateClienteRequest $request)
     {
-
         $cliente = Cliente::where('id', $request->id)->first();
         $cliente->aval_id = $request->aval_id;
         $cliente->save();
@@ -409,6 +409,34 @@ class ClienteController extends Controller
         // }
         return $query->orderBy('personas.ape_pat', 'asc')
         ->paginate($paginacion);
+
+    }
+    public function obtenerClienteReciente(Request $request)
+    {
+        $filters = $this->getUserFilters();
+        $cliente = Cliente::with('persona:id,dni,ape_pat,ape_mat,primernombre,otrosnombres,fecha_nac')
+        ->where('usuario_id', $filters['user_id'])->first();
+        return $cliente;
+    }
+    public function obtenerClienteRecientePdf(Request $request)
+    {
+        $filters = $this->getUserFilters();
+        $cliente = Cliente::with('persona:id,dni,ape_pat,ape_mat,primernombre,otrosnombres,fecha_nac')
+        ->where('id', $request->cliente_id)->first();
+
+        $cliente->load([
+            'persona',
+            'negocio',
+            'referente',
+        ]);
+
+        // Render PDF con Blade
+        $pdf = Pdf::loadView('pdf.cliente_resumen', [
+            'cliente' => $cliente
+        ])->setPaper('A4', 'portrait');
+
+        // stream abre en navegador, download descarga
+        return $pdf->stream("cliente_{$cliente->id}.pdf");
 
     }
 }

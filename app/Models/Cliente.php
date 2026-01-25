@@ -21,6 +21,10 @@ class Cliente extends Model
     {
         return $this->belongsTo(Persona::class, 'persona_id');
     }
+    public function referente(): BelongsTo
+    {
+        return $this->belongsTo(Persona::class, 'referente_id');
+    }
     public function usuario(): BelongsTo
     {
         return $this->belongsTo(User::class, 'usuario_id');
@@ -37,10 +41,7 @@ class Cliente extends Model
     {
         return $this->HasMany(Credito::class, 'cliente_id');
     }
-    public function juntas(): HasMany
-    {
-        return $this->HasMany(Junta::class, 'cliente_id');
-    }
+
     public function aval(): BelongsTo
     {
         return $this->belongsTo(Persona::class, 'aval_id')->latest();

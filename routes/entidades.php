@@ -16,6 +16,8 @@ Route::group(['prefix' => 'cliente', 'middleware' => 'auth'], function () {
     Route::get('mostrar-con-registros-dni', [ClienteController::class, 'datosCreditoJuntaPorDni']);
     Route::get('mostrar-dni-nuevo-credito', [ClienteController::class, 'getDatosParaNuevoCredito']);
     Route::post('asignar-asesor-masivo', [ClienteController::class, 'asignarAsesorMasivo']);
+    Route::get('obtener-cliente-reciente', [ClienteController::class, 'obtenerClienteReciente']);
+    Route::post('obtener-cliente-reciente-pdf', [ClienteController::class, 'obtenerClienteRecientePdf']);
 });
 
 Route::group(['prefix' => 'actividadnegocio', 'middleware' => 'auth'], function () {
@@ -26,4 +28,5 @@ Route::group(['prefix' => 'actividadnegocio', 'middleware' => 'auth'], function 
     Route::post('guardar', [ActividadNegocioController::class, 'store']);
     Route::get('todos', [ActividadNegocioController::class, 'todos']);
     Route::get('detalleactividadnegocio', [ActividadNegocioController::class, 'todosPorActividad'] );
+
 });

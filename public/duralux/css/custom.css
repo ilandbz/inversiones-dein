@@ -13,3 +13,11 @@
     border-radius: 14px;
     backdrop-filter: blur(4px);
 }
+
+.modal-backdrop {
+    z-index: 1050 !important;
+}
+
+.modal {
+    z-index: 1055 !important;
+}

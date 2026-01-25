@@ -4,10 +4,16 @@ import { useRouter } from 'vue-router'
 import useHelper from '@/Helpers'
 import useCliente from '@/Composables/Cliente.js'
 import useActividadNegocio from '@/Composables/ActividadNegocio.js'
+import Resumen from '@/Pages/Clientes/Resumen.vue'
 
 const router = useRouter()
-const { Toast, soloNumeros, Swal } = useHelper()
-const { errors, respuesta, agregarCliente } = useCliente()
+const { Toast, soloNumeros, Swal, openModal } = useHelper()
+
+const {
+  errors, respuesta, agregarCliente,
+  obtenerClienteReciente, cliente,
+  obtenerClienteRecientePdf, pdfUrl
+} = useCliente()
 
 const {
   actividadNegocios,
@@ -16,9 +22,10 @@ const {
   detalleActividadNegocios
 } = useActividadNegocio()
 
-onMounted(() => {
+onMounted(async () => {
   document.title = 'Registro de Clientes'
-  listaActividadNegocios()
+  await listaActividadNegocios()
+  await obtenerClienteReciente()
 })
 
 /* ----------------- FORM (base) ----------------- */
@@ -83,8 +90,6 @@ const form = ref({
 
 /* ----------------- UI State ----------------- */
 const isSaving = ref(false)
-const lastCreated = ref(null) // aquí guardamos el último registro (lo que devuelva backend)
-const lastPdfUrl = ref('')
 
 /* ----------------- GEO ----------------- */
 const geoLoading = ref(false)
@@ -137,8 +142,7 @@ watch(
   () => form.value.latitud_longitud,
   (v) => {
     if (!v) return
-    const ok = parseLatLng(v)
-    geoMsg.value = ok ? '' : 'Formato sugerido: -9.930123,-76.242991'
+    geoMsg.value = parseLatLng(v) ? '' : 'Formato sugerido: -9.930123,-76.242991'
   }
 )
 
@@ -189,32 +193,21 @@ const normalizeErrors = (payload) => {
     for (const k of Object.keys(src)) out[k] = toArr(src[k])
   }
 
-  // soporte negocio[xxx] -> negocio.xxx
   for (const k of Object.keys(out)) {
     const m = k.match(/^negocio\[(.+)\]$/)
     if (m?.[1]) out[`negocio.${m[1]}`] ||= out[k]
     const r = k.match(/^referente\[(.+)\]$/)
     if (r?.[1]) out[`referente.${r[1]}`] ||= out[k]
   }
-
   return out
 }
 
-const setErrorsFromComposable = () => {
-  form.value.errors = normalizeErrors(errors.value)
-}
-
-const clearErrors = () => {
-  form.value.errors = {}
-}
-
+const setErrorsFromComposable = () => { form.value.errors = normalizeErrors(errors.value) }
+const clearErrors = () => { form.value.errors = {} }
 const hasError = (name) => toArr(form.value.errors?.[name]).length > 0
 const firstError = (name) => toArr(form.value.errors?.[name])[0] || ''
-const clearFieldError = (name) => {
-  if (form.value.errors?.[name]) delete form.value.errors[name]
-}
+const clearFieldError = (name) => { if (form.value.errors?.[name]) delete form.value.errors[name] }
 
-// scroll a primer error
 const scrollToFirstInvalid = async () => {
   await nextTick()
   const el = document.querySelector('.is-invalid')
@@ -224,9 +217,7 @@ const scrollToFirstInvalid = async () => {
 /* ----------------- INDEPENDIENTE / NEGOCIO ----------------- */
 const esIndependiente = computed(() => form.value.origen_labor === 'INDEPENDIENTE')
 
-const resetNegocio = () => {
-  form.value.negocio = NEGOCIO_DEFAULT()
-}
+const resetNegocio = () => { form.value.negocio = NEGOCIO_DEFAULT() }
 
 watch(
   () => form.value.origen_labor,
@@ -300,27 +291,17 @@ const appendIfFilled = (fd, key, value) => {
 
 const fullName = computed(() => {
   const p = form.value
-  return [p.ape_pat, p.ape_mat, p.primernombre, p.otrosnombres].filter(Boolean).join(' ').replace(/\s+/g, ' ').trim()
+  return [p.ape_pat, p.ape_mat, p.primernombre, p.otrosnombres]
+    .filter(Boolean).join(' ').replace(/\s+/g, ' ').trim()
 })
 
-const buildPdfUrl = (payload) => {
-  // prioridad: pdf_url del backend
-  const direct = payload?.pdf_url
-  if (direct) return direct
-
-  // alternativa: si devuelves data.id
-  const id = payload?.data?.id ?? payload?.cliente?.id ?? payload?.id
-  if (id) return `/clientes/${id}/pdf`
-
-  return ''
-}
-
-const openPdf = (url) => {
-  if (!url) {
-    Swal.fire({ icon: 'info', title: 'PDF no disponible', text: 'Tu backend no devolvió pdf_url ni id para armar la ruta.' })
-    return
-  }
-  window.open(url, '_blank', 'noopener')
+/* ----------------- PDF (modal) ----------------- */
+const openPdf = async (cliente_id) => {
+  if (!cliente_id) return
+  await obtenerClienteRecientePdf(cliente_id)
+  const t = document.getElementById('impresionresumenLabel')
+  if (t) t.innerHTML = 'Resumen Cliente'
+  openModal('#impresionresumen')
 }
 
 /* ----------------- GUARDAR ----------------- */
@@ -331,8 +312,8 @@ const guardar = async () => {
 
   try {
     const fd = new FormData()
-
     const { negocio, referente, errors: _errors, ...plain } = form.value // eslint-disable-line no-unused-vars
+
     for (const [k, v] of Object.entries(plain)) appendIfFilled(fd, k, v)
 
     if (esIndependiente.value) {
@@ -340,7 +321,6 @@ const guardar = async () => {
     }
 
     for (const [k, v] of Object.entries(referente || {})) appendIfFilled(fd, `referente[${k}]`, v)
-
     if (photoFile.value instanceof File) fd.append('foto', photoFile.value)
 
     await agregarCliente(fd)
@@ -352,31 +332,12 @@ const guardar = async () => {
     }
 
     if (respuesta.value?.ok == 1) {
-      // guardamos el “último registro” para mostrar panel superior
-      lastCreated.value = respuesta.value?.data ?? respuesta.value?.cliente ?? {
-        nombre: fullName.value,
-        dni: form.value.dni,
-        celular: form.value.celular
-      }
-      lastPdfUrl.value = buildPdfUrl(respuesta.value)
-
-      // resumen bonito (sin perder el estilo de la plantilla)
       const html = `
         <div class="text-start">
           <div class="mb-2"><b>Cliente:</b> ${fullName.value || '-'}</div>
           <div class="mb-2"><b>DNI:</b> ${form.value.dni || '-'}</div>
           <div class="mb-2"><b>Celular:</b> ${form.value.celular || '-'}</div>
           <div class="mb-2"><b>Origen:</b> ${form.value.origen_labor || '-'}</div>
-          ${esIndependiente.value ? `
-            <hr class="my-2"/>
-            <div class="mb-2"><b>Negocio:</b> ${form.value.negocio.razonsocial || '-'}</div>
-            <div class="mb-2"><b>Cel. negocio:</b> ${form.value.negocio.celular || '-'}</div>
-          ` : `
-            <hr class="my-2"/>
-            <div class="mb-2"><b>Ocupación:</b> ${form.value.ocupacion || '-'}</div>
-            <div class="mb-2"><b>Institución:</b> ${form.value.institucion_lab || '-'}</div>
-          `}
-          <div class="small text-muted mt-2">Puedes ver el resumen en PDF si tu backend devuelve <code>pdf_url</code> o <code>id</code>.</div>
         </div>
       `
 
@@ -392,8 +353,11 @@ const guardar = async () => {
         reverseButtons: true
       })
 
+      // Actualiza "cliente reciente" (para tener id seguro)
+      await obtenerClienteReciente()
+
       if (result.isDenied) {
-        openPdf(lastPdfUrl.value)
+        await openPdf(cliente.value?.id)
       }
 
       if (result.isConfirmed) {
@@ -430,34 +394,11 @@ const resetForm = () => {
 const cancelar = () => router.push({ name: 'Principal' })
 </script>
 
+
 <template>
   <div class="page-content">
     <section class="row">
 
-      <!-- ✅ PANEL SUPERIOR: ÚLTIMO REGISTRO -->
-      <div class="col-12" v-if="lastCreated">
-        <div class="alert alert-success d-flex align-items-start justify-content-between gap-3 shadow-sm">
-          <div>
-            <div class="fw-semibold">Último registro guardado</div>
-            <div class="small">
-              <b>Cliente:</b> {{ fullName || lastCreated?.nombre || '-' }}
-              <span class="mx-2">•</span>
-              <b>DNI:</b> {{ form.dni || lastCreated?.dni || '-' }}
-              <span class="mx-2">•</span>
-              <b>Cel:</b> {{ form.celular || lastCreated?.celular || '-' }}
-            </div>
-          </div>
-
-          <div class="d-flex gap-2">
-            <button type="button" class="btn btn-outline-success btn-sm" @click="openPdf(lastPdfUrl)">
-              <i class="bi bi-filetype-pdf me-1"></i> PDF
-            </button>
-            <button type="button" class="btn btn-success btn-sm" @click="resetForm">
-              <i class="bi bi-plus-circle me-1"></i> Nuevo
-            </button>
-          </div>
-        </div>
-      </div>
 
       <!-- IZQUIERDA -->
       <div class="col-12 col-lg-8">
@@ -1119,18 +1060,16 @@ const cancelar = () => router.push({ name: 'Principal' })
       <!-- DERECHA: FOTO -->
       <div class="col-12 col-lg-4">
         <div class="card shadow-sm sticky-lg-top" style="top: 1rem;">
-          <div class="card-header">
+          <div class="card-header d-flex align-items-center justify-content-between">
             <h4 class="card-title mb-0">Foto del cliente</h4>
+            <span class="badge bg-light text-secondary">Vista previa</span>
           </div>
+
           <div class="card-body">
             <div class="d-flex flex-column align-items-center gap-3">
+
               <div class="avatar-box rounded-circle d-flex align-items-center justify-content-center border">
-                <img
-                  v-if="photoPreview"
-                  :src="photoPreview"
-                  alt="Foto"
-                  class="avatar-img"
-                />
+                <img v-if="photoPreview" :src="photoPreview" alt="Foto" class="avatar-img" />
                 <div v-else class="text-muted text-center px-3">
                   <i class="bi bi-person-circle" style="font-size: 3rem;"></i>
                   <div class="small mt-1">Sin foto</div>
@@ -1154,11 +1093,35 @@ const cancelar = () => router.push({ name: 'Principal' })
                 </button>
               </div>
 
-              <div class="w-100 pt-2" v-if="lastPdfUrl">
-                <button type="button" class="btn btn-outline-danger w-100" @click="openPdf(lastPdfUrl)">
-                  <i class="bi bi-filetype-pdf me-1"></i> Ver resumen PDF
-                </button>
+              <!-- Cliente reciente -->
+              <div class="w-100" v-if="cliente?.id">
+                <div class="border rounded p-3 bg-light">
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h6 class="mb-0">Cliente reciente</h6>
+                    <span class="badge bg-success-subtle text-success">OK</span>
+                  </div>
+
+                  <div class="small">
+                    <div class="mb-1">
+                      <b>Nombre:</b>
+                      {{ cliente.persona?.ape_pat }} {{ cliente.persona?.ape_mat }}
+                      {{ cliente.persona?.primernombre }} {{ cliente.persona?.otrosnombres }}
+                    </div>
+                    <div><b>DNI:</b> {{ cliente.persona?.dni }}</div>
+                  </div>
+
+                  <div class="pt-3">
+                    <button
+                      type="button"
+                      class="btn btn-outline-danger w-100"
+                      @click="openPdf(cliente.id)"
+                    >
+                      <i class="bi bi-filetype-pdf me-1"></i> Ver resumen PDF
+                    </button>
+                  </div>
+                </div>
               </div>
+
             </div>
           </div>
         </div>
@@ -1166,6 +1129,7 @@ const cancelar = () => router.push({ name: 'Principal' })
 
     </section>
   </div>
+  <Resumen :url="pdfUrl" />
 </template>
 
 <style scoped>

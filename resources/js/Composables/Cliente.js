@@ -1,6 +1,6 @@
 import axios from 'axios'
 import { ref } from 'vue'
-import { getConfigHeader, getdataParamsPagination } from '@/Helpers'
+import { getConfigHeader, getdataParamsPagination, getConfigHeaderpdf } from '@/Helpers'
 
 export default function useCliente() {
     const clientes = ref([])
@@ -10,38 +10,38 @@ export default function useCliente() {
     const respuesta = ref([])
     const creditos = ref([])
     const juntas = ref([])
-    
-    const obtenerCliente = async(id) => {
-        let respuesta = await axios.get('/cliente/mostrar?id='+id, getConfigHeader())
+    const pdfUrl = ref('')
+    const obtenerCliente = async (id) => {
+        let respuesta = await axios.get('/cliente/mostrar?id=' + id, getConfigHeader())
         cliente.value = respuesta.data
     }
-    const obtenerClientePorDni = async(dni) => {
-        let respuesta = await axios.get('/cliente/mostrar-dni?dni='+dni, getConfigHeader())
+    const obtenerClientePorDni = async (dni) => {
+        let respuesta = await axios.get('/cliente/mostrar-dni?dni=' + dni, getConfigHeader())
         cliente.value = respuesta.data
     }
-    const datosCreditoJuntaPorDni = async(dni) => {
-        let respuesta = await axios.get('/cliente/mostrar-con-registros-dni?dni='+dni, getConfigHeader())
+    const datosCreditoJuntaPorDni = async (dni) => {
+        let respuesta = await axios.get('/cliente/mostrar-con-registros-dni?dni=' + dni, getConfigHeader())
         cliente.value = respuesta.data.cliente
         creditos.value = respuesta.data.creditos
         juntas.value = respuesta.data.juntas
-    }    
-    const obtenerDatosParaNuevoCredito = async(dni) => {
-        let respuesta = await axios.get('/cliente/mostrar-dni-nuevo-credito?dni='+dni, getConfigHeader())
-        datos.value = respuesta.data
-    }        
-    const listaClientes = async()=>{
-        let respuesta = await axios.get('/cliente/todos', getConfigHeader())
-        clientes.value = respuesta.data        
     }
-    const obtenerClientesPosicion = async(data)=>{
+    const obtenerDatosParaNuevoCredito = async (dni) => {
+        let respuesta = await axios.get('/cliente/mostrar-dni-nuevo-credito?dni=' + dni, getConfigHeader())
+        datos.value = respuesta.data
+    }
+    const listaClientes = async () => {
+        let respuesta = await axios.get('/cliente/todos', getConfigHeader())
+        clientes.value = respuesta.data
+    }
+    const obtenerClientesPosicion = async (data) => {
         let respuesta = await axios.get('/cliente/listar-clientes-posicion' + getdataParamsPagination(data), getConfigHeader())
-        clientes.value = respuesta.data        
-    }    
-    const obtenerClientes = async(data) => {
+        clientes.value = respuesta.data
+    }
+    const obtenerClientes = async (data) => {
         let respuesta = await axios.get('/cliente/listar' + getdataParamsPagination(data), getConfigHeader())
         clientes.value = respuesta.data
     }
-    const agregarCliente = async(data) => {
+    const agregarCliente = async (data) => {
         errors.value = ''
         try {
             let respond = await axios.post('/cliente/guardar', data, getConfigHeader())
@@ -56,7 +56,7 @@ export default function useCliente() {
             }
         }
     }
-    const asignarAsesorMasivo = async(data) => {
+    const asignarAsesorMasivo = async (data) => {
         errors.value = ''
         try {
             let respond = await axios.post('/cliente/asignar-asesor-masivo', data, getConfigHeader())
@@ -71,7 +71,7 @@ export default function useCliente() {
             }
         }
     }
-    const actualizarCliente = async(data) => {
+    const actualizarCliente = async (data) => {
         errors.value = ''
         try {
             let respond = await axios.post('/cliente/actualizar', data, getConfigHeader())
@@ -86,15 +86,34 @@ export default function useCliente() {
             }
         }
     }
-    const eliminarCliente = async(id) => {
+    const eliminarCliente = async (id) => {
         const respond = await axios.post('/cliente/eliminar', { id: id }, getConfigHeader())
         if (respond.data.ok == 1) {
             respuesta.value = respond.data
         }
     }
+    const obtenerClienteReciente = async () => {
+        const respond = await axios.get('/cliente/obtener-cliente-reciente', getConfigHeader())
+        cliente.value = respond.data
+    }
+    const obtenerClienteRecientePdf = async (cliente_id) => {
+        errors.value = "";
+        try {
+            let response = await axios.post("/cliente/obtener-cliente-reciente-pdf", { cliente_id: cliente_id }, getConfigHeaderpdf());
+
+            const file = new Blob([response.data], { type: "application/pdf" });
+            pdfUrl.value = URL.createObjectURL(file);
+
+        } catch (error) {
+            console.error("Error al generar el PDF:", error);
+            if (error.response && error.response.status === 422) {
+                errors.value = error.response.data.errors;
+            }
+        }
+    }
     return {
         errors, clientes, listaClientes, cliente, obtenerCliente, obtenerClientes, obtenerDatosParaNuevoCredito,
         agregarCliente, actualizarCliente, eliminarCliente, respuesta, obtenerClientePorDni, datos, obtenerClientesPosicion,
-        datosCreditoJuntaPorDni, creditos, juntas, asignarAsesorMasivo
+        datosCreditoJuntaPorDni, creditos, juntas, asignarAsesorMasivo, obtenerClienteReciente, obtenerClienteRecientePdf, pdfUrl
     }
 }
