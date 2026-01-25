@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import useHelper from '@/Helpers'
 import useCliente from '@/Composables/Cliente.js'
 import useActividadNegocio from '@/Composables/ActividadNegocio.js'
+import useUbigeo from '@/Composables/Ubigeo.js'
 import Resumen from '@/Pages/Clientes/Resumen.vue'
 
 const router = useRouter()
@@ -12,7 +13,8 @@ const { Toast, soloNumeros, Swal, openModal } = useHelper()
 const {
   errors, respuesta, agregarCliente,
   obtenerClienteReciente, cliente,
-  obtenerClienteRecientePdf, pdfUrl
+  obtenerClienteRecientePdf, pdfUrl,
+  existeClientePorDni, existeCliente
 } = useCliente()
 
 const {
@@ -22,10 +24,181 @@ const {
   detalleActividadNegocios
 } = useActividadNegocio()
 
+const {
+  obtenerDepartamentos, departamentos,
+  obtenerProvinciasPorDepartamento, provincias,
+  obtenerDistritosPorProvincia, distritos,
+  obtenerUbigeo, registro,
+  buscarDistritos
+} = useUbigeo()
+
+
+
+// ----------------- UBIGEO UI (NAC / DOM) -----------------
+const ubigeoModeNac = ref('select') // 'select' | 'search'
+const ubigeoModeDom = ref('select')
+
+const nac = ref({ dep: '', prov: '', dist: '' })
+const dom = ref({ dep: '', prov: '', dist: '' })
+
+const provinciasNac = ref([])
+const distritosNac = ref([])
+
+const provinciasDom = ref([])
+const distritosDom = ref([])
+
+// Para el modo búsqueda (autocomplete)
+const buscarNac = ref('')
+const buscarDom = ref('')
+const resultadosNac = ref([]) // lista simple para UI
+const resultadosDom = ref([])
+
+const loadingNac = ref(false)
+const loadingDom = ref(false)
+
+watch(() => nac.value.dist, (ub) => { form.value.ubigeo_nac = ub || '' })
+watch(() => dom.value.dist, (ub) => { form.value.ubigeo_dom = ub || '' })
+
+// Cambios jerárquicos (NAC)
+watch(() => nac.value.dep, async (dep) => {
+  nac.value.prov = ''
+  nac.value.dist = ''
+  provinciasNac.value = []
+  distritosNac.value = []
+  form.value.ubigeo_nac = ''
+  if (!dep) return
+
+  loadingNac.value = true
+  try {
+    // usa tu endpoint
+    await obtenerProvinciasPorDepartamento(dep)
+    provinciasNac.value = provincias.value
+  } finally {
+    loadingNac.value = false
+  }
+})
+
+watch(() => nac.value.prov, async (prov) => {
+  nac.value.dist = ''
+  distritosNac.value = []
+  form.value.ubigeo_nac = ''
+  if (!prov) return
+
+  loadingNac.value = true
+  try {
+    await obtenerDistritosPorProvincia(prov)
+    distritosNac.value = distritos.value
+  } finally {
+    loadingNac.value = false
+  }
+})
+
+// Cambios jerárquicos (DOM)
+watch(() => dom.value.dep, async (dep) => {
+  dom.value.prov = ''
+  dom.value.dist = ''
+  provinciasDom.value = []
+  distritosDom.value = []
+  form.value.ubigeo_dom = ''
+  if (!dep) return
+
+  loadingDom.value = true
+  try {
+    await obtenerProvinciasPorDepartamento(dep)
+    provinciasDom.value = provincias.value
+  } finally {
+    loadingDom.value = false
+  }
+})
+
+watch(() => dom.value.prov, async (prov) => {
+  dom.value.dist = ''
+  distritosDom.value = []
+  form.value.ubigeo_dom = ''
+  if (!prov) return
+
+  loadingDom.value = true
+  try {
+    await obtenerDistritosPorProvincia(prov)
+    distritosDom.value = distritos.value
+  } finally {
+    loadingDom.value = false
+  }
+})
+
+// Auto-set si escriben ubigeo manual: usa tu obtenerPorUbigeo
+const syncFromUbigeo = async (which, ubigeo) => {
+  if (!ubigeo || String(ubigeo).length !== 6) return
+  try {
+    await obtenerUbigeo(ubigeo)
+    const r = registro.value
+    if (!r) return
+
+    const depId = r?.provincia?.departamento_id
+    const provId = r?.provincia?.id
+    const disUb = r?.ubigeo
+
+    if (which === 'nac') {
+      ubigeoModeNac.value = 'select'
+      nac.value.dep = depId
+      // provincias se cargarán por watch(dep). Esperamos microtick y seteamos
+      setTimeout(() => {
+        nac.value.prov = provId
+        setTimeout(() => (nac.value.dist = disUb), 0)
+      }, 0)
+    } else {
+      ubigeoModeDom.value = 'select'
+      dom.value.dep = depId
+      setTimeout(() => {
+        dom.value.prov = provId
+        setTimeout(() => (dom.value.dist = disUb), 0)
+      }, 0)
+    }
+  } catch (e) {}
+}
+
+// búsqueda (autocomplete)
+let tNac = null
+let tDom = null
+
+watch(buscarNac, (q) => {
+  clearTimeout(tNac)
+  resultadosNac.value = []
+  if (!q || q.trim().length < 3) return
+  tNac = setTimeout(async () => {
+    await buscarDistritos({ buscar: q, paginacion: 8 })
+    resultadosNac.value = distritos.value?.data || []
+  }, 300)
+})
+
+watch(buscarDom, (q) => {
+  clearTimeout(tDom)
+  resultadosDom.value = []
+  if (!q || q.trim().length < 3) return
+  tDom = setTimeout(async () => {
+    await buscarDistritos({ buscar: q, paginacion: 8 })
+    resultadosDom.value = distritos.value?.data || []
+  }, 300)
+})
+
+const selectFromSearch = (which, item) => {
+  // item: {ubigeo, distrito, provincia, departamento}
+  if (which === 'nac') {
+    form.value.ubigeo_nac = item.ubigeo
+    buscarNac.value = `${item.departamento} / ${item.provincia} / ${item.distrito}`
+    resultadosNac.value = []
+  } else {
+    form.value.ubigeo_dom = item.ubigeo
+    buscarDom.value = `${item.departamento} / ${item.provincia} / ${item.distrito}`
+    resultadosDom.value = []
+  }
+}
+
 onMounted(async () => {
   document.title = 'Registro de Clientes'
   await listaActividadNegocios()
   await obtenerClienteReciente()
+  await obtenerDepartamentos()
 })
 
 /* ----------------- FORM (base) ----------------- */
@@ -87,6 +260,7 @@ const form = ref({
 
   errors: {}
 })
+
 
 /* ----------------- UI State ----------------- */
 const isSaving = ref(false)
@@ -181,6 +355,20 @@ watch(
     }
   }
 )
+
+const validarDni = async (dni) => {
+  if (!dni) return
+  await existeClientePorDni(dni)
+  if(existeCliente){
+    form.value.dni = ''
+    resetForm()
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'El DNI ya existe',
+    })
+  }
+}
 
 /* ----------------- ERRORS ----------------- */
 const toArr = (v) => (Array.isArray(v) ? v.map(String) : v ? [String(v)] : [])
@@ -482,6 +670,7 @@ const cancelar = () => router.push({ name: 'Principal' })
                   :class="{ 'is-invalid': hasError('dni') }"
                   maxlength="8"
                   @keypress="soloNumeros"
+                  @change="validarDni(form.dni)"
                   placeholder="Ej: 12345678"
                   @input="clearFieldError('dni')"
                 />
@@ -490,16 +679,84 @@ const cancelar = () => router.push({ name: 'Principal' })
                 </div>
               </div>
 
-              <div class="col-12 col-md-3">
-                <label class="form-label">Ubigeo Nacimiento</label>
+              <div class="col-12 col-md-6">
+                <div class="d-flex align-items-center justify-content-between">
+                  <label class="form-label mb-0">Ubigeo Nacimiento</label>
+                  <div class="btn-group btn-group-sm">
+                    <button type="button"
+                      class="btn"
+                      :class="ubigeoModeNac==='select' ? 'btn-primary' : 'btn-outline-primary'"
+                      @click="ubigeoModeNac='select'">
+                      Seleccionar
+                    </button>
+                    <button type="button"
+                      class="btn"
+                      :class="ubigeoModeNac==='search' ? 'btn-primary' : 'btn-outline-primary'"
+                      @click="ubigeoModeNac='search'">
+                      Buscar
+                    </button>
+                  </div>
+                </div>
+
+                <!-- MODO SELECT -->
+                <div v-if="ubigeoModeNac==='select'" class="row g-2 mt-1">
+                  <div class="col-12 col-md-4">
+                    <select v-model="nac.dep" class="form-select">
+                      <option value="">Departamento</option>
+                      <option v-for="d in departamentos.data || departamentos" :key="d.id" :value="d.id">
+                        {{ d.nombre }}
+                      </option>
+                    </select>
+                  </div>
+
+                  <div class="col-12 col-md-4">
+                    <select v-model="nac.prov" class="form-select" :disabled="!nac.dep">
+                      <option value="">Provincia</option>
+                      <option v-for="p in provinciasNac" :key="p.id" :value="p.id">
+                        {{ p.nombre }}
+                      </option>
+                    </select>
+                  </div>
+
+                  <div class="col-12 col-md-4">
+                    <select v-model="nac.dist" class="form-select" :disabled="!nac.prov">
+                      <option value="">Distrito</option>
+                      <option v-for="di in distritosNac" :key="di.ubigeo" :value="di.ubigeo">
+                        {{ di.nombre }} — {{ di.ubigeo }}
+                      </option>
+                    </select>
+                  </div>
+                </div>
+
+                <!-- MODO SEARCH -->
+                <div v-else class="mt-2 position-relative">
+                  <input
+                    v-model="buscarNac"
+                    class="form-control"
+                    placeholder="Escribe: distrito / provincia / departamento (min 3 letras)"
+                  />
+
+                  <div v-if="resultadosNac.length" class="list-group position-absolute w-100 shadow" style="z-index: 20;">
+                    <button
+                      v-for="it in resultadosNac"
+                      :key="it.ubigeo"
+                      type="button"
+                      class="list-group-item list-group-item-action"
+                      @click="selectFromSearch('nac', it)">
+                      <div class="fw-semibold">{{ it.distrito }} — {{ it.ubigeo }}</div>
+                      <div class="small text-muted">{{ it.departamento }} / {{ it.provincia }}</div>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Ubigeo final -->
                 <input
                   v-model.trim="form.ubigeo_nac"
-                  class="form-control"
+                  class="form-control mt-2"
                   :class="{ 'is-invalid': hasError('ubigeo_nac') }"
                   maxlength="6"
-                  @keypress="soloNumeros"
-                  placeholder="Ej: 090101"
-                  @input="clearFieldError('ubigeo_nac')"
+                  placeholder="Ubigeo (6 dígitos) - auto"
+                  @input="syncFromUbigeo('nac', form.ubigeo_nac)"
                 />
                 <div class="invalid-feedback" v-if="hasError('ubigeo_nac')">
                   {{ firstError('ubigeo_nac') }}
@@ -655,21 +912,90 @@ const cancelar = () => router.push({ name: 'Principal' })
                 </div>
               </div>
 
-              <div class="col-12 col-md-3">
-                <label class="form-label">Ubigeo Domicilio</label>
+              <div class="col-12 col-md-6">
+                <div class="d-flex align-items-center justify-content-between">
+                  <label class="form-label mb-0">Ubigeo Domicilio</label>
+                  <div class="btn-group btn-group-sm">
+                    <button type="button"
+                      class="btn"
+                      :class="ubigeoModeDom==='select' ? 'btn-primary' : 'btn-outline-primary'"
+                      @click="ubigeoModeDom='select'">
+                      Seleccionar
+                    </button>
+                    <button type="button"
+                      class="btn"
+                      :class="ubigeoModeDom==='search' ? 'btn-primary' : 'btn-outline-primary'"
+                      @click="ubigeoModeDom='search'">
+                      Buscar
+                    </button>
+                  </div>
+                </div>
+
+                <!-- MODO SELECT -->
+                <div v-if="ubigeoModeDom==='select'" class="row g-2 mt-1">
+                  <div class="col-12 col-md-4">
+                    <select v-model="dom.dep" class="form-select">
+                      <option value="">Departamento</option>
+                      <option v-for="d in departamentos.data || departamentos" :key="d.id" :value="d.id">
+                        {{ d.nombre }}
+                      </option>
+                    </select>
+                  </div>
+
+                  <div class="col-12 col-md-4">
+                    <select v-model="dom.prov" class="form-select" :disabled="!dom.dep">
+                      <option value="">Provincia</option>
+                      <option v-for="p in provinciasDom" :key="p.id" :value="p.id">
+                        {{ p.nombre }}
+                      </option>
+                    </select>
+                  </div>
+
+                  <div class="col-12 col-md-4">
+                    <select v-model="dom.dist" class="form-select" :disabled="!dom.prov">
+                      <option value="">Distrito</option>
+                      <option v-for="di in distritosDom" :key="di.ubigeo" :value="di.ubigeo">
+                        {{ di.nombre }} — {{ di.ubigeo }}
+                      </option>
+                    </select>
+                  </div>
+                </div>
+
+                <!-- MODO SEARCH -->
+                <div v-else class="mt-2 position-relative">
+                  <input
+                    v-model="buscarDom"
+                    class="form-control"
+                    placeholder="Escribe: distrito / provincia / departamento (min 3 letras)"
+                  />
+
+                  <div v-if="resultadosDom.length" class="list-group position-absolute w-100 shadow" style="z-index: 20;">
+                    <button
+                      v-for="it in resultadosDom"
+                      :key="it.ubigeo"
+                      type="button"
+                      class="list-group-item list-group-item-action"
+                      @click="selectFromSearch('dom', it)">
+                      <div class="fw-semibold">{{ it.distrito }} — {{ it.ubigeo }}</div>
+                      <div class="small text-muted">{{ it.departamento }} / {{ it.provincia }}</div>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Ubigeo final -->
                 <input
                   v-model.trim="form.ubigeo_dom"
-                  class="form-control"
+                  class="form-control mt-2"
                   :class="{ 'is-invalid': hasError('ubigeo_dom') }"
                   maxlength="6"
-                  @keypress="soloNumeros"
-                  placeholder="Ej: 090101"
-                  @input="clearFieldError('ubigeo_dom')"
+                  placeholder="Ubigeo (6 dígitos) - auto"
+                  @input="syncFromUbigeo('dom', form.ubigeo_dom)"
                 />
                 <div class="invalid-feedback" v-if="hasError('ubigeo_dom')">
                   {{ firstError('ubigeo_dom') }}
                 </div>
               </div>
+
 
               <div class="col-12 col-md-6">
                 <label class="form-label">Dirección</label>

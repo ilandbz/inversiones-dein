@@ -21,64 +21,53 @@ class ClienteController extends Controller
     public function store(StoreClienteRequest $request)
     {
         $filters = $this->getUserFilters();
+        $data = $request->validated();
 
         DB::beginTransaction();
         try {
-            $existeDni = Cliente::whereHas('persona', function ($query) use ($request) {
-                $query->where('dni', $request->dni);
-            })->exists(); 
-            if ($existeDni) {
-                return response()->json([
-                    'errors' => [
-                        'dni' => ['El DNI ya está registrado como cliente'] // Asegurar que sea un array
-                    ]
-                ], 422);
-            }
-            $file = $request->file('foto');
-            if ($file) {
+
+            // Foto
+            if ($request->hasFile('foto')) {
+                $file = $request->file('foto');
                 $manager = new ImageManager(new Driver());
-                $image = $manager->read($file);
+                $image = $manager->read($file)->scaleDown(width: 800, height: 1000);
 
-                // Resize suave (mantiene proporción)
-                $image->scaleDown(width: 800, height: 1000);
-
-                $nombre_archivo = $request->dni . '.webp';
+                $nombre_archivo = $data['dni'] . '.webp';
                 Storage::disk('fotos')->makeDirectory('clientes');
-
-                // Baja peso con calidad (prueba 75-85)
-                Storage::disk('fotos')->put(
-                    'clientes/' . $nombre_archivo,
-                    (string) $image->toWebp(80)
-                );
+                Storage::disk('fotos')->put('clientes/' . $nombre_archivo, (string) $image->toWebp(80));
             }
-   
-            $personaCliente = Persona::firstOrCreate(['dni' => $request->dni],
-            [
-                'ape_pat' => $request->ape_pat,
-                'ape_mat' => $request->ape_mat,
-                'primernombre' => $request->primernombre,
-                'otrosnombres' => $request->otrosnombres,
-                'fecha_nac' => $request->fecha_nac,
-                'ubigeo_nac' => $request->ubigeo_nac,
-                'ubigeo_dom' => $request->ubigeo_dom,
-                'genero' => $request->genero,
-                'celular' => $request->celular,
-                'celular2' => $request->celular2,
-                'email' => $request->email,
-                'ruc' => $request->ruc,
-                'estado_civil' => $request->estado_civil,
-                'profesion' => $request->profesion,
-                'grado_instr' => $request->grado_instr,
-                'origen_labor' => $request->origen_labor,
-                'ocupacion' => $request->ocupacion,
-                'institucion_lab' => $request->institucion_lab,
-                'latitud_longitud' => $request->latitud_longitud,
-                'direccion' => $request->direccion,
-            ]);
 
-            $ref = $request->input('referente');
+            // Persona Cliente
+            $personaCliente = Persona::updateOrCreate(
+                ['dni' => $data['dni']],
+                [
+                    'ape_pat' => $data['ape_pat'],
+                    'ape_mat' => $data['ape_mat'],
+                    'primernombre' => $data['primernombre'],
+                    'otrosnombres' => $data['otrosnombres'] ?? null,
+                    'fecha_nac' => $data['fecha_nac'],
+                    'ubigeo_nac' => $data['ubigeo_nac'],
+                    'ubigeo_dom' => $data['ubigeo_dom'],
+                    'genero' => $data['genero'],
+                    'celular' => $data['celular'],
+                    'celular2' => $data['celular2'] ?? null,
+                    'email' => $data['email'] ?? null,
+                    'ruc' => $data['ruc'] ?? null,
+                    'estado_civil' => $data['estado_civil'],
+                    'profesion' => $data['profesion'] ?? null,
+                    'grado_instr' => $data['grado_instr'],
+                    'origen_labor' => $data['origen_labor'],
+                    'ocupacion' => $data['ocupacion'] ?? null,
+                    'institucion_lab' => $data['institucion_lab'] ?? null,
+                    'latitud_longitud' => $data['latitud_longitud'] ?? null,
+                    'direccion' => $data['direccion'],
+                ]
+            );
 
-            $personaReferente = Persona::firstOrCreate(
+            // Referente
+            $ref = $data['referente'];
+
+            $personaReferente = Persona::updateOrCreate(
                 ['dni' => $ref['dni']],
                 [
                     'ape_pat'      => $ref['ape_pat'],
@@ -87,8 +76,9 @@ class ClienteController extends Controller
                     'otrosnombres' => $ref['otrosnombres'] ?? null,
                     'celular'      => $ref['celular'],
                     'email'        => $ref['email'] ?? null,
-                    'direccion'    => $ref['direccion'], // required en tu rules
-                    // puedes setear defaults para campos no enviados:
+                    'direccion'    => $ref['direccion'],
+
+                    // defaults
                     'fecha_nac'    => '2000-01-01',
                     'genero'       => 'M',
                     'estado_civil' => 'SOLTERO',
@@ -96,42 +86,36 @@ class ClienteController extends Controller
                 ]
             );
 
+            // Cliente
             $cliente = Cliente::create([
-                'id'          => $request->id,
                 'usuario_id'  => $filters['user_id'],
                 'persona_id'  => $personaCliente->id,
-                'referente_id'     => $personaReferente->id,
+                'referente_id' => $personaReferente->id,
                 'referente_parentesco' => $ref['parentesco'],
-                'fecha_reg'   => now()->toDateString(), // Asigna la fecha actual
-                'hora_reg'    => now()->toTimeString(), // Asigna la hora actual
+                'fecha_reg' => now()->toDateString(),
+                'hora_reg'  => now()->toTimeString(),
             ]);
 
-            if ($request->origen_labor === 'INDEPENDIENTE') {
-                $neg = $request->input('negocio', []);
+            // Negocio
+            if ($data['origen_labor'] === 'INDEPENDIENTE') {
+                $neg = $data['negocio']; // ya viene validado y existe
 
-                // OJO: tu tabla negocios exige tel_cel y tel_cel_referido NO NULL
-                // Si quieres que sean opcionales, cambia tu migración a nullable().
                 Negocio::create([
-                    'cliente_id'         => $cliente->id,
-                    'razonsocial'        => $neg['razonsocial'],
-                    'ruc'               => $neg['ruc'] ?? null,
-                    'celular'           => $neg['celular'] ?? null,
-                    'detalle_actividad_id' => $neg['detalle_actividad_id'] ?? null,
-                    'inicioactividad'   => $neg['inicioactividad'] ?? null,
-                    'direccion'         => $neg['direccion'] ?? null,
+                    'cliente_id'           => $cliente->id,
+                    'razonsocial'          => $neg['razonsocial'],
+                    'ruc'                  => $neg['ruc'] ?? null,
+                    'celular'              => $neg['celular'] ?? null,
+                    'detalle_actividad_id' => $neg['detalle_actividad_id'],
+                    'inicioactividad'      => $neg['inicioactividad'] ?? null,
+                    'direccion'            => $neg['direccion'] ?? null,
                 ]);
             }
 
-
             DB::commit();
-            return response()->json([
-                'ok' => 1,
-                'mensaje' => 'Cliente Registrado satisfactoriamente'
-            ],200);
+            return response()->json(['ok' => 1, 'mensaje' => 'Cliente Registrado satisfactoriamente'], 200);
 
-        } catch (\Exception $e) {
-            DB::rollBack(); // Revertir la transacción si hubo un error
-
+        } catch (\Throwable $e) {
+            DB::rollBack();
             return response()->json([
                 'ok' => 0,
                 'mensaje' => 'Error al registrar cliente',

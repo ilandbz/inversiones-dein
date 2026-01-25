@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ActividadNegocioController;
 use App\Http\Controllers\ClienteController;
+use App\Http\Controllers\UbicacionController;
 
 use Illuminate\Support\Facades\Route;
 Route::group(['prefix' => 'cliente', 'middleware' => 'auth'], function () {
@@ -29,4 +30,16 @@ Route::group(['prefix' => 'actividadnegocio', 'middleware' => 'auth'], function 
     Route::get('todos', [ActividadNegocioController::class, 'todos']);
     Route::get('detalleactividadnegocio', [ActividadNegocioController::class, 'todosPorActividad'] );
 
+});
+
+
+Route::group(['prefix' => 'ubigeo', 'middleware' => 'auth'], function () {
+    Route::get('obtener', [UbicacionController::class, 'obtenerPorUbigeo']);
+    Route::get('lista-distritos', [UbicacionController::class, 'listarDistritos']);
+    Route::get('lista-provincias', [UbicacionController::class, 'listarProvincias']);
+    Route::get('departamentos', [UbicacionController::class, 'obtenerDepartamentos']); 
+    Route::get('provincias', [UbicacionController::class, 'obtenerProvincias']);
+    Route::get('distritos', [UbicacionController::class, 'obtenerDistritos']);
+    Route::post('guardar', [UbicacionController::class, 'store']);
+    Route::post('eliminar', [UbicacionController::class, 'destroy']);
 });

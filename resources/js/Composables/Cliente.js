@@ -11,6 +11,7 @@ export default function useCliente() {
     const creditos = ref([])
     const juntas = ref([])
     const pdfUrl = ref('')
+    const existeCliente = ref(false)
     const obtenerCliente = async (id) => {
         let respuesta = await axios.get('/cliente/mostrar?id=' + id, getConfigHeader())
         cliente.value = respuesta.data
@@ -18,6 +19,10 @@ export default function useCliente() {
     const obtenerClientePorDni = async (dni) => {
         let respuesta = await axios.get('/cliente/mostrar-dni?dni=' + dni, getConfigHeader())
         cliente.value = respuesta.data
+    }
+    const existeClientePorDni = async (dni) => {
+        let respuesta = await axios.get('/cliente/mostrar-dni?dni=' + dni, getConfigHeader())
+        existeCliente.value = respuesta.data.dni ? true : false
     }
     const datosCreditoJuntaPorDni = async (dni) => {
         let respuesta = await axios.get('/cliente/mostrar-con-registros-dni?dni=' + dni, getConfigHeader())
@@ -114,6 +119,7 @@ export default function useCliente() {
     return {
         errors, clientes, listaClientes, cliente, obtenerCliente, obtenerClientes, obtenerDatosParaNuevoCredito,
         agregarCliente, actualizarCliente, eliminarCliente, respuesta, obtenerClientePorDni, datos, obtenerClientesPosicion,
-        datosCreditoJuntaPorDni, creditos, juntas, asignarAsesorMasivo, obtenerClienteReciente, obtenerClienteRecientePdf, pdfUrl
+        datosCreditoJuntaPorDni, creditos, juntas, asignarAsesorMasivo, obtenerClienteReciente, obtenerClienteRecientePdf, pdfUrl,
+        existeClientePorDni, existeCliente
     }
 }
