@@ -6,6 +6,7 @@ import useCliente from '@/Composables/Cliente.js'
 import useActividadNegocio from '@/Composables/ActividadNegocio.js'
 import useUbigeo from '@/Composables/Ubigeo.js'
 import Resumen from '@/Pages/Clientes/Resumen.vue'
+import Prestamo from '@/Pages/Prestamos/Form.vue'
 
 const router = useRouter()
 const { Toast, soloNumeros, Swal, openModal } = useHelper()
@@ -1440,13 +1441,26 @@ const cancelar = () => router.push({ name: 'Principal' })
                   </div>
 
                   <div class="pt-3">
-                    <button
-                      type="button"
-                      class="btn btn-outline-danger w-100"
-                      @click="openPdf(cliente.id)"
-                    >
-                      <i class="bi bi-filetype-pdf me-1"></i> Ver resumen PDF
-                    </button>
+                    <div class="row">
+                      <div class="col-6">
+                        <button
+                          type="button"
+                          class="btn btn-outline-danger w-100"
+                          @click="openPdf(cliente.id)"
+                        >
+                          <i class="bi bi-filetype-pdf me-1"></i> Ver resumen PDF
+                        </button>
+                      </div>
+                      <div class="col-6">
+                        <button
+                        type="button"
+                        class="btn btn-outline-warning w-100"
+                        @click="openModal('#prestamomodal')"
+                        >
+                        Solicitar Prestamo
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1459,6 +1473,7 @@ const cancelar = () => router.push({ name: 'Principal' })
     </section>
   </div>
   <Resumen :url="pdfUrl" />
+  <Prestamo :cliente="cliente" />
 </template>
 
 <style scoped>

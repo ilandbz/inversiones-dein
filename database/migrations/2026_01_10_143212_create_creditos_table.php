@@ -14,7 +14,8 @@ return new class extends Migration
         Schema::create('creditos', function (Blueprint $table) {
             $table->id();
             $table->foreignId('cliente_id')->constrained('clientes')->onUpdate('cascade')->onDelete('cascade');
-            $table->foreignId('asesor_id')->constrained('users')->onUpdate('cascade')->onDelete('cascade');
+            $table->foreignId('asesor_id')->constrained('asesors')->onUpdate('cascade')->onDelete('cascade');
+            $table->foreignId('aval_id')->nullable()->constrained('personas')->onUpdate('cascade')->onDelete('cascade');
             $table->string('estado', 40);
             $table->date('fecha_reg');
             $table->string('tipo', 40);

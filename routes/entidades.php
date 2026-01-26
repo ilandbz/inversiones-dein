@@ -3,6 +3,8 @@
 use App\Http\Controllers\ActividadNegocioController;
 use App\Http\Controllers\ClienteController;
 use App\Http\Controllers\UbicacionController;
+use App\Http\Controllers\PersonaController;
+use App\Http\Controllers\AsesorController;
 
 use Illuminate\Support\Facades\Route;
 Route::group(['prefix' => 'cliente', 'middleware' => 'auth'], function () {
@@ -42,4 +44,26 @@ Route::group(['prefix' => 'ubigeo', 'middleware' => 'auth'], function () {
     Route::get('distritos', [UbicacionController::class, 'obtenerDistritos']);
     Route::post('guardar', [UbicacionController::class, 'store']);
     Route::post('eliminar', [UbicacionController::class, 'destroy']);
+});
+
+
+//PERSONA
+Route::group(['prefix' => 'persona', 'middleware' => 'auth'], function () {
+    Route::get('mostrar-por-dni', [PersonaController::class, 'mostrarPorDniconApi']);
+    Route::get('todos', [PersonaController::class, 'todos']);
+    Route::get('mostrar', [PersonaController::class, 'show']);
+    Route::post('actualizar', [PersonaController::class, 'update']);
+    Route::post('eliminar', [PersonaController::class, 'destroy']);
+    Route::post('guardar', [PersonaController::class, 'store']);
+    Route::get('listar', [PersonaController::class, 'listar']);
+    Route::post('actualizar-celular', [PersonaController::class, 'actualizarCelular']);
+});
+
+
+Route::group(['prefix' => 'asesor', 'middleware' => 'auth'], function () {
+    Route::get('mostrar', [AsesorController::class, 'show']);
+    Route::post('guardar', [AsesorController::class, 'store']);
+    Route::post('eliminar', [AsesorController::class, 'destroy']);
+    Route::get('todos', [AsesorController::class, 'todos']);
+    Route::get('listar', [AsesorController::class, 'listar']);
 });

@@ -22,6 +22,7 @@ class DatabaseSeeder extends Seeder
             DistritoSeeder::class,
             ActividadNegocioSeeder::class,
             DetalleActividadNegocioSeeder::class,
+            AsesorSeeder::class,
         ]);
     }
 }
