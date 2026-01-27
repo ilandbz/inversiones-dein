@@ -360,7 +360,7 @@ watch(
 const validarDni = async (dni) => {
   if (!dni) return
   await existeClientePorDni(dni)
-  if(existeCliente){
+  if(existeCliente.value){
     form.value.dni = ''
     resetForm()
     Swal.fire({
