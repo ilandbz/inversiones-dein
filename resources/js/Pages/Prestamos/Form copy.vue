@@ -4,13 +4,11 @@ import useHelper from '@/Helpers'
 import usePersona from '@/Composables/Persona.js'
 import useAsesor from '@/Composables/Asesor.js'
 import usePlazo from '@/Composables/Plazo.js' 
-import useCredito from '@/Composables/Credito.js' 
 import useOrigenFinanciamiento from '@/Composables/OrigenFinanciamiento.js'
 
 const { asesores, listaAsesores } = useAsesor()
 const { origenes, listaOrigenesFinanciamientos } = useOrigenFinanciamiento()
 const { plazos, listaPlazos } = usePlazo()
-const { creditos, listaCreditos, agregarCredito, actualizarCredito, eliminarCredito } = useCredito()
 
 const props = defineProps({
   cliente: Object,
@@ -62,6 +60,7 @@ const form = ref({
   frecuencia: 'MENSUAL',
   plazo: '',
 
+  dondepagara: 'NINGUNO',
   fuenterecursos: '',
 
   tasainteres: '0.00',
@@ -101,35 +100,27 @@ const sanitizeDecimalInput = (val, { maxInt = 9, maxDec = 2 } = {}) => {
   return dd.length ? `${ii}.${dd}` : ii
 }
 
-const frecuenciaOptions = computed(() => {
-  const arr = Array.isArray(plazos.value) ? plazos.value : []
-  return [...new Set(arr.map(x => x.frecuencia))].filter(Boolean)
-})
-
+/* ----------------- PLAZOS POR FRECUENCIA ----------------- */
 const plazoOptions = computed(() => {
   const f = form.value.frecuencia
-  const arr = Array.isArray(plazos.value) ? plazos.value : []
 
-  return arr
-    .filter(x => x.frecuencia === f)
-    .map(x => ({
-      value: x.plazo,
-      label:
-        f === 'DIARIA' ? `${x.plazo} días` :
-        f === 'SEMANAL' ? `${x.plazo} semanas` :
-        f === 'QUINCENAL' ? `${x.plazo} quincenas` :
-        `${x.plazo} meses`,
-      tasa: x.tasainteres,
-      mora: x.costomora,
-    }))
-    .sort((a, b) => Number(a.value) - Number(b.value))
-})
-
-const selectedPlazo = computed(() => {
-  const f = form.value.frecuencia
-  const p = form.value.plazo
-  const arr = Array.isArray(plazos.value) ? plazos.value : []
-  return arr.find(x => x.frecuencia === f && String(x.plazo) === String(p)) || null
+  if (f === 'DIARIA') return [
+    { value: 7, label: '7 días' }, { value: 15, label: '15 días' }, { value: 30, label: '30 días' },
+    { value: 45, label: '45 días' }, { value: 60, label: '60 días' },
+  ]
+  if (f === 'SEMANAL') return [
+    { value: 4, label: '4 semanas' }, { value: 8, label: '8 semanas' }, { value: 12, label: '12 semanas' },
+    { value: 16, label: '16 semanas' }, { value: 20, label: '20 semanas' },
+  ]
+  if (f === 'QUINCENAL') return [
+    { value: 2, label: '2 quincenas (1 mes)' }, { value: 4, label: '4 quincenas (2 meses)' },
+    { value: 6, label: '6 quincenas (3 meses)' }, { value: 8, label: '8 quincenas (4 meses)' },
+    { value: 10, label: '10 quincenas (5 meses)' }, { value: 12, label: '12 quincenas (6 meses)' },
+  ]
+  return [
+    { value: 3, label: '3 meses' }, { value: 6, label: '6 meses' }, { value: 9, label: '9 meses' },
+    { value: 12, label: '12 meses' }, { value: 18, label: '18 meses' }, { value: 24, label: '24 meses' },
+  ]
 })
 
 watch(
@@ -142,39 +133,7 @@ watch(
   { immediate: true }
 )
 
-watch(
-  () => form.value.plazo,
-  () => {
-    const tasa = selectedPlazo.value?.tasainteres ?? '0.00'
-    const mora = selectedPlazo.value?.costomora ?? '0.00'
-
-    form.value.tasainteres = toMoney2(toNumber(tasa))   // % como string "5.00"
-    form.value.costomora   = toMoney2(toNumber(mora))   // S/ como string "10.00"
-
-    clearFieldError('plazo')
-  },
-  { immediate: true }
-)
-
-watch(
-  () => plazos.value,
-  (newVal) => {
-    if (!Array.isArray(newVal) || !newVal.length) return
-
-    // si la frecuencia actual no existe en data, asigna la primera
-    if (!frecuenciaOptions.value.includes(form.value.frecuencia)) {
-      form.value.frecuencia = frecuenciaOptions.value[0] || ''
-    }
-
-    // si el plazo actual no existe para esa frecuencia, asigna el primero
-    const exists = plazoOptions.value.some(p => String(p.value) === String(form.value.plazo))
-    if (!exists) {
-      form.value.plazo = plazoOptions.value?.[0]?.value ?? ''
-    }
-  },
-  { immediate: true }
-)
-
+/* ----------------- TOTAL AUTO ----------------- */
 const totalCalc = computed(() => {
   const monto = toNumber(form.value.monto)
   const tasa = toNumber(form.value.tasainteres)
@@ -292,6 +251,7 @@ const validateFront = () => {
   req('origen_financiamiento_id')
   req('frecuencia')
   req('plazo')
+  req('fuenterecursos')
 
   const monto = toNumber(form.value.monto)
   if (String(form.value.monto).trim() && monto <= 0) e.monto = ['Monto debe ser mayor a 0']
@@ -300,7 +260,7 @@ const validateFront = () => {
   if (tasa < 0 || tasa > 100) e.tasainteres = ['Tasa interés debe estar entre 0 y 100']
 
   const mora = toNumber(form.value.costomora)
-  if (mora < 0) e.costomora = ['Costo mora no puede ser negativo']
+  if (mora < 0 || mora > 100) e.costomora = ['Costo mora debe estar entre 0 y 100']
 
   // aval opcional: si llenó DNI pero no está asignado id, avisar
   if (String(aval.value.dni || '').trim().length === 8 && !form.value.aval_id) {
@@ -319,46 +279,17 @@ const isSaving = ref(false)
 
 const guardar = async () => {
   if (isSaving.value) return
-
   if (!validateFront()) {
-    console.log('VALIDATION ERRORS:', form.value.errors)
     await scrollToFirstInvalid()
     return
   }
 
-  const payload = {
-    cliente_id: form.value.cliente_id,
-    asesor_id: form.value.asesor_id,
-    aval_id: form.value.aval_id,
-    tipo: form.value.tipo,
-    monto: form.value.monto,
-    origen_financiamiento_id: form.value.origen_financiamiento_id,
-    frecuencia: form.value.frecuencia,
-    plazo: form.value.plazo,
-    tasainteres: form.value.tasainteres,
-    costomora: form.value.costomora,
-    total: form.value.total,
-  }
-
-  console.log('PAYLOAD:', payload)
-
   isSaving.value = true
   try {
-    await agregarCredito(payload)
-
-    console.log('RESPUESTA:', respuesta.value)
-
-    if (respuesta.value?.ok == 1) {
-      Toast?.success ? Toast.success(respuesta.value.msg) : console.log(respuesta.value.msg)
-      limpiar()
-    } else {
-      Toast?.error ? Toast.error(respuesta.value?.msg || 'No se pudo guardar') : console.log(respuesta.value)
-    }
+    // aquí conectas tu composable real de créditos
+    await Swal.fire({ icon: 'success', title: 'OK', text: 'Crédito listo para enviar con aval_id=' + (form.value.aval_id ?? 'NULL') })
   } catch (e) {
-    console.error('CATCH ERROR:', e)
-    // si usas axios:
-    console.error('AXIOS RESPONSE:', e?.response?.data)
-    Toast?.error ? Toast.error(e?.response?.data?.message || 'Error al guardar.') : null
+    Toast?.error ? Toast.error('Error al guardar.') : console.error(e)
   } finally {
     isSaving.value = false
   }
@@ -376,6 +307,7 @@ const limpiar = () => {
     origen_financiamiento_id: '',
     frecuencia: 'MENSUAL',
     plazo: plazoOptions.value?.[0]?.value ?? '',
+    dondepagara: 'NINGUNO',
     fuenterecursos: '',
     tasainteres: '0.00',
     costomora: '0.00',
@@ -384,13 +316,7 @@ const limpiar = () => {
   }
   resetAval()
 }
-watch(
-  () => cliente.value?.id,
-  (id) => {
-    if (id) form.value.cliente_id = id
-  },
-  { immediate: true }
-)
+
 onMounted(() => {
   listaAsesores()
   listaOrigenesFinanciamientos()
@@ -464,10 +390,10 @@ onMounted(() => {
                     <select v-model="form.frecuencia" class="form-select"
                       :class="{ 'is-invalid': hasError('frecuencia') }"
                       @change="clearFieldError('frecuencia')">
-                      <option value="">-- Seleccione --</option>
-                      <option v-for="f in frecuenciaOptions" :key="f" :value="f">
-                        {{ f }}
-                      </option>
+                      <option value="DIARIA">DIARIA</option>
+                      <option value="SEMANAL">SEMANAL</option>
+                      <option value="QUINCENAL">QUINCENAL</option>
+                      <option value="MENSUAL">MENSUAL</option>
                     </select>
                     <div class="invalid-feedback" v-if="hasError('frecuencia')">{{ firstError('frecuencia') }}</div>
                   </div>
@@ -477,10 +403,8 @@ onMounted(() => {
                     <select v-model="form.plazo" class="form-select"
                       :class="{ 'is-invalid': hasError('plazo') }"
                       @change="clearFieldError('plazo')">
-                      <option value="" hidden>-- Seleccione --</option>
-                      <option v-for="p in plazoOptions" :key="p.value" :value="p.value">
-                        {{ p.label }}
-                      </option>
+                      <option value="">-- Seleccione --</option>
+                      <option v-for="p in plazoOptions" :key="p.value" :value="p.value">{{ p.label }}</option>
                     </select>
                     <div class="invalid-feedback" v-if="hasError('plazo')">{{ firstError('plazo') }}</div>
                   </div>
@@ -496,13 +420,20 @@ onMounted(() => {
 
                   <div class="col-12 col-md-3">
                     <label class="form-label">Tasa interés (%)</label>
-                    <input v-model="form.tasainteres" class="form-control" readonly />
+                    <input v-model="form.tasainteres" class="form-control"
+                      :class="{ 'is-invalid': hasError('tasainteres') }"
+                      placeholder="Ej: 10.50"
+                      @input="form.tasainteres = sanitizeDecimalInput(form.tasainteres, { maxInt: 3, maxDec: 2 }); clearFieldError('tasainteres')" />
+                    <div class="invalid-feedback" v-if="hasError('tasainteres')">{{ firstError('tasainteres') }}</div>
                   </div>
 
                   <div class="col-12 col-md-3">
-                    <label class="form-label">Costo mora (S/)</label>
-                    <input v-model="form.costomora" class="form-control" readonly />
-                    <div class="form-text">Automático según el plazo</div>
+                    <label class="form-label">Costo mora (%)</label>
+                    <input v-model="form.costomora" class="form-control"
+                      :class="{ 'is-invalid': hasError('costomora') }"
+                      placeholder="Ej: 2.00"
+                      @input="form.costomora = sanitizeDecimalInput(form.costomora, { maxInt: 3, maxDec: 2 }); clearFieldError('costomora')" />
+                    <div class="invalid-feedback" v-if="hasError('costomora')">{{ firstError('costomora') }}</div>
                   </div>
 
                   <div class="col-12 col-md-3">

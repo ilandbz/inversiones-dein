@@ -5,6 +5,9 @@ use App\Http\Controllers\ClienteController;
 use App\Http\Controllers\UbicacionController;
 use App\Http\Controllers\PersonaController;
 use App\Http\Controllers\AsesorController;
+use App\Http\Controllers\OrigenFinanciamientoController;
+use App\Http\Controllers\PlazoController;
+use App\Http\Controllers\CreditoController;
 
 use Illuminate\Support\Facades\Route;
 Route::group(['prefix' => 'cliente', 'middleware' => 'auth'], function () {
@@ -66,4 +69,24 @@ Route::group(['prefix' => 'asesor', 'middleware' => 'auth'], function () {
     Route::post('eliminar', [AsesorController::class, 'destroy']);
     Route::get('todos', [AsesorController::class, 'todos']);
     Route::get('listar', [AsesorController::class, 'listar']);
+});
+
+Route::group(['prefix' => 'origen_financiamiento', 'middleware' => 'auth'], function () {
+    Route::get('mostrar', [OrigenFinanciamientoController::class, 'show']);
+    Route::post('guardar', [OrigenFinanciamientoController::class, 'store']);
+    Route::post('eliminar', [OrigenFinanciamientoController::class, 'destroy']);
+    Route::get('todos', [OrigenFinanciamientoController::class, 'todos']);
+    Route::get('listar', [OrigenFinanciamientoController::class, 'listar']);
+});
+
+Route::group(['prefix' => 'plazo', 'middleware' => 'auth'], function () {
+    Route::get('mostrar', [PlazoController::class, 'show']);
+    Route::post('guardar', [PlazoController::class, 'store']);
+    Route::post('eliminar', [PlazoController::class, 'destroy']);
+    Route::get('todos', [PlazoController::class, 'todos']);
+    Route::get('listar', [PlazoController::class, 'listar']);
+});
+
+Route::group(['prefix' => 'credito', 'middleware' => 'auth'], function () {
+    Route::post('guardar', [CreditoController::class, 'store']);
 });

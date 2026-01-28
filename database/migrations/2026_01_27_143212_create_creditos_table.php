@@ -23,8 +23,6 @@ return new class extends Migration
             $table->foreignId('origen_financiamiento_id')->constrained('origen_financiamientos')->onUpdate('cascade')->onDelete('cascade');
             $table->string('frecuencia', 30);
             $table->integer('plazo')->length(15);
-            $table->string('dondepagara', 40)->default('NINGUNO');
-            $table->string('fuenterecursos', 50);
             $table->decimal('tasainteres', 5, 2)->default(0.00);
             $table->decimal('total', 9, 2)->default(0.00);
             $table->decimal('costomora', 5, 2)->default(0.00);

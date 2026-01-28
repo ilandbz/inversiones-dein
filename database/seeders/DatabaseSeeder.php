@@ -23,6 +23,7 @@ class DatabaseSeeder extends Seeder
             ActividadNegocioSeeder::class,
             DetalleActividadNegocioSeeder::class,
             AsesorSeeder::class,
+            PlazoSeeder::class,
         ]);
     }
 }
