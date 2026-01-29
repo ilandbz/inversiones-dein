@@ -10,14 +10,14 @@ import useOrigenFinanciamiento from '@/Composables/OrigenFinanciamiento.js'
 const { asesores, listaAsesores } = useAsesor()
 const { origenes, listaOrigenesFinanciamientos } = useOrigenFinanciamiento()
 const { plazos, listaPlazos } = usePlazo()
-const { creditos, listaCreditos, agregarCredito, actualizarCredito, eliminarCredito } = useCredito()
+const { creditos, listaCreditos, agregarCredito, actualizarCredito, eliminarCredito, respuesta } = useCredito()
 
 const props = defineProps({
   cliente: Object,
 })
-
+const emit = defineEmits(['cargar'])
 const { cliente } = toRefs(props)
-const { Toast, soloNumeros, Swal } = useHelper()
+const { Toast, soloNumeros, Swal, hideModal } = useHelper()
 
 /* ----------------- PERSONA (AVAL) ----------------- */
 const { persona, errors: personaErrors, respuesta: personaRespuesta, obtenerPorDni, agregarPersona } = usePersona()
@@ -340,19 +340,31 @@ const guardar = async () => {
     total: form.value.total,
   }
 
-  console.log('PAYLOAD:', payload)
 
   isSaving.value = true
   try {
     await agregarCredito(payload)
 
-    console.log('RESPUESTA:', respuesta.value)
-
     if (respuesta.value?.ok == 1) {
-      Toast?.success ? Toast.success(respuesta.value.msg) : console.log(respuesta.value.msg)
+
+      await Swal.fire({
+        title: 'Registro exitoso',
+        text: respuesta.value.msg || 'El crédito fue registrado correctamente',
+        icon: 'success',
+        confirmButtonText: 'Aceptar'
+      });
+
+      //Toast?.success ? Toast.success(respuesta.value.msg) : console.log(respuesta.value.msg)
+      hideModal('#prestamomodal')
+      emit('cargar')
       limpiar()
     } else {
-      Toast?.error ? Toast.error(respuesta.value?.msg || 'No se pudo guardar') : console.log(respuesta.value)
+      Swal.fire({
+        title: 'Error',
+        text: respuesta.value?.msg || 'No se pudo guardar el registro',
+        icon: 'error',
+        confirmButtonText: 'Aceptar'
+      });
     }
   } catch (e) {
     console.error('CATCH ERROR:', e)

@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Intervention\Image\Drivers\Gd\Driver;
+
 class ClienteController extends Controller
 {
     use UserFilters;
@@ -117,7 +118,6 @@ class ClienteController extends Controller
                 'mensaje' => 'Cliente Registrado satisfactoriamente',
                 'cliente' => $cliente
             ], 200);
-
         } catch (\Throwable $e) {
             DB::rollBack();
             return response()->json([
@@ -137,10 +137,11 @@ class ClienteController extends Controller
             'aval:id,dni,ape_pat,ape_mat,primernombre,otrosnombres',
             'agencia:id,nombre'
         )->where('id', $request->id)->first();
-        
+
         return $persona;
     }
-    public function asignarAsesorMasivo(Request $request){
+    public function asignarAsesorMasivo(Request $request)
+    {
         $nuevo_asesor_id = $request->asesor_id;
         $clientes = $request->selected;
         $convigentes = filter_var($request->convigentes, FILTER_VALIDATE_BOOLEAN); // asegura booleano real
@@ -163,9 +164,9 @@ class ClienteController extends Controller
             'ok' => 1,
             'mensaje' => 'Cliente modificado satisfactoriamente'
         ], 200);
-
     }
-    public function getDatosParaNuevoCredito(Request $request){
+    public function getDatosParaNuevoCredito(Request $request)
+    {
         $dni = $request->dni;
         $cliente = Cliente::whereHas('persona', function ($q) use ($dni) {
             $q->where('dni', $dni);
@@ -181,19 +182,21 @@ class ClienteController extends Controller
         ];
         return $datos;
     }
-    public function mostrarPorDni(Request $request){
+    public function mostrarPorDni(Request $request)
+    {
         $dni = $request->dni;
         $cliente = Cliente::with([
             'persona:id,dni,ape_pat,ape_mat,primernombre,otrosnombres,ubicacion_domicilio_id',
             'persona.ubicacion:id,tipo,ubigeo,tipovia,nombrevia,nro,interior,mz,lote,tipozona,nombrezona,referencia',
             'negocios',
             'negocios.tipo_actividad:id,nombre',
-            ])->whereHas('persona', function ($q) use ($dni) {
-                $q->where('dni', $dni);
-            })->first();
+        ])->whereHas('persona', function ($q) use ($dni) {
+            $q->where('dni', $dni);
+        })->first();
         return $cliente;
     }
-    public function datosCreditoJuntaPorDni(Request $request){
+    public function datosCreditoJuntaPorDni(Request $request)
+    {
         $dni = $request->dni;
         $cliente = Cliente::with('persona:id,dni,ape_pat,ape_mat,primernombre,otrosnombres')
             ->whereHas('persona', function ($q) use ($dni) {
@@ -204,9 +207,8 @@ class ClienteController extends Controller
         return response()->json([
             'cliente'    => $cliente,
             'creditos'   => $creditos,
-            'juntas'     => $juntas, 
-        ],200);
-
+            'juntas'     => $juntas,
+        ], 200);
     }
     public function update(UpdateClienteRequest $request)
     {
@@ -221,9 +223,9 @@ class ClienteController extends Controller
                     'dniconyugue' => ['DNI conyugue es necesario']
                 ]
             ], 422);
-        }   
+        }
         $file = $request->file('foto');
-        $persona = Persona::where('id',$request->persona_id)->first();
+        $persona = Persona::where('id', $request->persona_id)->first();
         $persona->ape_pat = $request->ape_pat;
         $persona->ape_mat = $request->ape_mat;
         $persona->primernombre = $request->primernombre;
@@ -244,14 +246,14 @@ class ClienteController extends Controller
         $persona->conyugue  = $esconyugue ? $request->conyugue_id : null;
         $persona->save();
 
-        
+
 
         if ($persona->ubicacion_domicilio_id) {
             $domicilio = Ubicacion::find($persona->ubicacion_domicilio_id);
-        }else{
+        } else {
             $domicilio = new Ubicacion();
         }
-        
+
         $domicilio->tipo        = $request->tipodomicilio ?? 'NDF';
         $domicilio->ubigeo      = $request->ubigeodomicilio;
         $domicilio->tipovia     = $request->tipovia ?? 'S/N';
@@ -278,18 +280,18 @@ class ClienteController extends Controller
             $manager = new ImageManager(new Driver());
 
             $image = $manager->read($file);
-    
+
             if ($image->width() > 800 || $image->height() > 1000) {
                 $image->resize(800, 1000, function ($constraint) {
                     $constraint->aspectRatio(); // conserva proporción original
                     $constraint->upsize();      // evita agrandar imágenes pequeñas
                 });
             }
-    
+
             if (!empty($errores)) {
                 return response()->json(['errors' => $errores], 422);
             }
-    
+
             $nombre_archivo = $request->dni . '.webp';
             Storage::disk('fotos')->makeDirectory('clientes');
             Storage::disk('fotos')->put('clientes/' . $nombre_archivo, (string) $image->toWebp());
@@ -297,7 +299,7 @@ class ClienteController extends Controller
         return response()->json([
             'ok' => 1,
             'mensaje' => 'Cliente modificado satisfactoriamente'
-        ],200);
+        ], 200);
     }
     public function destroy(Request $request)
     {
@@ -306,25 +308,27 @@ class ClienteController extends Controller
         return response()->json([
             'ok' => 1,
             'mensaje' => 'Cliente eliminado satisfactoriamente'
-        ],200);
+        ], 200);
     }
-    public function todos(){
+    public function todos()
+    {
         $personas = Cliente::with([
-            'usuario:id,name', 
+            'usuario:id,name',
             'agencia:id,nombre',
             'persona:id,dni,ape_pat,ape_mat,primernombre,otrosnombres'
         ])->get();
         return $personas;
     }
-    public function listar(Request $request){
+    public function listar(Request $request)
+    {
         $filters = $this->getUserFilters();
         $buscar = mb_strtoupper($request->buscar);
         $paginacion = $request->paginacion ?? 10;
         $query = Cliente::with([
-                'usuario:id,name', 
-                'agencia:id,nombre',
-                'persona:id,dni,ape_pat,ape_mat,primernombre,otrosnombres,fecha_nac,tipo_trabajador',
-            ])
+            'usuario:id,name',
+            'agencia:id,nombre',
+            'persona:id,dni,ape_pat,ape_mat,primernombre,otrosnombres,fecha_nac,tipo_trabajador',
+        ])
             ->join('personas', 'clientes.persona_id', '=', 'personas.id')
             ->where(function ($query) use ($buscar) {
                 $query->whereRaw('UPPER(personas.dni) LIKE ?', ['%' . $buscar . '%'])
@@ -359,36 +363,35 @@ class ClienteController extends Controller
         $buscar = mb_strtoupper($request->buscar);
         $paginacion = $request->paginacion ?? 10;
         $query = Cliente::join('personas', 'clientes.persona_id', '=', 'personas.id')
-        ->with([
-            'usuario:id,name', 
-            'agencia:id,nombre',
-            'persona:id,dni,ape_pat,ape_mat,primernombre,otrosnombres,fecha_nac',
-        ])
-        ->withCount([
-            'creditos as creditos_vigentes' => function ($q) {
-                $q->where('estado', 'DESEMBOLSADO');
-            },
-            'juntas as juntas_vigentes' => function ($q) {
-                $q->where('estado', 'APROBADO');
-            },
-            'creditos as creditos_totales' => function ($q) {
-                $q->whereHas('desembolso');
-            },
-            'juntas as juntas_totales'
-        ])
-        ->where(function ($q) use ($buscar) {
-            $q->whereRaw('UPPER(personas.dni) LIKE ?', ['%' . $buscar . '%'])
-            ->orWhereRaw('UPPER(personas.ape_pat) LIKE ?', ['%' . $buscar . '%'])
-            ->orWhereRaw('UPPER(personas.ape_mat) LIKE ?', ['%' . $buscar . '%'])
-            ->orWhereRaw('UPPER(personas.primernombre) LIKE ?', ['%' . $buscar . '%'])
-            ->orWhereRaw('UPPER(personas.otrosnombres) LIKE ?', ['%' . $buscar . '%'])
-            ->orWhereRaw("UPPER(CONCAT(personas.ape_pat, ' ', personas.ape_mat, ' ', personas.primernombre, ' ', IFNULL(personas.otrosnombres, ''))) LIKE ?", ['%' . $buscar . '%'])
-            ->orWhereHas('usuario', function ($q3) use ($buscar) {
-                $q3->whereRaw('UPPER(name) LIKE ?', ['%' . $buscar . '%']);
+            ->with([
+                'usuario:id,name',
+                'agencia:id,nombre',
+                'persona:id,dni,ape_pat,ape_mat,primernombre,otrosnombres,fecha_nac',
+            ])
+            ->withCount([
+                'creditos as creditos_vigentes' => function ($q) {
+                    $q->where('estado', 'DESEMBOLSADO');
+                },
+                'juntas as juntas_vigentes' => function ($q) {
+                    $q->where('estado', 'APROBADO');
+                },
+                'creditos as creditos_totales' => function ($q) {
+                    $q->whereHas('desembolso');
+                },
+                'juntas as juntas_totales'
+            ])
+            ->where(function ($q) use ($buscar) {
+                $q->whereRaw('UPPER(personas.dni) LIKE ?', ['%' . $buscar . '%'])
+                    ->orWhereRaw('UPPER(personas.ape_pat) LIKE ?', ['%' . $buscar . '%'])
+                    ->orWhereRaw('UPPER(personas.ape_mat) LIKE ?', ['%' . $buscar . '%'])
+                    ->orWhereRaw('UPPER(personas.primernombre) LIKE ?', ['%' . $buscar . '%'])
+                    ->orWhereRaw('UPPER(personas.otrosnombres) LIKE ?', ['%' . $buscar . '%'])
+                    ->orWhereRaw("UPPER(CONCAT(personas.ape_pat, ' ', personas.ape_mat, ' ', personas.primernombre, ' ', IFNULL(personas.otrosnombres, ''))) LIKE ?", ['%' . $buscar . '%'])
+                    ->orWhereHas('usuario', function ($q3) use ($buscar) {
+                        $q3->whereRaw('UPPER(name) LIKE ?', ['%' . $buscar . '%']);
+                    });;
             });
-            ;
-        });
-        
+
         if ($filters['role'] === 'ASESOR') {
             $query->where('usuario_id', $filters['user_id']);
         }
@@ -396,21 +399,23 @@ class ClienteController extends Controller
         //     $query->where('agencia_id', $filters['agencia_id']);
         // }
         return $query->orderBy('personas.ape_pat', 'asc')
-        ->paginate($paginacion);
-
+            ->paginate($paginacion);
     }
     public function obtenerClienteReciente(Request $request)
     {
         $filters = $this->getUserFilters();
         $cliente = Cliente::with('persona:id,dni,ape_pat,ape_mat,primernombre,otrosnombres,fecha_nac')
-        ->where('usuario_id', $filters['user_id'])->first();
+            ->where('usuario_id', $filters['user_id'])
+            ->where('estado', 'REGISTRADO')
+            ->orderBy('fecha_reg', 'desc')
+            ->first();
         return $cliente;
     }
     public function obtenerClienteRecientePdf(Request $request)
     {
         $filters = $this->getUserFilters();
         $cliente = Cliente::with('persona:id,dni,ape_pat,ape_mat,primernombre,otrosnombres,fecha_nac')
-        ->where('id', $request->cliente_id)->first();
+            ->where('id', $request->cliente_id)->first();
 
         $cliente->load([
             'persona',
@@ -425,6 +430,5 @@ class ClienteController extends Controller
 
         // stream abre en navegador, download descarga
         return $pdf->stream("cliente_{$cliente->id}.pdf");
-
     }
 }

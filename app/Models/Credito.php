@@ -11,6 +11,8 @@ class Credito extends Model
         'cliente_id',
         'asesor_id',
         'aval_id',
+        'fecha_reg',
+        'fecha_venc',
         'tipo',
         'monto',
         'origen_financiamiento_id',

@@ -63,12 +63,7 @@ watch(isDark, (value) => {
 
   <Navbar :menus="menus" />
 
-  <Topbar :is-dark="isDark"
-  :user="usuario"
-  :role="role"
-  :menus="menus"
-  @toggle-sidebar="toggleSidebarDesktop"
-  @logout="logout" />
+  <Topbar :is-dark="isDark" :user="usuario" :role="role" @toggle-sidebar="toggleSidebarDesktop" @logout="logout" />
 
   <main class="nxl-container">
 
@@ -124,9 +119,7 @@ watch(isDark, (value) => {
           <slot />
         </div>
     </div>
-    <Footer />
+      <Footer />
   </main>
 
 </template>
-
-

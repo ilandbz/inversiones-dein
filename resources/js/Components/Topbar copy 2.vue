@@ -1,59 +1,47 @@
 <script setup>
-import { toRef, ref } from 'vue'
-import { RouterLink } from 'vue-router'
-import TemaCustomizer from './TemaCustomizer.vue'
-import useHelper from '@/Helpers'
+    import { ref, computed, onBeforeUnmount } from 'vue'
+    import { RouterLink } from 'vue-router'
+    import TemaCustomizer from './TemaCustomizer.vue'
+    import useHelper from '@/Helpers'
 
-import MenusRenderer from '@/Components/MenusRenderer.vue'
-import useMenuUI from '@/Composables/useMenuUI'
-const props = defineProps({
-isDark: Boolean,
-user: Object,
-role: Object,
-menus: { type: Array, default: () => [] }
-})
-const menusRef = toRef(props, 'menus')
+    const { Swal } = useHelper()
 
-const { menuUI, openMenu, submenuRefs, toggleMenu, isActive } = useMenuUI(menusRef)
-
-// show/hide mega menu (control Vue, no ids sueltos)
-const megaOpen = ref(false)
-
-const { Swal } = useHelper()
-
-
-
-const emit = defineEmits(['toggleSidebar', 'toggleMobile', 'logout'])
-const cerrarSesion = async () => {
-    Swal.fire({
-        title: '¿Está seguro de Cerrar Sesión?',
-        text: 'INVERSIONES DEIN',
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',
-        confirmButtonText: 'Si',
-        cancelButtonText: 'No'
-    }).then((result) => {
-        if (result.isConfirmed) {
-        emit('logout')
-        }
+    const props = defineProps({
+    isDark: { type: Boolean, default: false },
+    user: { type: Object, default: () => ({}) },
+    role: { type: Object, default: () => ({}) }
     })
-}
+
+    const emit = defineEmits(['toggleSidebar', 'logout'])
+    const cerrarSesion = async () => {
+        Swal.fire({
+            title: '¿Está seguro de Cerrar Sesión?',
+            text: 'INVERSIONES DEIN',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Si',
+            cancelButtonText: 'No'
+        }).then((result) => {
+            if (result.isConfirmed) {
+            emit('logout')
+            }
+        })
+    }
 </script>
 
 <template>
     <header class="nxl-header">
         <div class="header-wrapper">
             <div class="header-left d-flex align-items-center gap-4">
-                <!-- <a href="javascript:void(0);" class="nxl-head-mobile-toggler" id="mobile-collapse">
+                <a href="javascript:void(0);" class="nxl-head-mobile-toggler" id="mobile-collapse">
                     <div class="hamburger hamburger--arrowturn">
                         <div class="hamburger-box">
                             <div class="hamburger-inner"></div>
                         </div>
                     </div>
-                </a> -->
-                <!-- ESTO FUNCIONA EN DESKTOP -->
+                </a>
                 <div class="nxl-navigation-toggle">
                     <a href="javascript:void(0);" id="menu-mini-button">
                         <i class="feather-align-left"></i>
@@ -62,7 +50,6 @@ const cerrarSesion = async () => {
                         <i class="feather-arrow-right"></i>
                     </a>
                 </div>
-                <!-- ESTO FUNCIONA EN MOBILE -->
                 <div class="nxl-lavel-mega-menu-toggle d-flex d-lg-none">
                     <a href="javascript:void(0);" id="nxl-lavel-mega-menu-open">
                         <i class="feather-align-left"></i>
@@ -72,17 +59,11 @@ const cerrarSesion = async () => {
                     <div class="nxl-lavel-mega-menu-toggle d-flex d-lg-none">
                         <a href="javascript:void(0)" id="nxl-lavel-mega-menu-hide">
                             <i class="feather-arrow-left me-2"></i>
-                            <span>Volver</span>
+                            <span>Back</span>
                         </a>
                     </div>
                     <div class="nxl-lavel-mega-menu-wrapper d-flex gap-3">
-                        <MenusRenderer
-                            :menuUI="menuUI"
-                            :openMenu="openMenu"
-                            :submenuRefs="submenuRefs"
-                            :toggleMenu="toggleMenu"
-                            :isActive="isActive"
-                        />  
+
                     </div>
                 </div>
             </div>

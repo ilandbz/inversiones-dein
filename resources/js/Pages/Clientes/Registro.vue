@@ -195,10 +195,14 @@ const selectFromSearch = (which, item) => {
   }
 }
 
+const getClienteReciente = async () => {
+  await obtenerClienteReciente()
+}
+
 onMounted(async () => {
   document.title = 'Registro de Clientes'
   await listaActividadNegocios()
-  await obtenerClienteReciente()
+  await getClienteReciente()
   await obtenerDepartamentos()
 })
 
@@ -551,9 +555,9 @@ const guardar = async () => {
         await openPdf(cliente.value?.id)
       }
 
-      if (result.isConfirmed) {
+      //if (result.isConfirmed) {
         resetForm()
-      }
+      //}
     }
   } catch (e) {
     Toast?.error ? Toast.error('Ocurrió un error al guardar.') : console.error(e)
@@ -1473,7 +1477,7 @@ const cancelar = () => router.push({ name: 'Principal' })
     </section>
   </div>
   <Resumen :url="pdfUrl" />
-  <Prestamo :cliente="cliente" />
+  <Prestamo :cliente="cliente || null" @cargar="getClienteReciente()" />
 </template>
 
 <style scoped>

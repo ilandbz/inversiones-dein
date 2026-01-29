@@ -1,13 +1,40 @@
 <?php
 
 namespace App\Http\Controllers;
+
+use App\Models\Cliente;
 use App\Models\Credito;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 
 class CreditoController extends Controller
 {
     public function store(Request $request)
     {
+
+        $fechaInicio = Carbon::now();
+
+        switch (strtoupper($request->frecuencia)) {
+            case 'DIARIO':
+                $fechaVenc = $fechaInicio->addDays($request->plazo);
+                break;
+
+            case 'SEMANAL':
+                $fechaVenc = $fechaInicio->addWeeks($request->plazo);
+                break;
+
+            case 'QUINCENAL':
+                $fechaVenc = $fechaInicio->addDays($request->plazo * 15);
+                break;
+
+            case 'MENSUAL':
+                $fechaVenc = $fechaInicio->addMonths($request->plazo);
+                break;
+
+            default:
+                throw new \Exception('Frecuencia no válida');
+        }
+
         try {
             $request->validate([
                 'cliente_id' => 'required|exists:clientes,id',
@@ -16,7 +43,7 @@ class CreditoController extends Controller
                 'tipo' => 'required',
                 'monto' => 'required|numeric|min:0',
                 'origen_financiamiento_id' => 'required|exists:origen_financiamientos,id',
-                'frecuencia' => 'required',
+                'frecuencia' => 'required|in:DIARIO,SEMANAL,QUINCENAL,MENSUAL',
                 'plazo' => 'required|integer|min:1',
                 'tasainteres' => 'required|numeric|min:0',
                 'costomora' => 'required|numeric|min:0',
@@ -35,6 +62,12 @@ class CreditoController extends Controller
                 'tasainteres' => $request->tasainteres,
                 'costomora' => $request->costomora,
                 'total' => $request->total,
+                'fecha_reg' => now(),
+                'fecha_venc' => $fechaVenc,
+                'estado' => 'PENDIENTE',
+            ]);
+
+            Cliente::where('id', $request->cliente_id)->update([
                 'estado' => 'PENDIENTE',
             ]);
 
