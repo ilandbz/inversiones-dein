@@ -27,13 +27,14 @@ const props = defineProps({
           v-if="item.url && item.url !== '#'"
           :to="item.url"
           class="nxl-link"
+          :title="item.name"
         >
-          <span class="nxl-micon"><i :class="`feather-${item.icon}`"></i></span>
+          <span class="nxl-micon"><i :class="`bi bi-${item.icon}`"></i></span>
           <span class="nxl-mtext">{{ item.name }}</span>
         </RouterLink>
 
         <a v-else href="javascript:void(0);" class="nxl-link" @click.prevent>
-          <span class="nxl-micon"><i :class="`feather-${item.icon}`"></i></span>
+          <span class="nxl-micon"><i :class="`bi bi-${item.icon}`"></i></span>
           <span class="nxl-mtext">{{ item.name }}</span>
         </a>
       </li>
@@ -44,7 +45,7 @@ const props = defineProps({
         :class="{ active: openMenu === item.key }"
       >
         <a href="javascript:void(0);" class="nxl-link" @click.prevent="toggleMenu(item.key)">
-          <span class="nxl-micon"><i :class="`feather-${item.icon}`"></i></span>
+          <span class="nxl-micon"><i :class="`bi bi-${item.icon}`"></i></span>
           <span class="nxl-mtext">{{ item.name }}</span>
           <span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
         </a>
@@ -53,7 +54,7 @@ const props = defineProps({
           class="nxl-submenu"
           :class="{ active: openMenu === item.key }"
           :ref="el => { if (el) submenuRefs[item.key] = el }"
-          style="max-height:0; overflow:hidden; transition:max-height .25s ease;"
+          :style="openMenu === item.key ? '' : 'max-height:0; overflow:hidden; transition:max-height .25s ease;'"
         >
           <li
             v-for="sub in item.submenu"
@@ -61,7 +62,8 @@ const props = defineProps({
             class="nxl-item"
             :class="{ active: isActive(sub.url) }"
           >
-            <RouterLink :to="sub.url" class="nxl-link">{{ sub.name }}</RouterLink>
+            <RouterLink :to="sub.url" class="nxl-link" :title="sub.name"
+            >{{ sub.name }}</RouterLink>
           </li>
         </ul>
       </li>

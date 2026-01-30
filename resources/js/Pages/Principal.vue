@@ -7,6 +7,12 @@
         <div class="col-xxl-3 col-md-6">
             <div class="card stretch stretch-full">
                 <div class="card-body">
+
+                    loredfsdf sdfsdf
+
+
+                    <i class="feather-dollar-sign"></i><i class="fas fa-eye"></i>
+
                     <div class="d-flex align-items-start justify-content-between mb-4">
                         <div class="d-flex gap-4 align-items-center">
                             <div class="avatar-text avatar-lg bg-gray-200">
