@@ -31,7 +31,10 @@ export default function useCredito() {
             }
         }
     }
-
+    const obtenerCreditos = async (data) => {
+        let respuesta = await axios.get('/credito/listar' + getdataParamsPagination(data), getConfigHeader())
+        creditos.value = respuesta.data
+    }
     const actualizarCredito = async (data) => {
         errors.value = ''
         try {
@@ -61,5 +64,6 @@ export default function useCredito() {
         agregarCredito,
         actualizarCredito,
         eliminarCredito,
+        obtenerCreditos,
     }
 }

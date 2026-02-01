@@ -10,6 +10,7 @@ use App\Http\Controllers\PlazoController;
 use App\Http\Controllers\CreditoController;
 
 use Illuminate\Support\Facades\Route;
+
 Route::group(['prefix' => 'cliente', 'middleware' => 'auth'], function () {
     Route::get('todos', [ClienteController::class, 'todos']);
     Route::get('mostrar', [ClienteController::class, 'show']);
@@ -33,8 +34,7 @@ Route::group(['prefix' => 'actividadnegocio', 'middleware' => 'auth'], function 
     Route::post('eliminar', [ActividadNegocioController::class, 'destroy']);
     Route::post('guardar', [ActividadNegocioController::class, 'store']);
     Route::get('todos', [ActividadNegocioController::class, 'todos']);
-    Route::get('detalleactividadnegocio', [ActividadNegocioController::class, 'todosPorActividad'] );
-
+    Route::get('detalleactividadnegocio', [ActividadNegocioController::class, 'todosPorActividad']);
 });
 
 
@@ -42,7 +42,7 @@ Route::group(['prefix' => 'ubigeo', 'middleware' => 'auth'], function () {
     Route::get('obtener', [UbicacionController::class, 'obtenerPorUbigeo']);
     Route::get('lista-distritos', [UbicacionController::class, 'listarDistritos']);
     Route::get('lista-provincias', [UbicacionController::class, 'listarProvincias']);
-    Route::get('departamentos', [UbicacionController::class, 'obtenerDepartamentos']); 
+    Route::get('departamentos', [UbicacionController::class, 'obtenerDepartamentos']);
     Route::get('provincias', [UbicacionController::class, 'obtenerProvincias']);
     Route::get('distritos', [UbicacionController::class, 'obtenerDistritos']);
     Route::post('guardar', [UbicacionController::class, 'store']);
@@ -89,4 +89,14 @@ Route::group(['prefix' => 'plazo', 'middleware' => 'auth'], function () {
 
 Route::group(['prefix' => 'credito', 'middleware' => 'auth'], function () {
     Route::post('guardar', [CreditoController::class, 'store']);
+    Route::get('listar', [CreditoController::class, 'listar']);
+    Route::get('tipo-credito-cliente', [CreditoController::class, 'obtenerTiposCreditoPorCiente']);
+    Route::post('replicar-evaluacion-anterior', [CreditoController::class, 'cargarEvaluacionAnterior']);
+    Route::get('validar-evaluacion-asesor', [CreditoController::class, 'validarParaEvaluacion']);
+    Route::post('cambiar-estado', [CreditoController::class, 'cambiarEstado']);
+    Route::post('generar-pdf', [CreditoController::class, 'generarPDF']);
+    Route::post('listar-estado-agencia', [CreditoController::class, 'listarCreditosPorEstado']);
+    Route::get('obtener-creditos-cancelar', [CreditoController::class, 'obtenerSolicitudesCancelar']);
+    Route::get('todos-tipo-creditos', [CreditoController::class, 'todosTipoCreditos']);
+    Route::get('datos-evaluar', [CreditoController::class, 'obtenerDatosCreditoEvaluar']);
 });

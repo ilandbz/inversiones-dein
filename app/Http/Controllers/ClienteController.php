@@ -407,7 +407,7 @@ class ClienteController extends Controller
         $cliente = Cliente::with('persona:id,dni,ape_pat,ape_mat,primernombre,otrosnombres,fecha_nac')
             ->where('usuario_id', $filters['user_id'])
             ->where('estado', 'REGISTRADO')
-            ->orderBy('fecha_reg', 'desc')
+            ->orderBy('id', 'desc')
             ->first();
         return $cliente;
     }

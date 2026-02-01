@@ -552,7 +552,8 @@ const guardar = async () => {
       await obtenerClienteReciente()
 
       if (result.isDenied) {
-        await openPdf(cliente.value?.id)
+        console.log("se selecciono pdf")
+        await openPdf(cliente.id)
       }
 
       //if (result.isConfirmed) {

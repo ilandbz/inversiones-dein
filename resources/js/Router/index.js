@@ -7,6 +7,8 @@ import Principal from '@/Pages/Principal.vue'
 import RegistroClientes from '@/Pages/Clientes/Registro.vue'
 import Login from '@/Pages/Auth/Login.vue'
 import Perfil from '@/Pages/Usuario/Perfil.vue'
+import Evaluacion from '@/Pages/Evaluacion/Inicio.vue'
+import Desembolso from '@/Pages/Desembolso/Inicio.vue'
 import CambiarClave from '@/Pages/Usuario/CambiarClave.vue'
 import ActividadDeNegocio from '@/Pages/ActividadNegocio/Inicio.vue'
 
@@ -30,6 +32,20 @@ const routes = [
     name: 'ActividadDeNegocio',
     component: ActividadDeNegocio,
     meta: { layout: LayoutDefault, requiresAuth: true, title: 'Actividad de Negocio' }
+  },
+
+  {
+    path: '/prestamos/evaluacion',
+    name: 'Evaluacion',
+    component: Evaluacion,
+    meta: { layout: LayoutDefault, requiresAuth: true, title: 'Evaluación' }
+  },
+
+  {
+    path: '/prestamos/desembolso',
+    name: 'Desembolso',
+    component: Desembolso,
+    meta: { layout: LayoutDefault, requiresAuth: true, title: 'Desembolso' }
   },
 
   {

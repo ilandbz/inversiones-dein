@@ -17,8 +17,8 @@ class MenuSeeder extends Seeder
      */
     public function run(): void
     {
-        
-DB::transaction(function () {
+
+        DB::transaction(function () {
 
             $data = [
                 [
@@ -79,6 +79,8 @@ DB::transaction(function () {
                                 ["name" => "Simulación", "key" => "simulacion", "url" => "/prestamos/simulacion"],
                                 ["name" => "Cronograma de Pagos", "key" => "cronograma-de-pagos", "url" => "/prestamos/cronograma-de-pagos"],
                                 ["name" => "Historial de Préstamos", "key" => "historial-de-prestamos", "url" => "/prestamos/historial-de-prestamos"],
+                                ["name" => "Evaluación", "key" => "evaluacion", "url" => "/prestamos/evaluacion"],
+                                ["name" => "Desembolso", "key" => "desembolso", "url" => "/prestamos/desembolso"],
                             ],
                         ],
                         [
@@ -190,6 +192,5 @@ DB::transaction(function () {
                 $role->menus()->sync(array_values(array_unique($createdMenuIds)));
             }
         });
-
     }
 }
