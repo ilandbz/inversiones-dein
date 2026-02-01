@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Credito\StoreCreditoRequest;
+use App\Http\Requests\Credito\UpdateCreditoRequest;
 use App\Models\Cliente;
 use App\Models\Credito;
 use Illuminate\Http\Request;
@@ -13,7 +15,7 @@ class CreditoController extends Controller
 
     use UserFilters;
 
-    public function store(Request $request)
+    public function store(StoreCreditoRequest $request)
     {
         $fechaInicio = Carbon::now();
         switch (strtoupper($request->frecuencia)) {
@@ -38,19 +40,6 @@ class CreditoController extends Controller
         }
 
         try {
-            $request->validate([
-                'cliente_id' => 'required|exists:clientes,id',
-                'asesor_id' => 'required|exists:asesors,id',
-                'aval_id' => 'nullable|exists:personas,id',
-                'tipo' => 'required',
-                'monto' => 'required|numeric|min:0',
-                'origen_financiamiento_id' => 'required|exists:origen_financiamientos,id',
-                'frecuencia' => 'required|in:DIARIO,SEMANAL,QUINCENAL,MENSUAL',
-                'plazo' => 'required|integer|min:1',
-                'tasainteres' => 'required|numeric|min:0',
-                'costomora' => 'required|numeric|min:0',
-                'total' => 'required|numeric|min:0',
-            ]);
 
             $credito = Credito::create([
                 'cliente_id' => $request->cliente_id,
@@ -96,14 +85,12 @@ class CreditoController extends Controller
     {
         $credito = Credito::with([
             'cliente:id,estado,persona_id',
-            'agencia:id,nombre',
-            'asesor:id,name',
+            'asesor.user:id,name',
             'cliente.persona:id,dni,ape_pat,ape_mat,primernombre,otrosnombres',
             'cliente.creditos' => function ($query) {
                 $query->where('estado', 'DESEMBOLSADO')
                     ->orwhere('estado', 'PAGAR POR RCS');
             },
-            'creditosCancelar',
         ])->where('id', $request->id)->first();
         return $credito;
     }
@@ -111,66 +98,46 @@ class CreditoController extends Controller
     {
 
         $monto = $request->monto;
-        $costoMora = CostoMora::where('montoinicial', '<=', $monto)
-            ->where('montofinal', '>=', $monto)
-            ->first()->costodiario;
+
+
+        $fechaInicio = Carbon::now();
+        switch (strtoupper($request->frecuencia)) {
+            case 'DIARIO':
+                $fechaVenc = $fechaInicio->addDays($request->plazo);
+                break;
+
+            case 'SEMANAL':
+                $fechaVenc = $fechaInicio->addWeeks($request->plazo);
+                break;
+
+            case 'QUINCENAL':
+                $fechaVenc = $fechaInicio->addDays($request->plazo * 15);
+                break;
+
+            case 'MENSUAL':
+                $fechaVenc = $fechaInicio->addMonths($request->plazo);
+                break;
+
+            default:
+                throw new \Exception('Frecuencia no válida');
+        }
 
         $credito = Credito::where('id', $request->id)->first();
-        $credito->cliente_id     = $request->cliente_id;
-        $credito->agencia_id     = $request->agencia_id;
-        $credito->asesor_id      = $request->asesor_id;
-        $credito->estado         = $request->estado;
-        $credito->fecha_reg      = $request->fecha_reg;
-        $credito->tipo           = $request->tipo;
-        $credito->monto          = $monto;
-        $credito->producto       = $request->producto;
-        $credito->frecuencia     = $request->frecuencia;
-        $credito->plazo          = $request->plazo;
-        $credito->medioorigen    = $request->medioorigen;
-        $credito->dondepagara    = $request->dondepagara ?? 'NINGUNO';
-        $credito->fuenterecursos = $request->fuenterecursos;
-        $credito->tasainteres    = $request->tasainteres ?? 0.00;
-        $credito->total          = $request->total ?? 0.00;
-        $credito->costomora      = $costoMora;
+        $credito->cliente_id                       = $request->cliente_id;
+        $credito->asesor_id                        = $request->asesor_id;
+        $credito->aval_id                          = $request->aval_id;
+        $credito->tipo                             = $request->tipo;
+        $credito->monto                            = $monto;
+        $credito->origen_financiamiento_id         = $request->origen_financiamiento_id;
+        $credito->frecuencia                       = $request->frecuencia;
+        $credito->plazo                            = $request->plazo;
+        $credito->tasainteres                      = $request->tasainteres ?? 0.00;
+        $credito->costomora                        = $request->costomora;
+        $credito->total                            = $request->total ?? 0.00;
+        $credito->fecha_venc                       = $fechaVenc;
 
         $credito->save();
 
-
-        if ($request->tipo === 'Recurrente Con Saldo') {
-            CreditosCancelar::where('credito_id', $credito->id)->delete();
-            foreach ($request->creditos_seleccionados as $fila) {
-                CreditosCancelar::create([
-                    'credito_id'            => $credito->id,
-                    'credito_pagar_id'      => $fila['id'],
-                    'saldopagar'            => $fila['Saldo'],
-                    'moradias'              => $fila['saldo_mora_dias'],
-                    'morapagar'             => $fila['saldo_mora'],
-                    'estado'                => 'DEBE',
-                ]);
-            }
-        }
-        if ($request->tipo === 'Paralelo') {
-            CreditosCancelar::where('credito_id', $credito->id)->delete();
-        }
-        if ($credito->monto < 1000) {
-            $montopoliza = 2;
-        } else {
-            $montopoliza = floor($credito->monto / 1000) * 2;
-        }
-
-        $seguro = SeguroDesgravamen::where('credito_id', $credito->id)->first();
-
-        if ($seguro) {
-            $seguro->monto = $montopoliza;
-            $seguro->save();
-        } else {
-            $seguro = new SeguroDesgravamen();
-            $seguro->credito_id = $credito->id;
-            $seguro->monto = $montopoliza;
-            $seguro->fecha_reg = now()->toDateString();
-            $seguro->hora_reg = now()->toTimeString();
-            $seguro->save();
-        }
 
         return response()->json([
             'ok' => 1,

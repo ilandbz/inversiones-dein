@@ -1,12 +1,12 @@
 import { inject } from 'vue';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
-import timezone  from 'dayjs/plugin/timezone';
+import timezone from 'dayjs/plugin/timezone';
 import advanced from 'dayjs/plugin/advancedFormat';
 import 'dayjs/locale/es'; // Importa el idioma deseado, por ejemplo, español
 import FingerprintJS from '@fingerprintjs/fingerprintjs'
 // Configura el idioma de dayjs
-dayjs.locale('es'); 
+dayjs.locale('es');
 // export * from './body';
 
 export * from './methods';
@@ -21,11 +21,11 @@ export default function useHelper() {
         timer: 1200,
         timerProgressBar: true,
         didOpen: (toast) => {
-          toast.addEventListener('mouseenter', Swal.stopTimer)
-          toast.addEventListener('mouseleave', Swal.resumeTimer)
+            toast.addEventListener('mouseenter', Swal.stopTimer)
+            toast.addEventListener('mouseleave', Swal.resumeTimer)
         }
     })
-    const meses= [
+    const meses = [
         { numero: '01', nombre: 'Enero' },
         { numero: '02', nombre: 'Febrero' },
         { numero: '03', nombre: 'Marzo' },
@@ -38,23 +38,44 @@ export default function useHelper() {
         { numero: '10', nombre: 'Octubre' },
         { numero: '11', nombre: 'Noviembre' },
         { numero: '12', nombre: 'Diciembre' }
-      ];
-    const openModal = (modal_nombre) => {
-        const myModal = bootstrap.Modal.getOrCreateInstance(modal_nombre);
-        myModal.show();
+    ];
+    // const openModal = (modal_nombre) => {
+    //     const myModal = bootstrap.Modal.getOrCreateInstance(modal_nombre);
+    //     myModal.show();
+    // }
+
+
+    const openModal = (selectorOrEl) => {
+        const el = typeof selectorOrEl === 'string'
+            ? document.querySelector(selectorOrEl)
+            : selectorOrEl
+
+        if (!el) return console.warn('Modal no encontrado:', selectorOrEl)
+
+        bootstrap.Modal.getOrCreateInstance(el).show()
     }
 
-    const hideModal = (modal_nombre) => {
-        const myModal = bootstrap.Modal.getOrCreateInstance(modal_nombre);
-        myModal.hide();
+
+    // const hideModal = (modal_nombre) => {
+    //     const myModal = bootstrap.Modal.getOrCreateInstance(modal_nombre);
+    //     myModal.hide();
+    // }
+
+    const hideModal = (selectorOrEl) => {
+        const el = typeof selectorOrEl === 'string'
+            ? document.querySelector(selectorOrEl)
+            : selectorOrEl
+
+        if (!el) return console.warn('Modal no encontrado:', selectorOrEl)
+
+        bootstrap.Modal.getOrCreateInstance(el).hide()
     }
 
     const soloNumeros = (evt) => {
         evt = (evt) ? evt : window.event
         var charCode = (evt.which) ? evt.which : evt.keyCode
 
-        if((charCode > 31 && (charCode< 48 || charCode > 57)) && charCode !=48 )
-        {
+        if ((charCode > 31 && (charCode < 48 || charCode > 57)) && charCode != 48) {
             evt.preventDefault()
         } else {
             return true
@@ -117,42 +138,42 @@ export default function useHelper() {
         return edad + " años, " + meses + " meses y " + dias + " días";
     }
 
-    const formatoFecha = (fecha,formato) => {
+    const formatoFecha = (fecha, formato) => {
         dayjs.extend(utc);
         dayjs.extend(timezone);
         dayjs.extend(advanced);
 
         let time_zone = import.meta.env.VITE_TIME_ZONE
 
-        return (![null,'', undefined].includes(fecha)) ? dayjs(fecha).tz(time_zone).format(formato) 
+        return (![null, '', undefined].includes(fecha)) ? dayjs(fecha).tz(time_zone).format(formato)
             : dayjs().tz(time_zone).format(formato)
     }
     const slugify = (text) => {
         return text
-        .toString()
-        .normalize()
-        .toLowerCase()
-        .trim()
-        .replace(/\s+/g,'-')
-        .replace(/[^\w\-]+/g,'')
-        .replace(/\-\-+/g, '-')
+            .toString()
+            .normalize()
+            .toLowerCase()
+            .trim()
+            .replace(/\s+/g, '-')
+            .replace(/[^\w\-]+/g, '')
+            .replace(/\-\-+/g, '-')
     }
 
     const formatearHora = (hora, fecha = '2000-01-01') => {
         if (!hora) return ''
-        
+
         const dateTime = `${fecha} ${hora}` // Ejemplo: "2000-01-01 19:25:24"
         const parsed = dayjs(dateTime, 'YYYY-MM-DD HH:mm:ss', true)
-        
+
         if (!parsed.isValid()) return 'Hora inválida'
-        
+
         return parsed.format('hh:mm A') // Ej: 07:25 PM
     }
 
     const calcularNroCuotas = (fecha, frecuencia, plazo) => {
         let fechaActual = dayjs(fecha);
         let sumDias = 0;
-    
+
         switch (frecuencia.toUpperCase()) {
             case 'DIARIO':
                 for (let i = 0; i < plazo; i++) {
@@ -160,16 +181,16 @@ export default function useHelper() {
                     fechaActual = fechaActual.add(1, 'month');
                 }
                 return sumDias;
-    
+
             case 'SEMANAL':
                 return plazo * 4; // Aproximación a 4 semanas por mes
-    
+
             case 'DPF':
                 return 1;
-    
+
             case 'MENSUAL':
                 return plazo;
-    
+
             default:
                 throw new Error('Frecuencia no válida');
         }
@@ -185,7 +206,7 @@ export default function useHelper() {
     }
 
     return {
-        Swal, Toast, openModal, hideModal, soloNumeros, calcularEdad, formatoFecha, formatearHora, meses, slugify, calcularNroCuotas, 
+        Swal, Toast, openModal, hideModal, soloNumeros, calcularEdad, formatoFecha, formatearHora, meses, slugify, calcularNroCuotas,
         obtenerFingerprint
     }
 

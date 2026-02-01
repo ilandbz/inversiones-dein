@@ -14,7 +14,7 @@
     <link rel="stylesheet" type="text/css" href="/duralux/vendors/css/vendors.min.css" />
     <!-- <link rel="stylesheet" type="text/css" href="duralux/vendors/css/daterangepicker.min.css" /> -->
     <link rel="stylesheet" type="text/css" href="/duralux/css/theme.min.css" />
-    <link rel="stylesheet" type="text/css" href="duralux/css/custom.css" />
+    <link rel="stylesheet" type="text/css" href="/duralux/css/custom.css" />
 
 
 
@@ -25,7 +25,6 @@
 <body>
 
     <main id="top"></main>
-
 
 
 

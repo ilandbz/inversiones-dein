@@ -89,7 +89,10 @@ Route::group(['prefix' => 'plazo', 'middleware' => 'auth'], function () {
 
 Route::group(['prefix' => 'credito', 'middleware' => 'auth'], function () {
     Route::post('guardar', [CreditoController::class, 'store']);
+    Route::post('actualizar', [CreditoController::class, 'update']);
     Route::get('listar', [CreditoController::class, 'listar']);
+    Route::get('mostrar', [CreditoController::class, 'show']);
+    Route::post('eliminar', [CreditoController::class, 'destroy']);
     Route::get('tipo-credito-cliente', [CreditoController::class, 'obtenerTiposCreditoPorCiente']);
     Route::post('replicar-evaluacion-anterior', [CreditoController::class, 'cargarEvaluacionAnterior']);
     Route::get('validar-evaluacion-asesor', [CreditoController::class, 'validarParaEvaluacion']);

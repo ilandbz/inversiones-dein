@@ -33,7 +33,34 @@ const {
   buscarDistritos
 } = useUbigeo()
 
+const formPrestamo = ref({
+  id: '',
+  cliente_id: '',
+  cliente_apenom : '',
+  asesor_id: '',
+  aval_id: null,
+  tipo: 'NUEVO',
+  monto: '',
+  origen_financiamiento_id: '',
+  frecuencia: 'MENSUAL',
+  plazo: '',
 
+  fuenterecursos: '',
+
+  tasainteres: '0.00',
+  costomora: '0.00',
+  total: '0.00',
+
+  errors: {}
+})
+
+const abrirPrestamo = (cliente) => {
+  formPrestamo.value.cliente_id = cliente.id
+  formPrestamo.value.cliente_apenom = cliente.persona.apenom
+  form.value.estadoCrud = 'nuevo'
+  document.getElementById("prestamomodalLabel").innerHTML = 'Solicitar Prestamo';
+  openModal('#prestamomodal')
+}
 
 // ----------------- UBIGEO UI (NAC / DOM) -----------------
 const ubigeoModeNac = ref('select') // 'select' | 'search'
@@ -262,7 +289,7 @@ const form = ref({
   estado: 'ACTIVO',
   fecha_reg: '',
   hora_reg: '',
-
+  estadoCrud: '',     
   errors: {}
 })
 
@@ -1460,7 +1487,7 @@ const cancelar = () => router.push({ name: 'Principal' })
                         <button
                         type="button"
                         class="btn btn-outline-warning w-100"
-                        @click="openModal('#prestamomodal')"
+                        @click="abrirPrestamo(cliente)"
                         >
                         Solicitar Prestamo
                         </button>
@@ -1478,7 +1505,7 @@ const cancelar = () => router.push({ name: 'Principal' })
     </section>
   </div>
   <Resumen :url="pdfUrl" />
-  <Prestamo :cliente="cliente || null" @cargar="getClienteReciente()" />
+  <Prestamo :form="formPrestamo" @cargar="getClienteReciente()" />
 </template>
 
 <style scoped>

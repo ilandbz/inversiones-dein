@@ -112,6 +112,8 @@ class ClienteController extends Controller
                 ]);
             }
 
+            $cliente = $cliente->load('persona');
+
             DB::commit();
             return response()->json([
                 'ok' => 1,

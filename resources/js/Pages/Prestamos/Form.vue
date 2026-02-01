@@ -7,16 +7,17 @@ import usePlazo from '@/Composables/Plazo.js'
 import useCredito from '@/Composables/Credito.js' 
 import useOrigenFinanciamiento from '@/Composables/OrigenFinanciamiento.js'
 
+
 const { asesores, listaAsesores } = useAsesor()
 const { origenes, listaOrigenesFinanciamientos } = useOrigenFinanciamiento()
 const { plazos, listaPlazos } = usePlazo()
 const { creditos, listaCreditos, agregarCredito, actualizarCredito, eliminarCredito, respuesta } = useCredito()
 
 const props = defineProps({
-  cliente: Object,
+  form: Object,
 })
 const emit = defineEmits(['cargar'])
-const { cliente } = toRefs(props)
+const { form } = toRefs(props)
 const { Toast, soloNumeros, Swal, hideModal } = useHelper()
 
 /* ----------------- PERSONA (AVAL) ----------------- */
@@ -49,27 +50,6 @@ const syncAvalErrorsFromComposable = () => {
   aval.value.errors = personaErrors.value && typeof personaErrors.value === 'object' ? personaErrors.value : {}
 }
 
-/* ----------------- FORM CREDITO ----------------- */
-const form = ref({
-  id: '',
-  cliente_id: cliente.value?.id || null,
-
-  asesor_id: '',
-  aval_id: null,
-  tipo: 'NUEVO',
-  monto: '',
-  origen_financiamiento_id: '',
-  frecuencia: 'MENSUAL',
-  plazo: '',
-
-  fuenterecursos: '',
-
-  tasainteres: '0.00',
-  costomora: '0.00',
-  total: '0.00',
-
-  errors: {}
-})
 
 /* ----------------- ERR HELPERS ----------------- */
 const toArr = (v) => (Array.isArray(v) ? v.map(String) : v ? [String(v)] : [])
@@ -319,14 +299,13 @@ const isSaving = ref(false)
 
 const guardar = async () => {
   if (isSaving.value) return
-
   if (!validateFront()) {
     console.log('VALIDATION ERRORS:', form.value.errors)
     await scrollToFirstInvalid()
     return
   }
-
   const payload = {
+    id: form.value.id,
     cliente_id: form.value.cliente_id,
     asesor_id: form.value.asesor_id,
     aval_id: form.value.aval_id,
@@ -339,21 +318,20 @@ const guardar = async () => {
     costomora: form.value.costomora,
     total: form.value.total,
   }
-
-
   isSaving.value = true
   try {
-    await agregarCredito(payload)
-
+    if (form.value.estadoCrud==='editar') {
+      await actualizarCredito(payload)
+    } else {
+      await agregarCredito(payload)
+    }
     if (respuesta.value?.ok == 1) {
-
       await Swal.fire({
         title: 'Registro exitoso',
-        text: respuesta.value.msg || 'El crédito fue registrado correctamente',
+        text: respuesta.value.mensaje,
         icon: 'success',
         confirmButtonText: 'Aceptar'
       });
-
       //Toast?.success ? Toast.success(respuesta.value.msg) : console.log(respuesta.value.msg)
       hideModal('#prestamomodal')
       emit('cargar')
@@ -368,7 +346,6 @@ const guardar = async () => {
     }
   } catch (e) {
     console.error('CATCH ERROR:', e)
-    // si usas axios:
     console.error('AXIOS RESPONSE:', e?.response?.data)
     Toast?.error ? Toast.error(e?.response?.data?.message || 'Error al guardar.') : null
   } finally {
@@ -380,7 +357,8 @@ const guardar = async () => {
 const limpiar = () => {
   form.value = {
     id: '',
-    cliente_id: cliente.value?.id || null,
+    // cliente_id: '',
+    // cliente_apenom: '',
     asesor_id: '',
     aval_id: null,
     tipo: 'NUEVO',
@@ -396,13 +374,6 @@ const limpiar = () => {
   }
   resetAval()
 }
-watch(
-  () => cliente.value?.id,
-  (id) => {
-    if (id) form.value.cliente_id = id
-  },
-  { immediate: true }
-)
 onMounted(() => {
   listaAsesores()
   listaOrigenesFinanciamientos()
@@ -420,7 +391,7 @@ onMounted(() => {
             <div>
               <h4 class="modal-title fs-4 mb-0" id="prestamomodalLabel">Crédito / Préstamo</h4>
               <div class="text-muted small">
-                Cliente: <b>{{ cliente?.persona?.ape_pat }} {{ cliente?.persona?.ape_mat }}, {{ cliente?.persona?.primernombre }}</b>
+                Cliente: <b>{{ form.cliente_apenom }}</b>
               </div>
             </div>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -432,7 +403,6 @@ onMounted(() => {
             <div class="card border-0 shadow-sm mb-3">
               <div class="card-body">
                 <h6 class="mb-2">Datos del crédito</h6>
-
 
                 <div class="row g-3">
                   <div class="col-12 col-md-3">
@@ -686,7 +656,7 @@ onMounted(() => {
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
             <button type="button" class="btn btn-primary" :disabled="isSaving" @click="guardar">
               <span v-if="isSaving" class="spinner-border spinner-border-sm me-2"></span>
-              Guardar
+              {{ (form.estadoCrud=='nuevo') ? 'Guardar' : 'Actualizar' }}
             </button>
           </div>
 

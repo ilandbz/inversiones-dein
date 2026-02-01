@@ -1,8 +1,9 @@
 <script setup>
 import { ref, onMounted, toRefs } from 'vue';
 import useCredito from '@/Composables/Credito';
+import Prestamo from '@/Pages/Prestamos/Form.vue'
 import useHelper from '@/Helpers'; 
-const { obtenerCreditos, creditos, credito, obtenerCredito, eliminarCredito, errors } = useCredito();
+const { obtenerCreditos, creditos, credito, obtenerCredito, eliminarCredito, errors, respuesta } = useCredito();
 const { openModal, Toast, Swal, formatoFecha } = useHelper();
 
 const dato = ref({
@@ -14,6 +15,7 @@ const dato = ref({
 const form = ref({
     id: '',
     cliente_id: '',
+    cliente_apenom : '',
     asesor_id: '',
     aval_id: '',
     estado: 'PENDIENTE',
@@ -32,7 +34,6 @@ const form = ref({
     estadoCrud: '',
     errors: []
 });
-
 
 const limpiar = () => {
     form.value = {
@@ -64,6 +65,7 @@ const obtenerDatos = async (id) => {
     if (credito.value) {
         form.value.id = credito.value.id ?? '';
         form.value.cliente_id = credito.value.cliente_id ?? '';
+        form.value.cliente_apenom = credito.value.cliente?.persona.apenom ?? '';
         form.value.asesor_id = credito.value.asesor_id ?? '';
         form.value.aval_id = credito.value.aval_id ?? '';
 
@@ -88,12 +90,13 @@ const obtenerDatos = async (id) => {
     }
 };
 
-const editar = (id) => {
+const editar = async(id) => {
     limpiar();
-    obtenerDatos(id)
+    await obtenerDatos(id)
     form.value.estadoCrud = 'editar'
-    document.getElementById("modalcreditoLabel").innerHTML = 'Editar credito';
-    openModal('#modalcredito')
+
+    document.getElementById("prestamomodalLabel").innerHTML = 'Editar credito';
+    openModal('#prestamomodal')
 }
 const nuevo = () => {
     limpiar()
@@ -108,7 +111,7 @@ const listarCreditos = async(page=1) => {
 const eliminar = (id) => {
     Swal.fire({
         title: '¿Estás seguro de Eliminar?',
-        text: "Menu",
+        text: "Credito",
         icon: 'question',
         showCancelButton: true,
         confirmButtonColor: '#3085d6',
@@ -167,7 +170,18 @@ onMounted(() => {
     listarCreditos()
 });
 </script>
+<style scoped>
+.acciones-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 4px; /* separación mínima */
+}
 
+.acciones-grid .btn {
+  width: 100%;
+  padding: 4px 0;
+}
+</style>
 <template>
     <div class="page-content">
 <div class="container-fluid">
@@ -179,11 +193,6 @@ onMounted(() => {
             </div>
             <div class="card-body">
                 <div class="row">
-                    <div class="col-md-1 mb-1">
-                        <button  type="button" class="btn btn-danger" @click.prevent="nuevo()">
-                            <i class="fas fa-plus"></i> Nuevo
-                        </button>                        
-                    </div>
                     <div class="col-md-2 mb-1">
                         <div class="input-group mb-1">
                             <span class="input-group-text" id="basic-addon1">Mostrar</span>
@@ -295,28 +304,48 @@ onMounted(() => {
                                     <td>{{ credito.estado }}</td>
 
                                     <td>
-                                    <div class="btn-group">
-                                        <button class="btn btn-warning btn-sm"
-                                        v-if="credito.estado=='PENDIENTE' || credito.estado=='OBSERVADO'"
-                                        title="Editar"
-                                        @click.prevent="editar(credito.id)">
-                                        <i class="fas fa-edit"></i>
+                                        <div class="acciones-grid">
+                                        <!-- EDITAR -->
+                                        <button
+                                            class="btn btn-warning btn-sm"
+                                            v-if="credito.estado === 'PENDIENTE' || credito.estado === 'OBSERVADO'"
+                                            title="Editar"
+                                            @click.prevent="editar(credito.id)"
+                                        >
+                                            <i class="fas fa-edit"></i>
                                         </button>
 
-                                        <button class="btn btn-danger btn-sm"
-                                        v-if="credito.estado=='PENDIENTE'"
-                                        title="Eliminar"
-                                        @click.prevent="eliminar(credito.id)">
-                                        <i class="fas fa-trash"></i>
+                                        <!-- ELIMINAR -->
+                                        <button
+                                            class="btn btn-danger btn-sm"
+                                            v-if="credito.estado === 'PENDIENTE'"
+                                            title="Eliminar"
+                                            @click.prevent="eliminar(credito.id)"
+                                        >
+                                            <i class="fas fa-trash"></i>
                                         </button>
 
-                                        <button v-if="['PENDIENTE','EVALUACION','DESEMBOLSADO','FINALIZADO'].includes(credito.estado)"
-                                        class="btn btn-success btn-sm"
-                                        title="Archivos"
-                                        @click.prevent="archivos(credito.id)">
-                                        <i class="fa-solid fa-file-pdf"></i>
+                                        <!-- EVALUACIÓN -->
+                                        <button
+                                            class="btn btn-primary btn-sm"
+                                            v-if="credito.estado === 'PENDIENTE'"
+                                            title="Evaluación"
+                                            @click.prevent="evaluacion(credito.id)"
+                                        >
+                                            <i class="fas fa-clipboard-check"></i>
                                         </button>
-                                    </div>
+
+                                        <!-- ARCHIVOS -->
+                                        <button
+                                            class="btn btn-success btn-sm"
+                                            v-if="['PENDIENTE','EVALUACION','DESEMBOLSADO','FINALIZADO'].includes(credito.estado)"
+                                            title="Archivos"
+                                            @click.prevent="archivos(credito.id)"
+                                        >
+                                            <i class="fa-solid fa-file-pdf"></i>
+                                        </button>
+                                        </div>
+
                                     </td>
                                 </tr>
                                 </tbody>
@@ -376,4 +405,5 @@ onMounted(() => {
         </div>
       </div>
     </div>
+    <Prestamo :form="form" @cargar="listarCreditos" />
 </template>
