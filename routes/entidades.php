@@ -5,6 +5,7 @@ use App\Http\Controllers\ClienteController;
 use App\Http\Controllers\UbicacionController;
 use App\Http\Controllers\PersonaController;
 use App\Http\Controllers\AsesorController;
+use App\Http\Controllers\BalanceController;
 use App\Http\Controllers\OrigenFinanciamientoController;
 use App\Http\Controllers\PlazoController;
 use App\Http\Controllers\CreditoController;
@@ -102,4 +103,12 @@ Route::group(['prefix' => 'credito', 'middleware' => 'auth'], function () {
     Route::get('obtener-creditos-cancelar', [CreditoController::class, 'obtenerSolicitudesCancelar']);
     Route::get('todos-tipo-creditos', [CreditoController::class, 'todosTipoCreditos']);
     Route::get('datos-evaluar', [CreditoController::class, 'obtenerDatosCreditoEvaluar']);
+});
+
+Route::group(['prefix' => 'balance', 'middleware' => 'auth'], function () {
+    Route::post('guardar', [BalanceController::class, 'store']);
+    Route::post('actualizar', [BalanceController::class, 'update']);
+    Route::get('listar', [BalanceController::class, 'listar']);
+    Route::get('mostrar', [BalanceController::class, 'show']);
+    Route::post('eliminar', [BalanceController::class, 'destroy']);
 });

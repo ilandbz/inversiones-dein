@@ -18,8 +18,6 @@ export default function useAsesor() {
         asesores.value = respond.data
     }
 
-
-
     const agregarAsesor = async (data) => {
         errors.value = ''
         try {

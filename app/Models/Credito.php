@@ -46,4 +46,8 @@ class Credito extends Model
     {
         return $this->hasMany(PagoCredito::class, 'credito_id');
     }
+    public function balance()
+    {
+        return $this->hasOne(Balance::class, 'credito_id');
+    }
 }
