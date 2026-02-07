@@ -57,8 +57,8 @@
           class="login-logo"
         />
       </div>
-
-      <h4 class="fs-13 fw-bold mb-4">INGRESAR SUS DATOS</h4>
+    <h3>BIENVENIDO AL EXITO</h3>
+    <h4 class="fs-13 fw-bold mb-4">INGRESAR SUS DATOS</h4>
 
       <form @submit.prevent="guardar" class="w-100">
         <div class="mb-3 text-start">
@@ -119,15 +119,25 @@
 
 .login-card{
   width: 100%;
-  max-width: 420px;
-  border-radius: 14px;
-  padding: 24px;
+  max-width: 480px;     /* más ancho */
+  padding: 40px;        /* más grande */
+  border-radius: 18px;
+  background: #2950F0; /* celeste suave */
+  border: none;
 }
-
+.login-card h3{
+  font-size: 28px;
+  font-weight: 700;
+  color: #fff;
+}
+.login-card h4{
+  font-size: 16px;
+  color: #fff;
+}
 /* Logo con bordes redondeados y gruesos */
 .login-logo{
-  width: 130px;
-  height: 130px;
+  width: 200px;
+  height: 200px;
   object-fit: cover;
   border-radius: 18px;   /* bordes redondeados cuadrados */
   border: 8px solid #0d6efd; /* borde grueso */
