@@ -133,9 +133,23 @@ const guardar=async()=>{
     }
     
 }
-
 const round2 = (n) => Number((toNumber(n)).toFixed(2))
-
+  const DetallePropiedades = ref([
+    'EQUIPO DE SONIDO',
+    'MOTO LINEAL',
+    'MOTO TAXI (BAJAT)',
+    'AUTO',
+    'MOTO FURGON',
+    'CAMIONETA',
+    'AUTO',
+    'VOLVO',
+    'COMPUTADORA',
+    'REFRIGERADORA',
+    'TELEVISOR',
+    'HORNO',
+    'COCINA',
+    'CONGELADORA',
+  ])
 const calcularBalance = () => {
   // --- ACTIVO CORRIENTE ---
   const ac_caja       = toNumber(form.value.activocaja)
@@ -175,6 +189,7 @@ const calcularBalance = () => {
 
   const totalPNCorr = pnc_largo + pnc_otras
   form.value.totalpncorriente = round2(totalPNCorr)
+
 
   // --- TOTAL PASIVO ---
   const totalPasivo = totalPCorr + totalPNCorr
@@ -393,7 +408,7 @@ watch(
 
                                     <div class="row g-2">
                                         <div class="col-6 col-md-6">
-                                            <label class="form-label mb-1">MUEBLES, MAQUINARIA Y EQUIPO</label>
+                                            <label class="form-label mb-1">PROPIEDADES ACTIVOS <br>NO CORRIENTES</label>
 
                                             <div class="input-group">
                                                 <input
@@ -440,7 +455,7 @@ watch(
                                         <div v-if="showMuebles" class="col-12 col-md-12">
                                             <div class="border rounded p-2 mt-2 bg-light">
                                                 <div class="d-flex justify-content-between align-items-center mb-2">
-                                                    <small class="text-muted">Detalle de muebles/maquinaria/equipo</small>
+                                                    <small class="text-muted">Detalle de Propiedades</small>
 
                                                     <button type="button" class="btn btn-outline-primary btn-sm" @click="addMueble()">
                                                     <i class="fas fa-plus"></i>
@@ -449,13 +464,25 @@ watch(
 
                                                 <div v-for="(item, idx) in form.muebles" :key="idx" class="row g-2 align-items-center mb-2">
                                                     <!-- Descripción -->
-                                                    <div class="col-12 col-md-7">
+                                                    <!-- <div class="col-12 col-md-7">
                                                     <input
                                                         type="text"
                                                         class="form-control form-control-sm"
                                                         v-model="item.descripcion"
                                                         placeholder="Descripción"
                                                     />
+                                                    </div> -->
+
+                                                    <div class="col-12 col-md-7">
+                                                    <select
+                                                        class="form-select form-select-sm"
+                                                        v-model="item.descripcion"
+                                                    >
+                                                        <option value="">Seleccionar...</option>
+                                                        <option v-for="op in DetallePropiedades" :key="op" :value="op">
+                                                        {{ op }}
+                                                        </option>
+                                                    </select>
                                                     </div>
 
                                                     <!-- Monto -->
