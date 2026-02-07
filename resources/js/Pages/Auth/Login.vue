@@ -1,6 +1,7 @@
 <script setup>
     import { useAutenticacion } from '@/Composables/autenticacion'
     import { ref, computed } from 'vue'
+    import SplashOverlay from '@/Components/SplashOverlay.vue'
 
     const { loginUsuario, errors } = useAutenticacion()
 
@@ -9,7 +10,10 @@
     password: '',
     remember: false
     })
-
+const showSplash = ref(false)
+const splashState = ref('loading') // 'loading' | 'success'
+const splashTitle = ref('Procesando...')
+const splashMessage = ref('Validando credenciales...')
     const loading = ref(false)
     const errorMsg = ref('')
 
@@ -25,26 +29,36 @@
     }
     }
 
-    const guardar = async () => {
-    clearErrors()
-    loading.value = true
+const guardar = async () => {
+  clearErrors()
+  loading.value = true
 
-    try {
-        await loginUsuario(form.value)
-    } catch (error) {
-        const data = error.response?.data
+  // mostrar splash en modo loading
+  showSplash.value = true
+  splashState.value = 'loading'
+  splashTitle.value = 'Procesando...'
+  splashMessage.value = 'Validando credenciales...'
 
-        // si el backend manda message
-        if (data?.message) errorMsg.value = data.message
+  try {
+    const ok = await loginUsuario(form.value) // <- que retorne true/false
 
-        // si por alguna razón no vino ni message ni errors
-        if (!errorMsg.value && !hasFieldErrors.value) {
-        errorMsg.value = 'Error al iniciar sesión'
-        }
-    } finally {
-        loading.value = false
+    if (ok) {
+      splashState.value = 'success'
+      splashTitle.value = '¡Bienvenido!'
+      splashMessage.value = 'Ingreso correcto. Entrando...'
+
+      setTimeout(() => (window.location.href = '/'), 900)
+    } else {
+      // si fue 422, ocultas splash (y se ven los errores)
+      showSplash.value = false
     }
-    }
+  } catch (e) {
+    showSplash.value = false
+    errorMsg.value = 'Error al iniciar sesión'
+  } finally {
+    loading.value = false
+  }
+}
 </script>
 <template>
   <div class="login-page">
@@ -102,6 +116,12 @@
       </form>
     </div>
   </div>
+  <SplashOverlay
+  v-if="showSplash"
+  :state="splashState"
+  :title="splashTitle"
+  :message="splashMessage"
+/>
 </template>
 
 <style scoped>
