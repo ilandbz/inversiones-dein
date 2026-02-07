@@ -22,174 +22,189 @@ class MenuSeeder extends Seeder
 
             $data = [
                 [
-                    "title" => "Principal",
+                    "titulo" => "Principal",
                     "items" => [
-                        ["name" => "Dashboard", "key" => "/", "icon" => "speedometer2", "url" => "/"],
+                        ["nombre" => "Dashboard", "slug" => "/", "icono" => "speedometer2", "url" => "/"],
                     ],
                 ],
                 [
-                    "title" => "Gestión Comercial",
+                    "titulo" => "Gestión Comercial",
                     "items" => [
                         [
-                            "name" => "Clientes",
-                            "key" => "clientes",
-                            "icon" => "person-badge-fill",
+                            "nombre" => "Clientes",
+                            "slug" => "clientes",
+                            "icono" => "person-badge-fill",
                             "submenu" => [
-                                ["name" => "Registro de Clientes", "key" => "registro-de-clientes", "url" => "/clientes/registro-de-clientes"],
-                                ["name" => "Posición del Cliente", "key" => "posicion-del-cliente", "url" => "/clientes/posicion-del-cliente"],
-                                ["name" => "Historial del Cliente", "key" => "historial-del-cliente", "url" => "/clientes/historial-del-cliente"],
+                                ["nombre" => "Registro de Clientes", "slug" => "registro-de-clientes", "url" => "/clientes/registro-de-clientes"],
+                                ["nombre" => "Posición del Cliente", "slug" => "posicion-del-cliente", "url" => "/clientes/posicion-del-cliente"],
+                                ["nombre" => "Historial del Cliente", "slug" => "historial-del-cliente", "url" => "/clientes/historial-del-cliente"],
                             ],
                         ],
                         [
-                            "name" => "Asesores",
-                            "key" => "asesores",
-                            "icon" => "people-fill",
+                            "nombre" => "Asesores",
+                            "slug" => "asesores",
+                            "icono" => "people-fill",
                             "submenu" => [
-                                ["name" => "Metas", "key" => "metas", "url" => "/asesores/metas"],
-                                ["name" => "Cartilla de Cobranza", "key" => "cartilla-de-cobranza", "url" => "/asesores/cartilla-de-cobranza"],
-                                ["name" => "Histórico del Asesor", "key" => "historico-del-asesor", "url" => "/asesores/historico-del-asesor"],
+                                ["nombre" => "Metas", "slug" => "metas", "url" => "/asesores/metas"],
+                                ["nombre" => "Cartilla de Cobranza", "slug" => "cartilla-de-cobranza", "url" => "/asesores/cartilla-de-cobranza"],
+                                ["nombre" => "Histórico del Asesor", "slug" => "historico-del-asesor", "url" => "/asesores/historico-del-asesor"],
                             ],
                         ],
                         [
-                            "name" => "Pagos",
-                            "key" => "pagos",
-                            "icon" => "people-fill",
+                            "nombre" => "Pagos",
+                            "slug" => "pagos",
+                            "icono" => "people-fill",
                             "submenu" => [
-                                ["name" => "Reportes", "key" => "reportes", "url" => "/pagos/reportes"],
-                                ["name" => "Estadísticas de Ingresos", "key" => "estadisticas-de-ingresos", "url" => "/pagos/estadisticas-de-ingresos"],
+                                ["nombre" => "Reportes", "slug" => "reportes", "url" => "/pagos/reportes"],
+                                ["nombre" => "Estadísticas de Ingresos", "slug" => "estadisticas-de-ingresos", "url" => "/pagos/estadisticas-de-ingresos"],
                             ],
                         ],
                         [
-                            "name" => "Actividad de Negocio",
-                            "key" => "actividad-de-negocio",
-                            "icon" => "person-badge-fill",
+                            "nombre" => "Actividad de Negocio",
+                            "slug" => "actividad-de-negocio",
+                            "icono" => "person-badge-fill",
                             "url" => "/actividadnegocio",
                         ],
                     ],
                 ],
                 [
-                    "title" => "Operaciones",
+                    "titulo" => "Operaciones",
                     "items" => [
                         [
-                            "name" => "Préstamos",
-                            "key" => "prestamos",
-                            "icon" => "cash-stack",
+                            "nombre" => "Préstamos",
+                            "slug" => "prestamos",
+                            "icono" => "cash-stack",
                             "submenu" => [
-                                ["name" => "Registrar Préstamo", "key" => "registrar-prestamo", "url" => "/prestamos/registrar"],
-                                ["name" => "Simulación", "key" => "simulacion", "url" => "/prestamos/simulacion"],
-                                ["name" => "Cronograma de Pagos", "key" => "cronograma-de-pagos", "url" => "/prestamos/cronograma-de-pagos"],
-                                ["name" => "Historial de Préstamos", "key" => "historial-de-prestamos", "url" => "/prestamos/historial-de-prestamos"],
-                                ["name" => "Evaluación", "key" => "evaluacion", "url" => "/prestamos/evaluacion"],
-                                ["name" => "Desembolso", "key" => "desembolso", "url" => "/prestamos/desembolso"],
+                                ["nombre" => "Registrar Préstamo", "slug" => "registrar-prestamo", "url" => "/prestamos/registrar"],
+                                ["nombre" => "Simulación", "slug" => "simulacion", "url" => "/prestamos/simulacion"],
+                                ["nombre" => "Cronograma de Pagos", "slug" => "cronograma-de-pagos", "url" => "/prestamos/cronograma-de-pagos"],
+                                ["nombre" => "Historial de Préstamos", "slug" => "historial-de-prestamos", "url" => "/prestamos/historial-de-prestamos"],
+                                ["nombre" => "Evaluación", "slug" => "evaluacion", "url" => "/prestamos/evaluacion"],
+                                ["nombre" => "Desembolso", "slug" => "desembolso", "url" => "/prestamos/desembolso"],
                             ],
                         ],
                         [
-                            "name" => "Ahorros",
-                            "key" => "ahorros",
-                            "icon" => "piggy-bank",
+                            "nombre" => "Ahorros",
+                            "slug" => "ahorros",
+                            "icono" => "piggy-bank",
                             "submenu" => [
-                                ["name" => "Apertura de Cuenta", "key" => "apertura-de-cuenta", "url" => "/ahorros/apertura-de-cuenta"],
-                                ["name" => "Depósitos / Retiros", "key" => "depositos-retiros", "url" => "/ahorros/depositos-retiros"],
-                                ["name" => "Estado de Cuenta", "key" => "estado-de-cuenta", "url" => "/ahorros/estado-de-cuenta"],
+                                ["nombre" => "Apertura de Cuenta", "slug" => "apertura-de-cuenta", "url" => "/ahorros/apertura-de-cuenta"],
+                                ["nombre" => "Depósitos / Retiros", "slug" => "depositos-retiros", "url" => "/ahorros/depositos-retiros"],
+                                ["nombre" => "Estado de Cuenta", "slug" => "estado-de-cuenta", "url" => "/ahorros/estado-de-cuenta"],
                             ],
                         ],
                         [
-                            "name" => "Caja",
-                            "key" => "caja",
-                            "icon" => "safe-fill",
+                            "nombre" => "Caja",
+                            "slug" => "caja",
+                            "icono" => "safe-fill",
                             "submenu" => [
-                                ["name" => "Cobros", "key" => "cobros", "url" => "/caja/cobros"],
-                                ["name" => "Pagos", "key" => "pagos", "url" => "/caja/pagos"],
-                                ["name" => "Cierre de Caja", "key" => "cierre-de-caja", "url" => "/caja/cierre-de-caja"],
+                                ["nombre" => "Cobros", "slug" => "cobros", "url" => "/caja/cobros"],
+                                ["nombre" => "Pagos", "slug" => "pagos", "url" => "/caja/pagos"],
+                                ["nombre" => "Cierre de Caja", "slug" => "cierre-de-caja", "url" => "/caja/cierre-de-caja"],
                             ],
                         ],
                     ],
                 ],
                 [
-                    "title" => "Control y Riesgos",
+                    "titulo" => "Control y Riesgos",
                     "items" => [
                         [
-                            "name" => "Gestión de Riesgos",
-                            "key" => "riesgos",
-                            "icon" => "exclamation-triangle-fill",
+                            "nombre" => "Gestión de Riesgos",
+                            "slug" => "riesgos",
+                            "icono" => "exclamation-triangle-fill",
                             "submenu" => [
-                                ["name" => "Mora y Castigos", "key" => "mora-y-castigos", "url" => "/riesgos/mora-y-castigos"],
-                                ["name" => "Bloqueo de Pagos", "key" => "bloqueo-de-pagos", "url" => "/riesgos/bloqueo-de-pagos"],
+                                ["nombre" => "Mora y Castigos", "slug" => "mora-y-castigos", "url" => "/riesgos/mora-y-castigos"],
+                                ["nombre" => "Bloqueo de Pagos", "slug" => "bloqueo-de-pagos", "url" => "/riesgos/bloqueo-de-pagos"],
                             ],
                         ],
                         [
-                            "name" => "Gerencia",
-                            "key" => "gerencia",
-                            "icon" => "shield-lock-fill",
+                            "nombre" => "Gerencia",
+                            "slug" => "gerencia",
+                            "icono" => "shield-lock-fill",
                             "submenu" => [
-                                ["name" => "Reportes Gerenciales", "key" => "reportes-gerenciales", "url" => "/gerencia/reportes-gerenciales"],
-                                ["name" => "Autorizaciones", "key" => "autorizaciones", "url" => "/gerencia/autorizaciones"],
+                                ["nombre" => "Reportes Gerenciales", "slug" => "reportes-gerenciales", "url" => "/gerencia/reportes-gerenciales"],
+                                ["nombre" => "Autorizaciones", "slug" => "autorizaciones", "url" => "/gerencia/autorizaciones"],
                             ],
+                        ],
+                    ],
+                ],
+                [
+                    "titulo" => "Administración",
+                    "items" => [
+                        [
+                            "nombre" => "Usuarios",
+                            "slug" => "usuarios",
+                            "icono" => "person-fill",
+                            "url" => "/usuarios",
+                        ],
+                        [
+                            "nombre" => "Roles",
+                            "slug" => "roles",
+                            "icono" => "shield-fill",
+                            "url" => "/roles",
+                        ],
+                        [
+                            "nombre" => "Permisos",
+                            "slug" => "permisos",
+                            "icono" => "shield-lock-fill",
+                            "url" => "/permisos",
+                        ],
+                        [
+                            "nombre" => "Configuración",
+                            "slug" => "configuracion",
+                            "icono" => "gear-fill",
+                            "url" => "/configuracion",
+                        ],
+                        [
+                            "nombre" => "Propiedades",
+                            "slug" => "propiedades",
+                            "icono" => "fas fa-wallet",
+                            "url" => "/propiedades",
                         ],
                     ],
                 ],
             ];
 
             $createdMenuIds = [];
+            // Sync rol Super Usuario
+            $role = Role::where('nombre', 'SUPER USUARIO')->first();
 
-            foreach ($data as $gIndex => $grupo) {
-                $grupoModel = GrupoMenu::firstOrCreate(
-                    ['titulo' => $grupo['title']]
-                );
+            foreach ($data as $grupoData) {
+                $grupo = GrupoMenu::firstOrCreate(['titulo' => $grupoData['titulo']]);
 
-                $ordenPadre = 1;
-
-                foreach ($grupo['items'] as $item) {
-                    $parentSlug = Str::slug($item['key'] ?? $item['name']);
-
-                    // Padre
-                    $menuPadre = Menu::updateOrCreate(
+                foreach ($grupoData['items'] as $itemData) {
+                    $menu = Menu::updateOrCreate(
+                        ['slug' => $itemData['slug']],
                         [
-                            'slug' => $parentSlug,
-                            'grupo_menu_id' => $grupoModel->id,
-                            'padre_menu_id' => null,
-                        ],
-                        [
-                            'nombre' => $item['name'],
-                            'url'    => $item['url'] ?? null,   // normalmente null en padres con submenu
-                            'icono'  => $item['icon'] ?? null,
-                            'orden'  => $ordenPadre++,
+                            'nombre' => $itemData['nombre'],
+                            'icono' => $itemData['icono'],
+                            'url' => $itemData['url'] ?? null,
+                            'grupo_menu_id' => $grupo->id
                         ]
                     );
 
-                    $createdMenuIds[] = $menuPadre->id;
+                    if ($role) {
+                        $role->menus()->syncWithoutDetaching([$menu->id]);
+                    }
 
-                    // Hijos
-                    if (!empty($item['submenu'])) {
-                        $ordenHijo = 1;
-
-                        foreach ($item['submenu'] as $sub) {
-                            $childSlug = $parentSlug . '.' . Str::slug($sub['key'] ?? $sub['name']);
-
-                            $menuHijo = Menu::updateOrCreate(
+                    if (!empty($itemData['submenu'])) {
+                        foreach ($itemData['submenu'] as $subData) {
+                            $subMenu = Menu::updateOrCreate(
+                                ['slug' => $subData['slug']],
                                 [
-                                    'slug' => $childSlug,
-                                    'grupo_menu_id' => $grupoModel->id,
-                                    'padre_menu_id' => $menuPadre->id,
-                                ],
-                                [
-                                    'nombre' => $sub['name'],
-                                    'url'    => $sub['url'] ?? null,
-                                    'icono'  => null,
-                                    'orden'  => $ordenHijo++,
+                                    'nombre' => $subData['nombre'],
+                                    'url' => $subData['url'],
+                                    'padre_menu_id' => $menu->id,
+                                    'grupo_menu_id' => $grupo->id
                                 ]
                             );
 
-                            $createdMenuIds[] = $menuHijo->id;
+                            if ($role) {
+                                $role->menus()->syncWithoutDetaching([$subMenu->id]);
+                            }
                         }
                     }
                 }
-            }
-
-            // Sync rol Super Usuario
-            $role = Role::where('nombre', 'Super Usuario')->first();
-            if ($role) {
-                $role->menus()->sync(array_values(array_unique($createdMenuIds)));
             }
         });
     }
