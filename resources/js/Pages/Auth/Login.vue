@@ -102,7 +102,7 @@ const guardar = async () => {
         </div>
 
         <div class="mt-4">
-          <button type="submit" class="btn btn-lg btn-primary w-100" :disabled="loading">
+          <button type="submit" class="btn btn-lg btn-primary w-100 btn-ingresar" :disabled="loading">
             <span v-if="!loading">
               <i class="bi bi-box-arrow-in-right me-1"></i>
               Ingresar
@@ -164,5 +164,10 @@ const guardar = async () => {
   padding: 6px;
   background: #fff;
   display: inline-block;
+}
+
+
+.btn-ingresar{
+  border: 2px solid #fff !important;
 }
 </style>

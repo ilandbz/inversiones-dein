@@ -82,10 +82,15 @@ const routes = [
   { path: '/pagos/estadisticas-de-ingresos', name: 'PagosEstadisticas', component: Placeholder, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Estadísticas de Ingresos' } },
 
   // --- ACTIVIDAD NEGOCIO (ojo: en tu log sale /actividad-de-negocio) ---
-  { path: '/actividad-de-negocio', name: 'ActividadNegocio', component: Placeholder, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Actividad de Negocio' } },
+  { path: '/actividadnegocio', name: 'ActividadNegocio', component: RegistroClientes, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Actividad de Negocio' } },
+  { path: '/usuarios', name: 'Usuarios', component: RegistroClientes, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Actividad de Negocio' } },
+  { path: '/roles', name: 'Roles', component: RegistroClientes, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Actividad de Negocio' } },
+  { path: '/permisos', name: 'Permisos', component: RegistroClientes, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Actividad de Negocio' } },
+  { path: '/configuracion', name: 'Configuracion', component: RegistroClientes, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Actividad de Negocio' } },
+  { path: '/propiedades', name: 'Propiedades', component: RegistroClientes, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Actividad de Negocio' } },
 
   // --- PRESTAMOS ---
-  { path: '/prestamos/registrar-prestamo', name: 'PrestamosRegistrar', component: Placeholder, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Registrar Préstamo' } },
+  { path: '/prestamos/registrar', name: 'PrestamosRegistrar', component: Placeholder, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Registrar Préstamo' } },
   { path: '/prestamos/simulacion', name: 'PrestamosSimulacion', component: Placeholder, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Simulación' } },
   { path: '/prestamos/cronograma-de-pagos', name: 'PrestamosCronograma', component: Placeholder, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Cronograma de Pagos' } },
   { path: '/prestamos/historial-de-prestamos', name: 'PrestamosHistorial', component: Placeholder, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Historial de Préstamos' } },

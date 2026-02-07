@@ -6,10 +6,11 @@ import useDatosSession from '@/Composables/session'
 import Footer from '@/Components/Footer.vue'
 import Topbar from '@/Components/Topbar.vue'
 import { useAutenticacion } from '@/Composables/autenticacion'
-
+import NetflixSplash from '@/Components/NetflixSplash.vue'
 const route = useRoute()
 const { logoutUsuario } = useAutenticacion()
-
+// const showWelcome = ref(false)
+const showWelcome = ref(true)
 const isDark = ref(false)
 const sidebarCollapsed = ref(false)
 const { usuario, menus, role } = useDatosSession()
@@ -48,7 +49,11 @@ onMounted(() => {
   const savedTheme = localStorage.getItem('theme') || 'light'
   isDark.value = savedTheme === 'dark'
   document.documentElement.setAttribute('data-bs-theme', savedTheme)
-
+  const seen = sessionStorage.getItem('welcomeSeen')
+  if (!seen) {
+    showWelcome.value = true
+    //sessionStorage.setItem('welcomeSeen', '1')
+  }
   sidebarCollapsed.value = localStorage.getItem('sidebarCollapsed') === '1'
 })
 
@@ -60,7 +65,13 @@ watch(isDark, (value) => {
 </script>
 
 <template>
-
+<NetflixSplash
+  v-if="showWelcome"
+  v-model="showWelcome"
+  logo="/imagenes/logo_redondo.png"
+  subtitle="Bienvenido al Dashboard"
+  :duration="1800"
+/>
   <Navbar :menus="menus" />
 
   <Topbar :is-dark="isDark"
@@ -128,5 +139,13 @@ watch(isDark, (value) => {
   </main>
 
 </template>
+<style scoped>
+.netflix-splash.hide{
+  animation: splashOut .45s ease-in both;
+  pointer-events: none;   /* <-- CLAVE: ya no bloquea clicks */
+}
 
+.netflix-splash { pointer-events: auto; }
+.netflix-splash.hide { pointer-events: none; }
+</style>
 
