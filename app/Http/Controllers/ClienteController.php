@@ -415,22 +415,21 @@ class ClienteController extends Controller
     }
     public function obtenerClienteRecientePdf(Request $request)
     {
-        $filters = $this->getUserFilters();
-        $cliente = Cliente::with('persona:id,dni,ape_pat,ape_mat,primernombre,otrosnombres,fecha_nac')
-            ->where('id', $request->cliente_id)->first();
+        $request->validate([
+            'cliente_id' => ['required', 'integer']
+        ]);
 
-        $cliente->load([
+        $cliente = Cliente::with([
             'persona',
             'negocio',
             'referente',
-        ]);
+        ])->findOrFail($request->cliente_id);
 
         // Render PDF con Blade
         $pdf = Pdf::loadView('pdf.cliente_resumen', [
             'cliente' => $cliente
         ])->setPaper('A4', 'portrait');
 
-        // stream abre en navegador, download descarga
         return $pdf->stream("cliente_{$cliente->id}.pdf");
     }
 }

@@ -188,6 +188,12 @@ const calcularBalance = () => {
   form.value.captrabajo = round2(totalACorr - totalPCorr)
 }
 
+const clearZeroOnFocus = (e) => {
+  if (e.target.value === '0') {
+    e.target.value = ''
+  }
+}
+
 watch(
   () => form.value.deudas,
   () => recalcularDeudasEnt(),
@@ -225,15 +231,16 @@ watch(
                                     <h5 class="mb-3">CORRIENTE</h5>
 
                                     <div class="row g-2">
-                                        <!-- ACTIVO CAJA -->
+                                        <!-- CAJA DE NEGOCIO -->
                                         <div class="col-12 col-md-6">
-                                            <label class="form-label mb-1">ACTIVO CAJA</label>
+                                            <label class="form-label mb-1">CAJA DE NEGOCIO</label>
                                             <input
                                             type="text"
                                             class="form-control form-control-sm"
                                             v-model="form.activocaja"
                                             :class="{ 'is-invalid': form.errors.activocaja?.length }"
-                                            placeholder="ACTIVO CAJA"
+                                            placeholder="CAJA DE NEGOCIO"
+                                            @focus="clearZeroOnFocus"
                                             @change="calcularBalance()"
                                             @keypress="onlyNumbersAndDecimal"
                                             />
@@ -242,15 +249,16 @@ watch(
                                             </div>
                                         </div>
 
-                                        <!-- ACTIVO BANCOS -->
+                                        <!-- FONDO BANCOS -->
                                         <div class="col-12 col-md-6">
-                                            <label class="form-label mb-1">ACTIVO BANCOS</label>
+                                            <label class="form-label mb-1">FONDO BANCOS</label>
                                             <input
                                             type="text"
                                             class="form-control form-control-sm"
                                             v-model="form.activobancos"
+                                            @focus="clearZeroOnFocus"
                                             :class="{ 'is-invalid': form.errors.activobancos?.length }"
-                                            placeholder="ACTIVO BANCOS"
+                                            placeholder="FONDO BANCOS"
                                             @change="calcularBalance()"
                                             @keypress="onlyNumbersAndDecimal"
                                             />
@@ -259,15 +267,16 @@ watch(
                                             </div>
                                         </div>
 
-                                        <!-- CUENTAS POR COBRAR -->
+                                        <!-- ACREEDORES -->
                                         <div class="col-12 col-md-6">
-                                            <label class="form-label mb-1">CUENTAS POR COBRAR</label>
+                                            <label class="form-label mb-1">ACREEDORES</label>
                                             <input
                                             type="text"
                                             class="form-control form-control-sm"
                                             v-model="form.activoctascobrar"
+                                            @focus="clearZeroOnFocus"
                                             :class="{ 'is-invalid': form.errors.activoctascobrar?.length }"
-                                            placeholder="CUENTAS POR COBRAR"
+                                            placeholder="ACREEDORES"
                                             @change="calcularBalance()"
                                             @keypress="onlyNumbersAndDecimal"
                                             />
@@ -316,6 +325,7 @@ watch(
                                                         <input
                                                             type="text"
                                                             v-model="form.detinventarios.inv_materiales"
+                                                            @focus="clearZeroOnFocus"
                                                             class="form-control form-control-sm"
                                                             @keypress="onlyNumbersAndDecimal"
                                                         />
@@ -331,6 +341,7 @@ watch(
                                                     <input
                                                         type="text"
                                                         v-model="form.detinventarios.inv_prodproc"
+                                                        @focus="clearZeroOnFocus"
                                                         class="form-control form-control-sm"
                                                         @keypress="onlyNumbersAndDecimal"
                                                     />
@@ -346,6 +357,7 @@ watch(
                                                     <input
                                                         type="text"
                                                         v-model="form.detinventarios.inv_prodtermi"
+                                                        @focus="clearZeroOnFocus"
                                                         class="form-control form-control-sm"
                                                         @keypress="onlyNumbersAndDecimal"
                                                     />
@@ -415,6 +427,7 @@ watch(
                                             type="text"
                                             class="form-control form-control-sm"
                                             v-model="form.activootrosact"
+                                            @focus="clearZeroOnFocus"
                                             :class="{ 'is-invalid': form.errors.activootrosact?.length }"
                                             placeholder="OTROS ACTIVOS"
                                             @change="calcularBalance()"
@@ -453,6 +466,7 @@ watch(
                                                         type="text"
                                                         class="form-control form-control-sm text-end"
                                                         v-model="item.valor"
+                                                        @focus="clearZeroOnFocus"
                                                         @keypress="onlyNumbersAndDecimal"
                                                         placeholder="0.00"
                                                         />
@@ -485,6 +499,7 @@ watch(
                                             type="text"
                                             class="form-control form-control-sm"
                                             v-model="form.activodepre"
+                                            @focus="clearZeroOnFocus"
                                             :class="{ 'is-invalid': form.errors.activodepre?.length }"
                                             placeholder="DEPRECIACION, AMORTIZACION Y AGOTAMIENTO ACUMULADO"
                                             @change="calcularBalance()"
@@ -543,6 +558,7 @@ watch(
                                             type="text"
                                             class="form-control form-control-sm"
                                             v-model="form.pasivodeudaprove"
+                                            @focus="clearZeroOnFocus"
                                             :class="{ 'is-invalid': form.errors.pasivodeudaprove?.length }"
                                             placeholder="PROVEEDORES"
                                             @change="calcularBalance()"
@@ -611,6 +627,7 @@ watch(
                                                         type="text"
                                                         class="form-control form-control-sm text-end"
                                                         v-model="item.saldo"
+                                                        @focus="clearZeroOnFocus"
                                                         @keypress="onlyNumbersAndDecimal"
                                                         placeholder="0.00"
                                                         />
@@ -666,6 +683,7 @@ watch(
                                             type="text"
                                             class="form-control form-control-sm"
                                             v-model="form.pasivolargop"
+                                            @focus="clearZeroOnFocus"
                                             :class="{ 'is-invalid': form.errors.pasivolargop?.length }"
                                             placeholder="PASIVO LARGO PLAZO"
                                             @change="calcularBalance()"
@@ -683,6 +701,7 @@ watch(
                                             type="text"
                                             class="form-control form-control-sm"
                                             v-model="form.otrascuentaspagar"
+                                            @focus="clearZeroOnFocus"
                                             :class="{ 'is-invalid': form.errors.otrascuentaspagar?.length }"
                                             placeholder="OTRAS CUENTAS POR PAGAR"
                                             @change="calcularBalance()"
@@ -747,6 +766,7 @@ watch(
                                     type="text"
                                     class="form-control form-control-sm"
                                     v-model="form.patrimonio"
+                                    @focus="clearZeroOnFocus"
                                     :class="{ 'is-invalid': form.errors.patrimonio?.length }"
                                     placeholder="PATRIMONIO EMPRESARIAL"
                                     @keypress="onlyNumbersAndDecimal"
