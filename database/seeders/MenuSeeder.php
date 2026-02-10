@@ -36,6 +36,7 @@ class MenuSeeder extends Seeder
                             "icono" => "person-badge-fill",
                             "submenu" => [
                                 ["nombre" => "Registro de Clientes", "slug" => "registro-de-clientes", "url" => "/clientes/registro-de-clientes"],
+                                ["nombre" => "Listado de Clientes", "slug" => "listado-de-clientes", "url" => "/clientes/listado-de-clientes"],
                                 ["nombre" => "Posición del Cliente", "slug" => "posicion-del-cliente", "url" => "/clientes/posicion-del-cliente"],
                                 ["nombre" => "Historial del Cliente", "slug" => "historial-del-cliente", "url" => "/clientes/historial-del-cliente"],
                             ],
@@ -58,12 +59,6 @@ class MenuSeeder extends Seeder
                                 ["nombre" => "Reportes", "slug" => "reportes", "url" => "/pagos/reportes"],
                                 ["nombre" => "Estadísticas de Ingresos", "slug" => "estadisticas-de-ingresos", "url" => "/pagos/estadisticas-de-ingresos"],
                             ],
-                        ],
-                        [
-                            "nombre" => "Actividad de Negocio",
-                            "slug" => "actividad-de-negocio",
-                            "icono" => "person-badge-fill",
-                            "url" => "/actividadnegocio",
                         ],
                     ],
                 ],
@@ -154,6 +149,18 @@ class MenuSeeder extends Seeder
                             "slug" => "configuracion",
                             "icono" => "gear-fill",
                             "url" => "/configuracion",
+                        ],
+                        [
+                            "nombre" => "Propiedades",
+                            "slug" => "propiedades",
+                            "icono" => "fas fa-wallet",
+                            "url" => "/propiedades",
+                        ],
+                        [
+                            "nombre" => "Actividad de Negocio",
+                            "slug" => "actividad-negocio",
+                            "icono" => "person-badge-fill",
+                            "url" => "/actividad-negocio",
                         ],
                         [
                             "nombre" => "Propiedades",

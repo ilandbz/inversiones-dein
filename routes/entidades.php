@@ -9,7 +9,7 @@ use App\Http\Controllers\BalanceController;
 use App\Http\Controllers\OrigenFinanciamientoController;
 use App\Http\Controllers\PlazoController;
 use App\Http\Controllers\CreditoController;
-
+use App\Http\Controllers\PropiedadController;
 use Illuminate\Support\Facades\Route;
 
 Route::group(['prefix' => 'cliente', 'middleware' => 'auth'], function () {
@@ -111,4 +111,13 @@ Route::group(['prefix' => 'balance', 'middleware' => 'auth'], function () {
     Route::get('listar', [BalanceController::class, 'listar']);
     Route::get('mostrar', [BalanceController::class, 'show']);
     Route::post('eliminar', [BalanceController::class, 'destroy']);
+});
+
+Route::group(['prefix' => 'propiedad', 'middleware' => 'auth'], function () {
+    Route::post('guardar', [PropiedadController::class, 'store']);
+    Route::post('actualizar', [PropiedadController::class, 'update']);
+    Route::post('eliminar', [PropiedadController::class, 'destroy']);
+    Route::get('mostrar', [PropiedadController::class, 'show']);
+    Route::get('todos', [PropiedadController::class, 'todos']);
+    Route::get('listar', [PropiedadController::class, 'listar']);
 });

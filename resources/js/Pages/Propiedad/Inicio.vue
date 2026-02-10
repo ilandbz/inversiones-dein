@@ -1,13 +1,14 @@
 <script setup>
     import { ref, onMounted, nextTick } from 'vue'
-    import useActividadNegocio from '@/Composables/ActividadNegocio.js'
-    import FormActividad from './Form.vue'
+    import usePropiedad from '@/Composables/Propiedad.js'
+    import FormPropiedad from './Form.vue'
+    import { defineTitle } from '@/Helpers';
     import useHelper from '@/Helpers';
     const { openModal, Toast, Swal } = useHelper();
 
 
-    const { listaActividadNegocios, actividadNegocios, obtenerActividadNegocio,
-        eliminarActividadNegocio, respuesta, actividadNegocio, errors } = useActividadNegocio()
+    const { listaPropiedades, propiedades, obtenerPropiedad,
+        eliminarPropiedad, respuesta, propiedad, errors } = usePropiedad()
 
     const modalTitle = ref('')
     const lastOpener = ref(null)
@@ -26,11 +27,11 @@
         errors.value = []
     }
     const obtenerDatos = async(id) => {
-        await obtenerActividadNegocio(id);
-        if(actividadNegocio.value)
+        await obtenerPropiedad(id);
+        if(propiedad.value)
         {
-            form.value.id=actividadNegocio.value.id;
-            form.value.nombre=actividadNegocio.value.nombre;
+            form.value.id=propiedad.value.id;
+            form.value.nombre=propiedad.value.nombre;
         }
     }
 
@@ -39,17 +40,17 @@
         limpiar()
         await obtenerDatos(id)
         form.value.estadoCrud = 'editar'
-        modalTitle.value = 'Editar Actividad de Negocio'
+        modalTitle.value = 'Editar Propiedad'
         await nextTick()
-        openModal('#modalactividad')
+        openModal('#modalpropiedad')
     }
     const nuevo = async (e) => {
         lastOpener.value = e.currentTarget
         limpiar()
         form.value.estadoCrud = 'nuevo'
-        modalTitle.value = 'Nuevo Actividad de Negocio'
+        modalTitle.value = 'Nuevo Propiedad'
         await nextTick()
-        openModal('#modalactividad')
+        openModal('#modalpropiedad')
     }
     const eliminar = (id) => {
         Swal.fire({
@@ -67,7 +68,7 @@
         })
     }
     const elimina = async(id) => {
-        await eliminarActividadNegocio(id)
+        await eliminarPropiedad(id)
         form.value.errors = []
         if(errors.value)
         {
@@ -76,16 +77,16 @@
         if(respuesta.value.ok==1){
             form.value.errors = []
             Toast.fire({icon:'success', title:respuesta.value.mensaje})
-            listarActividadNegocios()
+            listarPropiedades()
         }
     }
-    const listarActividadNegocios = async() => {
-        await listaActividadNegocios()
+    const listarPropiedades = async() => {
+        await listaPropiedades()
     }
 
     onMounted(() => {
-        document.title = 'Actividad de Negocio - Inversiones DEIN'
-        listaActividadNegocios()
+        defineTitle('Propiedades')
+        listarPropiedades()
     })
 
 
@@ -94,7 +95,7 @@
     <div class="card card-primary card-outline">
         <div class="card-header">
             <h6 class="card-title">
-                Listado de Actividades de Negocio
+                Listado de Propiedades
             </h6>
         </div>
         <div class="card-body">
@@ -124,7 +125,7 @@
                         <table class="table table-bordered table-hover table-sm table-striped">
                             <thead class="">
                                 <tr>
-                                    <th colspan="8" class="text-center">Actividades de Negocio</th>
+                                    <th colspan="8" class="text-center">Propiedades</th>
                                 </tr>
                                 <tr>
                                     <th>#</th>
@@ -133,20 +134,20 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr v-if="actividadNegocios.length == 0">
+                                <tr v-if="propiedades.length == 0">
                                     <td class="text-danger text-center" colspan="7">
                                         -- Datos No Registrados - Tabla Vacía --
                                     </td>
                                 </tr>
-                                <tr v-else v-for="(actividad,index) in actividadNegocios" :key="actividad.id">
+                                <tr v-else v-for="(propiedad,index) in propiedades" :key="propiedad.id">
                                     <td>{{ index + 1 }}</td>
-                                    <td>{{ actividad.nombre }}</td>
+                                    <td>{{ propiedad.nombre }}</td>
                                     <td>
                                         <div class="btn-group">
-                                            <button class="btn btn-warning btn-sm" title="Editar" @click.prevent="editar(actividad.id, $event)">
+                                            <button class="btn btn-warning btn-sm" title="Editar" @click.prevent="editar(propiedad.id, $event)">
                                                 <i class="fas fa-edit"></i>
                                             </button>
-                                            <button class="btn btn-danger btn-sm" title="Enviar a Papelera" @click.prevent="eliminar(actividad.id)">
+                                            <button class="btn btn-danger btn-sm" title="Enviar a Papelera" @click.prevent="eliminar(propiedad.id)">
                                                 <i class="fas fa-trash"></i>
                                             </button>
                                         </div>
@@ -160,10 +161,10 @@
 
         </div>
     </div>
-    <FormActividad
+    <FormPropiedad
         :form="form"
         :modalTitle="modalTitle"
         :lastOpener="lastOpener"
-        @onListar="listarActividadNegocios"
+        @onListar="listarPropiedades"
     />
 </template>

@@ -5,10 +5,12 @@ namespace App\Http\Controllers;
 use App\Models\ActividadNegocio;
 use App\Models\DetalleActividadNegocio;
 use Illuminate\Http\Request;
+use App\Http\Requests\ActividadNegocio\StoreActividadNegocioRequest;
+use App\Http\Requests\ActividadNegocio\UpdateActividadNegocioRequest;
 
 class ActividadNegocioController extends Controller
 {
-    public function store(Request $request)
+    public function store(StoreActividadNegocioRequest $request)
     {
         $request->validated();
 
@@ -34,7 +36,7 @@ class ActividadNegocioController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request)
+    public function update(UpdateActividadNegocioRequest $request)
     {
         $request->validated();
 
@@ -89,7 +91,5 @@ class ActividadNegocioController extends Controller
     {
         $actividad_negocio_id = $request->actividad_negocio_id;
         return DetalleActividadNegocio::where('actividad_negocio_id', $actividad_negocio_id)->get();
-        
-        
     }
 }

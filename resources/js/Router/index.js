@@ -3,8 +3,11 @@ import { createRouter, createWebHistory } from "vue-router";
 import LayoutLogin from '@/Layouts/AppLayoutLogin.vue'
 import LayoutDefault from '@/Layouts/AppLayoutDefault.vue'
 import Placeholder from '@/Pages/PlaceHolder.vue'
+import PrestamosInicio from '@/Pages/Prestamos/Inicio.vue'
 import Principal from '@/Pages/Principal.vue'
 import RegistroClientes from '@/Pages/Clientes/Registro.vue'
+import ClientesInicio from '@/Pages/Clientes/Inicio.vue'
+import RegistroPropiedades from '@/Pages/Propiedad/Inicio.vue'
 import Login from '@/Pages/Auth/Login.vue'
 import Perfil from '@/Pages/Usuario/Perfil.vue'
 import Evaluacion from '@/Pages/Evaluacion/Inicio.vue'
@@ -70,6 +73,7 @@ const routes = [
   },
 
   { path: '/clientes/posicion-del-cliente', name: 'ClientesPosicion', component: Placeholder, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Posición del Cliente' } },
+  { path: '/clientes/listado-de-clientes', name: 'ClientesListado', component: ClientesInicio, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Listado del Cliente' } },
   { path: '/clientes/historial-del-cliente', name: 'ClientesHistorial', component: Placeholder, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Historial del Cliente' } },
 
   // --- ASESORES ---
@@ -81,19 +85,17 @@ const routes = [
   { path: '/pagos/reportes', name: 'PagosReportes', component: Placeholder, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Reportes' } },
   { path: '/pagos/estadisticas-de-ingresos', name: 'PagosEstadisticas', component: Placeholder, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Estadísticas de Ingresos' } },
 
-  // --- ACTIVIDAD NEGOCIO (ojo: en tu log sale /actividad-de-negocio) ---
-  { path: '/actividadnegocio', name: 'ActividadNegocio', component: RegistroClientes, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Actividad de Negocio' } },
   { path: '/usuarios', name: 'Usuarios', component: RegistroClientes, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Actividad de Negocio' } },
   { path: '/roles', name: 'Roles', component: RegistroClientes, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Actividad de Negocio' } },
   { path: '/permisos', name: 'Permisos', component: RegistroClientes, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Actividad de Negocio' } },
   { path: '/configuracion', name: 'Configuracion', component: RegistroClientes, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Actividad de Negocio' } },
-  { path: '/propiedades', name: 'Propiedades', component: RegistroClientes, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Actividad de Negocio' } },
+  { path: '/propiedades', name: 'Propiedades', component: RegistroPropiedades, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Propiedades' } },
 
   // --- PRESTAMOS ---
   { path: '/prestamos/registrar', name: 'PrestamosRegistrar', component: Placeholder, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Registrar Préstamo' } },
   { path: '/prestamos/simulacion', name: 'PrestamosSimulacion', component: Placeholder, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Simulación' } },
   { path: '/prestamos/cronograma-de-pagos', name: 'PrestamosCronograma', component: Placeholder, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Cronograma de Pagos' } },
-  { path: '/prestamos/historial-de-prestamos', name: 'PrestamosHistorial', component: Placeholder, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Historial de Préstamos' } },
+  { path: '/prestamos/historial-de-prestamos', name: 'PrestamosHistorial', component: PrestamosInicio, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Historial de Préstamos' } },
 
   // --- AHORROS ---
   { path: '/ahorros/apertura-de-cuenta', name: 'AhorrosApertura', component: Placeholder, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Apertura de Cuenta' } },

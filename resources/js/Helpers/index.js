@@ -39,12 +39,6 @@ export default function useHelper() {
         { numero: '11', nombre: 'Noviembre' },
         { numero: '12', nombre: 'Diciembre' }
     ];
-    // const openModal = (modal_nombre) => {
-    //     const myModal = bootstrap.Modal.getOrCreateInstance(modal_nombre);
-    //     myModal.show();
-    // }
-
-
     const openModal = (selectorOrEl) => {
         const el = typeof selectorOrEl === 'string'
             ? document.querySelector(selectorOrEl)
@@ -55,11 +49,6 @@ export default function useHelper() {
         bootstrap.Modal.getOrCreateInstance(el).show()
     }
 
-
-    // const hideModal = (modal_nombre) => {
-    //     const myModal = bootstrap.Modal.getOrCreateInstance(modal_nombre);
-    //     myModal.hide();
-    // }
 
     const hideModal = (selectorOrEl) => {
         const el = typeof selectorOrEl === 'string'

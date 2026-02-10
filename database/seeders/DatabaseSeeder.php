@@ -24,6 +24,7 @@ class DatabaseSeeder extends Seeder
             DetalleActividadNegocioSeeder::class,
             AsesorSeeder::class,
             PlazoSeeder::class,
+            PropiedadSeeder::class,
         ]);
     }
 }

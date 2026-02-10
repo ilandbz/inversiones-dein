@@ -51,6 +51,7 @@ const formPrestamo = ref({
   costomora: '0.00',
   total: '0.00',
 
+  estadoCrud: 'nuevo',
   errors: {}
 })
 
@@ -257,6 +258,7 @@ const REFERENTE_DEFAULT = () => ({
 })
 
 const form = ref({
+  id : '',
   dni: '',
   ruc: '',
   celular: '',

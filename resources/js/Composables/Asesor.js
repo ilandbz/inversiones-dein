@@ -4,13 +4,13 @@ import { getConfigHeader, getdataParamsPagination } from '@/Helpers'
 
 export default function useAsesor() {
     const asesores = ref([])
-    const actividadNegocio = ref({})
+    const asesor = ref({})
     const errors = ref('')
     const respuesta = ref([])
 
     const obtenerAsesor = async (id) => {
         const respond = await axios.get('/asesor/mostrar?id=' + id, getConfigHeader())
-        actividadNegocio.value = respond.data
+        asesor.value = respond.data
     }
 
     const listaAsesores = async () => {
@@ -56,7 +56,7 @@ export default function useAsesor() {
         errors,
         respuesta,
         asesores,
-        actividadNegocio,
+        asesor,
         listaAsesores,
         obtenerAsesor,
         agregarAsesor,
