@@ -80,7 +80,7 @@ class StoreClienteRequest extends FormRequest
 
         // ✅ NEGOCIO: requerido solo si INDEPENDIENTE
         $rules['negocio']                    = ['required_if:origen_labor,INDEPENDIENTE', 'array'];
-        $rules['negocio.razonsocial']        = ['required_if:origen_labor,INDEPENDIENTE', 'string', 'max:80'];
+        $rules['negocio.razonsocial']        = ['nullable', 'string', 'max:80'];
         $rules['negocio.detalle_actividad_id'] = ['required_if:origen_labor,INDEPENDIENTE', 'integer', 'exists:detalle_actividad_negocios,id'];
 
         // opcionales
