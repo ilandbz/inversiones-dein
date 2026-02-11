@@ -6,6 +6,7 @@ import Placeholder from '@/Pages/PlaceHolder.vue'
 import PrestamosInicio from '@/Pages/Prestamos/Inicio.vue'
 import Principal from '@/Pages/Principal.vue'
 import RegistroClientes from '@/Pages/Clientes/Registro.vue'
+import Usuario from '@/Pages/Usuario/Inicio.vue'
 import ClientesInicio from '@/Pages/Clientes/Inicio.vue'
 import RegistroPropiedades from '@/Pages/Propiedad/Inicio.vue'
 import Login from '@/Pages/Auth/Login.vue'
@@ -14,6 +15,7 @@ import Evaluacion from '@/Pages/Evaluacion/Inicio.vue'
 import Desembolso from '@/Pages/Desembolso/Inicio.vue'
 import CambiarClave from '@/Pages/Usuario/CambiarClave.vue'
 import ActividadDeNegocio from '@/Pages/ActividadNegocio/Inicio.vue'
+import Rol from '@/Pages/Rol/Inicio.vue'
 
 const routes = [
   {
@@ -85,10 +87,10 @@ const routes = [
   { path: '/pagos/reportes', name: 'PagosReportes', component: Placeholder, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Reportes' } },
   { path: '/pagos/estadisticas-de-ingresos', name: 'PagosEstadisticas', component: Placeholder, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Estadísticas de Ingresos' } },
 
-  { path: '/usuarios', name: 'Usuarios', component: RegistroClientes, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Actividad de Negocio' } },
-  { path: '/roles', name: 'Roles', component: RegistroClientes, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Actividad de Negocio' } },
-  { path: '/permisos', name: 'Permisos', component: RegistroClientes, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Actividad de Negocio' } },
-  { path: '/configuracion', name: 'Configuracion', component: RegistroClientes, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Actividad de Negocio' } },
+  { path: '/usuarios', name: 'Usuarios', component: Usuario, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Usuarios' } },
+  { path: '/roles', name: 'Roles', component: Rol, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Roles' } },
+  { path: '/permisos', name: 'Permisos', component: RegistroClientes, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Permisos' } },
+  { path: '/configuracion', name: 'Configuracion', component: RegistroClientes, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Configuración' } },
   { path: '/propiedades', name: 'Propiedades', component: RegistroPropiedades, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Propiedades' } },
 
   // --- PRESTAMOS ---

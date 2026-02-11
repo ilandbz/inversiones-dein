@@ -103,7 +103,7 @@ class ClienteController extends Controller
 
                 Negocio::create([
                     'cliente_id'           => $cliente->id,
-                    'razonsocial'          => $neg['razonsocial'],
+                    'razonsocial'          => $neg['razonsocial'] ?? null,
                     'ruc'                  => $neg['ruc'] ?? null,
                     'celular'              => $neg['celular'] ?? null,
                     'detalle_actividad_id' => $neg['detalle_actividad_id'],

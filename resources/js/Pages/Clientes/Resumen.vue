@@ -11,7 +11,7 @@ const { url } = toRefs(props)
 <template>
 <teleport to="body">
     <div class="modal fade" id="impresionresumen" data-bs-backdrop="static" data-bs-keyboard="false" >
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog modal-xl">
             <div class="modal-content">
                 <div class="modal-header">
                     <h4 class="modal-title fs-4" id="impresionresumenLabel">Modal title</h4>
@@ -22,7 +22,7 @@ const { url } = toRefs(props)
                         <iframe 
                             :src="url" 
                             class="w-100" 
-                            style="height: 500px; border: none;">
+                            style="min-height: 800px; border: none;">
                         </iframe>
                     </div>
                 </div>

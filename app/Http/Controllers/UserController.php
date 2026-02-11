@@ -24,49 +24,86 @@ use Intervention\Image\Drivers\Gd\Driver;
 class UserController extends Controller
 {
     use UserFilters;
+
     public function store(StoreUserRequest $request)
     {
         $file = $request->file('foto');
-        Persona::firstOrcreate([
-            'dni'           => $request->dni,
-        ], [
-            'ape_pat'       => $request->apepat,
-            'ape_mat'       => $request->apemat,
-            'primernombre'  => $request->primernombre,
-            'otrosnombres'  => $request->otrosnombres,
-            'celular'       => $request->celular,
-        ]);
-        $usuario = User::create([
-            'name'          => $request->username,
-            'dni'           => $request->dni,
-            'password'      => Hash::make($request->username),
-        ]);
+
+        // 1) Validar foto ANTES de registrar
         if ($file) {
             $errores = [];
-            if ($file->getSize() > 2048 * 1024) {
-                $errores['foto'][] = 'El tamaño máximo permitido es 2MB.';
+
+            // peso
+            if ($file->getSize() > 3072 * 1024) {
+                $errores['foto'][] = 'El tamaño máximo permitido es 3MB.';
             }
-            $manager = new ImageManager(new Driver());
-            $image = $manager->read($file);
-            if ($image->width() > 800 || $image->height() > 1000) {
-                $image->resize(800, 1000, function ($constraint) {
-                    $constraint->aspectRatio();
-                    $constraint->upsize();
-                });
+
+            // opcional: validar que sea imagen real
+            if (!$file->isValid()) {
+                $errores['foto'][] = 'El archivo de foto es inválido.';
             }
+
+            // opcional: validar mime
+            $allowed = ['image/jpeg', 'image/png', 'image/webp'];
+            if (!in_array($file->getMimeType(), $allowed)) {
+                $errores['foto'][] = 'Formato permitido: JPG, PNG o WEBP.';
+            }
+
             if (!empty($errores)) {
                 return response()->json(['errors' => $errores], 422);
             }
-            $nombre_archivo = $request->username . ".webp";
-            Storage::disk('fotos')->makeDirectory('usuarios');
-            Storage::disk('fotos')->put('usuarios/' . $nombre_archivo, File::get($file));
         }
-        $usuario->roles()->sync([$request->role_id]);
-        return response()->json([
-            'ok' => 1,
-            'mensaje' => 'Usuario Registrado satisfactoriamente'
-        ], 200);
+
+        // 2) Transacción: si falla algo, NO se guarda nada
+        return DB::transaction(function () use ($request, $file) {
+
+            Persona::firstOrCreate(
+                ['dni' => $request->dni],
+                [
+                    'ape_pat'      => $request->apepat,
+                    'ape_mat'      => $request->apemat,
+                    'primernombre' => $request->primernombre,
+                    'otrosnombres' => $request->otrosnombres,
+                    'celular'      => $request->celular,
+                ]
+            );
+
+            $usuario = User::create([
+                'name'     => $request->username,
+                'dni'      => $request->dni,
+                'password' => Hash::make($request->username),
+            ]);
+
+            // Guardar foto (solo si existe y ya pasó validación)
+            if ($file) {
+                $manager = new ImageManager(new Driver());
+                $image = $manager->read($file);
+
+                if ($image->width() > 800 || $image->height() > 1000) {
+                    $image->resize(800, 1000, function ($constraint) {
+                        $constraint->aspectRatio();
+                        $constraint->upsize();
+                    });
+                }
+
+                $nombre_archivo = $request->username . ".webp";
+                Storage::disk('fotos')->makeDirectory('usuarios');
+
+                // IMPORTANTE: si quieres que realmente sea WEBP,
+                // guarda el resultado convertido (no el $file original)
+                $webp = (string) $image->toWebp(80);
+                Storage::disk('fotos')->put('usuarios/' . $nombre_archivo, $webp);
+            }
+
+            $usuario->roles()->sync([$request->role_id]);
+
+            return response()->json([
+                'ok' => 1,
+                'mensaje' => 'Usuario Registrado satisfactoriamente'
+            ], 200);
+        });
     }
+
     public function cambiarclaveperfil(UpdatePasswordRequest $request)
     {
         $filters = $this->getUserFilters();
@@ -206,7 +243,7 @@ class UserController extends Controller
             ->when(is_numeric($buscar), function ($query) use ($buscar) {
                 return $query->orWhere('dni', $buscar);
             })
-            ->with(['roles', 'agencias'])
+            ->with(['roles'])
             ->where('es_activo', 1);
         if ($filters['role'] === 'GERENTE AGENCIA') {
             $usuarios->whereHas('agencias', function ($query) use ($filters) {
@@ -225,7 +262,7 @@ class UserController extends Controller
             ->when(is_numeric($buscar), function ($query) use ($buscar) {
                 return $query->orWhere('dni', $buscar);
             })
-            ->with(['roles', 'agencias'])
+            ->with(['roles'])
             ->where('es_activo', 0);
         if ($filters['role'] === 'GERENTE AGENCIA') {
             $usuarios->whereHas('agencias', function ($query) use ($filters) {
@@ -244,7 +281,7 @@ class UserController extends Controller
             ->when(is_numeric($buscar), function ($query) use ($buscar) {
                 return $query->orWhere('dni', $buscar);
             })
-            ->with(['roles', 'agencias']);
+            ->with(['roles']);
         if ($filters['role'] === 'GERENTE AGENCIA') {
             $usuarios->whereHas('agencias', function ($query) use ($filters) {
                 $query->where('agencia_id', $filters['agencia_id']);
@@ -256,7 +293,7 @@ class UserController extends Controller
     {
         $filters = $this->getUserFilters();
         $usuarios = User::query()
-            ->with(['roles', 'agencias', 'persona', 'agencia'])
+            ->with(['roles', 'persona', 'agencia'])
             ->where('es_activo', 1)
             ->whereHas('roles', function ($query) {
                 $query->where('roles.id', 5);
