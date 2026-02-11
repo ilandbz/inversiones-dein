@@ -349,11 +349,11 @@ class ClienteController extends Controller
                 'personas.direccion',
 
                 DB::raw("CONCAT(
-            personas.ape_pat,' ',
-            personas.ape_mat,' ',
-            personas.primernombre,' ',
-            IFNULL(personas.otrosnombres,'')
-        ) AS apenom")
+                    personas.ape_pat,' ',
+                    personas.ape_mat,' ',
+                    personas.primernombre,' ',
+                    IFNULL(personas.otrosnombres,'')
+                ) AS apenom")
             ])
             ->get();
 
