@@ -9,7 +9,7 @@ import FormCliente from './FormCliente.vue'
 const { openModal, Toast, Swal } = useHelper()
 
 const {
-  obtenerClientes,
+  listaClientes,
   clientes,
   obtenerCliente,
   eliminarCliente,
@@ -18,14 +18,7 @@ const {
   errors
 } = useCliente()
 
-const dato = ref({
-    page:'',
-    buscar:'',
-    paginacion: 10
-});
-const modalTitle = ref('')
-const lastOpener = ref(null)
-
+// Si ya tienes estas funciones en algún helper/composable, reemplázalas por tus imports reales.
 const NEGOCIO_DEFAULT = () => ({
   id: '',
   nombre: '',
@@ -41,6 +34,9 @@ const REFERENTE_DEFAULT = () => ({
   celular: '',
   // ...lo que uses
 })
+
+const modalTitle = ref('')
+const lastOpener = ref(null)
 
 const form = ref({
   id: '',
@@ -79,8 +75,6 @@ const form = ref({
   estadoCrud: 'editar',
   errors: {}
 })
-
-
 
 const limpiar = () => {
   form.value.id = ''
@@ -129,11 +123,11 @@ const obtenerDatos = async (id) => {
     const c = cliente.value
 
     form.value.id = c.id ?? ''
-    form.value.dni = c.persona.dni ?? ''
-    form.value.ruc = c.persona.ruc ?? ''
-    form.value.celular = c.persona.celular ?? ''
-    form.value.celular2 = c.persona.celular2 ?? ''
-    form.value.email = c.persona.email ?? ''
+    form.value.dni = c.dni ?? ''
+    form.value.ruc = c.ruc ?? ''
+    form.value.celular = c.celular ?? ''
+    form.value.celular2 = c.celular2 ?? ''
+    form.value.email = c.email ?? ''
 
     form.value.ape_pat = c.ape_pat ?? ''
     form.value.ape_mat = c.ape_mat ?? ''
@@ -163,7 +157,6 @@ const obtenerDatos = async (id) => {
     form.value.hora_reg = c.hora_reg ?? ''
   }
 }
-
 
 const editar = async (id, e) => {
   lastOpener.value = e.currentTarget
@@ -205,49 +198,9 @@ const elimina = async (id) => {
     listarClientes()
   }
 }
-// PAGINACION
-const isActived = () => {
-    return clientes.value.current_page
-}
-const offset = 2;
-const buscar = () => {
-    listarClientes()
-}
-const verFoto=(registro)=>{
-  limpiar()
-  cliente.value.dni = registro.persona.dni;
-  cliente.value.foto = '/storage/fotos/clientes/'+registro.persona.dni+'.webp';
-  cliente.value.apenom = registro.persona.apenom;  
-  document.getElementById("fotoModalLabel").innerHTML = 'Imagen de Cliente';
-  openModal('#fotoModal') 
-}
-const cambiarPaginacion = () => {
-    listarClientes()
-}
-const cambiarPagina =(pagina) => {
-    listarClientes(pagina)
-}
-const pagesNumber = () => {
-    if(!clientes.value.to){
-        return []
-    }
-    let from = clientes.value.current_page - offset
-    if(from < 1) from = 1
-    let to = from + (offset*2)
-    if( to >= clientes.value.last_page) to = clientes.value.last_page
-    let pagesArray = []
-    while(from <= to) {
-        pagesArray.push(from)
-        from ++
-    }
-    return pagesArray
-}
-const imagenNoEncontrada = (event)=>{
-    event.target.src = "/storage/fotos/default.png";
-}
-const listarClientes = async(page=1) => {
-    dato.value.page= page
-    await obtenerClientes(dato.value)
+
+const listarClientes = async () => {
+  await listaClientes()
 }
 
 onMounted(() => {
@@ -295,14 +248,14 @@ onMounted(() => {
               </thead>
 
               <tbody>
-                <tr v-if="clientes.total == 0">
+                <tr v-if="clientes.length == 0">
                   <td class="text-danger text-center" colspan="8">
                     -- Datos No Registrados - Tabla Vacía --
                   </td>
                 </tr>
 
-                <tr v-else v-for="(c, index) in clientes.data" :key="c.id">
-                  <td>{{ index + clientes.from }}</td>
+                <tr v-else v-for="(c, index) in clientes" :key="c.id">
+                  <td>{{ index + 1 }}</td>
                   <td>{{ c.dni }}</td>
                   <td>{{ c.ruc }}</td>
                   <td>{{ c.apenom }}</td>
@@ -335,8 +288,9 @@ onMounted(() => {
 
   <FormCliente
     :form="form"
-    :currentPage="clientes.current_page"
+    :currentPage="currentPage"
     :modalTitle="modalTitle"
+    :lastOpener="lastOpener"
     @onListar="listarClientes"
   />
 </template>

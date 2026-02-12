@@ -132,12 +132,10 @@ class ClienteController extends Controller
     public function show(Request $request)
     {
         $persona = Cliente::with(
-            'persona:id,dni,ape_pat,ape_mat,primernombre,otrosnombres,fecha_nac,ubigeo_nac,email,celular,genero,estado_civil,ruc,grado_instr,tipo_trabajador,ocupacion,institucion_lab,ubicacion_domicilio_id,conyugue',
-            'persona.ubicacion:id,tipo,ubigeo,tipovia,nombrevia,nro,interior,mz,lote,tipozona,nombrezona,referencia',
+            'persona',
             'persona.conyugePersona',
             'usuario:id,name',
             'aval:id,dni,ape_pat,ape_mat,primernombre,otrosnombres',
-            'agencia:id,nombre'
         )->where('id', $request->id)->first();
 
         return $persona;
@@ -392,8 +390,7 @@ class ClienteController extends Controller
         $paginacion = $request->paginacion ?? 10;
         $query = Cliente::with([
             'usuario:id,name',
-            'agencia:id,nombre',
-            'persona:id,dni,ape_pat,ape_mat,primernombre,otrosnombres,fecha_nac,tipo_trabajador',
+            'persona:id,dni,ape_pat,ape_mat,primernombre,otrosnombres,fecha_nac',
         ])
             ->join('personas', 'clientes.persona_id', '=', 'personas.id')
             ->where(function ($query) use ($buscar) {
@@ -407,7 +404,6 @@ class ClienteController extends Controller
             ->select([
                 'clientes.id',
                 'clientes.usuario_id',
-                'clientes.agencia_id',
                 'clientes.persona_id',
                 'clientes.estado',
                 'clientes.fecha_reg',
@@ -416,9 +412,6 @@ class ClienteController extends Controller
             ]);
         if ($filters['role'] === 'ASESOR') {
             $query->where('usuario_id', $filters['user_id']);
-        }
-        if ($filters['role'] === 'GERENTE AGENCIA') {
-            $query->where('agencia_id', $filters['agencia_id']);
         }
 
         return $query->orderBy('apenom', 'asc')->paginate($paginacion);
