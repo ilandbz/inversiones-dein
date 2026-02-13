@@ -293,6 +293,17 @@ const validateFront = () => {
   return true
 }
 
+const cerrarModalPrestamo = () => {
+  // 1) mueve el foco fuera del modal
+  const modalEl = document.getElementById('prestamomodal')
+  if (modalEl && modalEl.contains(document.activeElement)) {
+    document.activeElement.blur()
+  }
+
+  // 2) ahora sí cierra con tu helper
+  hideModal('#prestamomodal')
+}
+
 /* ----------------- GUARDAR (placeholder) ----------------- */
 const isSaving = ref(false)
 
@@ -381,7 +392,15 @@ onMounted(() => {
 
 <template>
   <teleport to="body">
-    <div class="modal fade" id="prestamomodal" data-bs-backdrop="static" data-bs-keyboard="false">
+      <div
+        class="modal fade"
+        id="prestamomodal"
+        tabindex="-1"
+        aria-labelledby="prestamomodalLabel"
+        aria-hidden="true"
+        data-bs-backdrop="static"
+        data-bs-keyboard="false"
+      >
       <div class="modal-dialog modal-xl">
         <div class="modal-content">
           <div class="modal-header">
@@ -650,7 +669,13 @@ onMounted(() => {
 
           <div class="modal-footer">
             <button type="button" class="btn btn-light" @click="limpiar">Limpiar</button>
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+<button
+  type="button"
+  class="btn btn-secondary"
+  @click="cerrarModalPrestamo"
+>
+  Cerrar
+</button>
             <button type="button" class="btn btn-primary" :disabled="isSaving" @click="guardar">
               <span v-if="isSaving" class="spinner-border spinner-border-sm me-2"></span>
               {{ (form.estadoCrud=='nuevo') ? 'Guardar' : 'Actualizar' }}

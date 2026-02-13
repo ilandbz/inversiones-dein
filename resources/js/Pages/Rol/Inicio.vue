@@ -54,7 +54,6 @@
         form.value.estadoCrud = 'nuevo'
         openModal('#modalRole')
         document.getElementById("modalRoleLabel").innerHTML = 'Nuevo Rol';
-        //titulo.textContent = 'Editar Datos Personales';
     }
     const listarRoles = async(page=1) => {
         dato.value.page= page

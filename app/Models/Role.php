@@ -7,6 +7,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Role extends Model
 {
+    protected $fillable = [
+        'nombre',
+    ];
     public function users()
     {
         return $this->belongsToMany(User::class); // asume role_user
@@ -15,15 +18,16 @@ class Role extends Model
     {
         return $this->belongsToMany(Menu::class);
     }
-    public function asignarMenus($menus){
-        if(is_array($menus)){
+    public function asignarMenus($menus)
+    {
+        if (is_array($menus)) {
             $this->menus()->sync($menus);
-        }else{
-            if(count($this->menus) == 0){
+        } else {
+            if (count($this->menus) == 0) {
                 $this->menus()->attach($menus);
             } else {
-                foreach($this->menus as $menu){
-                    if($menu->id != $menus){
+                foreach ($this->menus as $menu) {
+                    if ($menu->id != $menus) {
                         $this->menus()->attach($menus);
                     }
                 }
