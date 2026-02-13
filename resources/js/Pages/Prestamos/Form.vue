@@ -7,7 +7,6 @@ import usePlazo from '@/Composables/Plazo.js'
 import useCredito from '@/Composables/Credito.js' 
 import useOrigenFinanciamiento from '@/Composables/OrigenFinanciamiento.js'
 
-
 const { asesores, listaAsesores } = useAsesor()
 const { origenes, listaOrigenesFinanciamientos } = useOrigenFinanciamiento()
 const { plazos, listaPlazos } = usePlazo()
@@ -355,10 +354,8 @@ const guardar = async () => {
 
 /* ----------------- LIMPIAR ----------------- */
 const limpiar = () => {
-  form.value = {
+  Object.assign(form.value, {
     id: '',
-    // cliente_id: '',
-    // cliente_apenom: '',
     asesor_id: '',
     aval_id: null,
     tipo: 'NUEVO',
@@ -370,8 +367,9 @@ const limpiar = () => {
     tasainteres: '0.00',
     costomora: '0.00',
     total: '0.00',
+    estadoCrud: 'nuevo',
     errors: {}
-  }
+  })
   resetAval()
 }
 onMounted(() => {
@@ -379,7 +377,6 @@ onMounted(() => {
   listaOrigenesFinanciamientos()
   listaPlazos()
 })
-
 </script>
 
 <template>

@@ -1,7 +1,13 @@
 <script setup>
 import { computed, reactive, ref, watch, onMounted } from 'vue'
+import useHelper from '@/Helpers'
 import useCliente from '@/Composables/Cliente.js'
-
+import Prestamo from '@/Pages/Prestamos/Form.vue'
+const {
+  openModal,
+  Toast,
+  Swal
+} = useHelper()
 const {
   clientesPorEstado,
   clientes,
@@ -14,27 +20,36 @@ const {
 
 const q=ref('')
 
-const form = ref({
-  cliente_id: null,
-  agencia_id: '',
+
+const formPrestamo = ref({
+  id: '',
+  cliente_id: '',
+  cliente_apenom : '',
   asesor_id: '',
-  estado: 'ACTIVO',
-  fecha_reg: new Date().toISOString().slice(0, 10),
+  aval_id: null,
   tipo: 'NUEVO',
   monto: '',
-  producto: '',
+  origen_financiamiento_id: '',
   frecuencia: 'MENSUAL',
   plazo: '',
-  medioorigen: '',
-  dondepagara: 'NINGUNO',
+
   fuenterecursos: '',
-  tasainteres: '0.000',
-  total: '0.00',
+
+  tasainteres: '0.00',
   costomora: '0.00',
-  mencion: 'PRINCIPAL',
-  fecha_venc: ''
+  total: '0.00',
+
+  estadoCrud: 'nuevo',
+  errors: {}
 })
 
+const abrirPrestamo = (cliente) => {
+  formPrestamo.value.cliente_id = cliente.id
+  formPrestamo.value.cliente_apenom = cliente.apenom
+  formPrestamo.value.estadoCrud = 'nuevo'
+  document.getElementById("prestamomodalLabel").innerHTML = 'Solicitar Prestamo';
+  openModal('#prestamomodal')
+}
 
 const buscarCliente = async () => {
   await clientesPorEstado('REGISTRADO',q.value)
@@ -57,7 +72,7 @@ onMounted(() => {
         <div class="col-12 col-lg-4">
           <div class="card">
             <div class="card-header d-flex align-items-center justify-content-between">
-              <h4 class="card-title mb-0">Cliente</h4>
+              <h4 class="card-title mb-0">Busqueda de Cliente</h4>
             </div>
 
             <div class="card-body">
@@ -70,10 +85,7 @@ onMounted(() => {
                   placeholder="Ej: 12345678 o Juan Pérez"
                   @change="buscarCliente()"
                 />
-
-
               </div>
-
             </div>
           </div>
         </div>
@@ -81,7 +93,7 @@ onMounted(() => {
       <section class="row">
           <div class="card">
             <div class="card-header">
-              <h4 class="card-title">Datos del préstamo</h4>
+              <h4 class="card-title">Listado de Clientes</h4>
             </div>
 
             <div class="card-body">
@@ -125,11 +137,8 @@ onMounted(() => {
                         </td>
                         <td>
                           <div class="btn-group">
-                            <button class="btn btn-warning btn-sm" title="Editar" @click.prevent="editar(c.id, $event)">
-                              <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="btn btn-danger btn-sm" title="Enviar a Papelera" @click.prevent="eliminar(c.id)">
-                              <i class="fas fa-trash"></i>
+                            <button class="btn btn-info btn-sm" title="Registrar" @click.prevent="abrirPrestamo(c)">
+                              <i class="fas fa-plus"></i>
                             </button>
                           </div>
                         </td>
@@ -145,4 +154,5 @@ onMounted(() => {
           </div>
       </section>
     </div>
+      <Prestamo :form="formPrestamo" @cargar="buscarCliente()" />
 </template>

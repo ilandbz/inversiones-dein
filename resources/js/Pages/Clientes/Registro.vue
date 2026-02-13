@@ -658,7 +658,7 @@ const cancelar = () => router.push({ name: 'Principal' })
               </div>
 
               <div class="col-12 col-md-3">
-                <label class="form-label">Segundo Nombre</label>
+                <label class="form-label">Otros Nombres</label>
                 <input
                   v-model.trim="form.otrosnombres"
                   class="form-control"

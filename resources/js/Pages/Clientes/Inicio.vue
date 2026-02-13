@@ -202,14 +202,9 @@ const elimina = async (id) => {
     listarClientes()
   }
 }
-// PAGINACION
-const isActived = () => {
-    return clientes.value.current_page
-}
+
 const offset = 2;
-const buscar = () => {
-    listarClientes()
-}
+
 const verFoto=(registro)=>{
   limpiar()
   cliente.value.dni = registro.persona.dni;
@@ -218,30 +213,7 @@ const verFoto=(registro)=>{
   document.getElementById("fotoModalLabel").innerHTML = 'Imagen de Cliente';
   openModal('#fotoModal') 
 }
-const cambiarPaginacion = () => {
-    listarClientes()
-}
-const cambiarPagina =(pagina) => {
-    listarClientes(pagina)
-}
-const pagesNumber = () => {
-    if(!clientes.value.to){
-        return []
-    }
-    let from = clientes.value.current_page - offset
-    if(from < 1) from = 1
-    let to = from + (offset*2)
-    if( to >= clientes.value.last_page) to = clientes.value.last_page
-    let pagesArray = []
-    while(from <= to) {
-        pagesArray.push(from)
-        from ++
-    }
-    return pagesArray
-}
-const imagenNoEncontrada = (event)=>{
-    event.target.src = "/storage/fotos/default.png";
-}
+
 const listarClientes = async(page=1) => {
     dato.value.page= page
     await obtenerClientes(dato.value)
