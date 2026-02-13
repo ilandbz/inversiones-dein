@@ -30,8 +30,8 @@ export default function useCliente() {
         creditos.value = respuesta.data.creditos
         juntas.value = respuesta.data.juntas
     }
-    const clientesPorEstado = async (estado) => {
-        let respuesta = await axios.get('/cliente/clientes-por-estado?estado=' + estado, getConfigHeader())
+    const clientesPorEstado = async (estado, buscar) => {
+        let respuesta = await axios.get('/cliente/clientes-por-estado?estado=' + estado + '&buscar=' + buscar, getConfigHeader())
         clientes.value = respuesta.data
     }
     const obtenerDatosParaNuevoCredito = async (dni) => {

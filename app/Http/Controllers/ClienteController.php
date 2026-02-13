@@ -359,9 +359,15 @@ class ClienteController extends Controller
     public function clientesPorEstado(Request $request)
     {
         $estado = $request->estado;
+        $buscar = $request->buscar;
         $clientes = Cliente::query()
             ->join('personas', 'clientes.persona_id', '=', 'personas.id')
             ->where('clientes.estado', $estado)
+            ->where('personas.dni', 'like', '%' . $buscar . '%')
+            ->orWhere('personas.ape_pat', 'like', '%' . $buscar . '%')
+            ->orWhere('personas.ape_mat', 'like', '%' . $buscar . '%')
+            ->orWhere('personas.primernombre', 'like', '%' . $buscar . '%')
+            ->orWhere('personas.otrosnombres', 'like', '%' . $buscar . '%')
             ->select([
                 'clientes.id',
                 'clientes.usuario_id',
