@@ -1,4 +1,3 @@
-<!-- resources/js/Pages/Clientes/Index.vue (o donde lo tengas) -->
 <script setup>
 import { ref, onMounted, nextTick } from 'vue'
 import useCliente from '@/Composables/Cliente.js'
@@ -79,8 +78,6 @@ const form = ref({
   estadoCrud: 'editar',
   errors: {}
 })
-
-
 
 const limpiar = () => {
   form.value.id = ''

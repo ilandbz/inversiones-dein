@@ -312,7 +312,6 @@ class ClienteController extends Controller
     }
     public function todos()
     {
-
         $clientes = Cliente::query()
             ->join('personas', 'clientes.persona_id', '=', 'personas.id')
             ->select([
@@ -355,31 +354,53 @@ class ClienteController extends Controller
             ])
             ->get();
 
-        // $clientes = Cliente::query()
-        //     ->with([
-        //         'persona:id,dni,ape_pat,ape_mat,primernombre,otrosnombres,fecha_nac,ubigeo_nac,genero,celular,celular2,email,ruc,estado_civil,profesion,grado_instr,origen_labor,ocupacion,institucion_lab,conyugue,direccion',
-        //         'referente:id,dni,ape_pat,ape_mat,primernombre,otrosnombres,fecha_nac',
-        //         'usuario:id,name',
-        //     ])
-        //     ->select([
-        //         'id',
-        //         'usuario_id',
-        //         'persona_id',
-        //         'estado',
-        //         'fecha_reg',
-        //         'hora_reg',
-        //         'referente_id',
-        //         'referente_parentesco',
-        //     ])
-        //     ->get();
-
         return $clientes;
-        // $clientes = Cliente::with([
-        //     'usuario:id,name',
-        //     'persona:id,dni,ape_pat,ape_mat,primernombre,otrosnombres'
-        // ])->get();
+    }
+    public function clientesPorEstado(Request $request)
+    {
+        $estado = $request->estado;
+        $clientes = Cliente::query()
+            ->join('personas', 'clientes.persona_id', '=', 'personas.id')
+            ->where('clientes.estado', $estado)
+            ->select([
+                'clientes.id',
+                'clientes.usuario_id',
+                'clientes.persona_id',
+                'clientes.estado',
+                'clientes.fecha_reg',
+                'clientes.hora_reg',
+                'clientes.referente_id',
+                'clientes.referente_parentesco',
 
+                'personas.dni',
+                'personas.ape_pat',
+                'personas.ape_mat',
+                'personas.primernombre',
+                'personas.otrosnombres',
+                'personas.fecha_nac',
+                'personas.ubigeo_nac',
+                'personas.genero',
+                'personas.celular',
+                'personas.celular2',
+                'personas.email',
+                'personas.ruc',
+                'personas.estado_civil',
+                'personas.profesion',
+                'personas.grado_instr',
+                'personas.origen_labor',
+                'personas.ocupacion',
+                'personas.institucion_lab',
+                'personas.conyugue',
+                'personas.direccion',
 
+                DB::raw("CONCAT(
+                    personas.ape_pat,' ',
+                    personas.ape_mat,' ',
+                    personas.primernombre,' ',
+                    IFNULL(personas.otrosnombres,'')
+                ) AS apenom")
+            ])
+            ->get();
 
         return $clientes;
     }

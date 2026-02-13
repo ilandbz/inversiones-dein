@@ -1,11 +1,17 @@
 <script setup>
-import { computed, reactive, ref, watch } from 'vue'
-import { Head, router } from '@inertiajs/vue3'
-import MazerLayout from '@/Layouts/MazerLayout.vue'
+import { computed, reactive, ref, watch, onMounted } from 'vue'
+import useCliente from '@/Composables/Cliente.js'
 
-/**
- * FORM según tu tabla
- */
+const {
+  clientesPorEstado,
+  clientes,
+  obtenerCliente,
+  eliminarCliente,
+  respuesta,
+  cliente,
+  errors
+} = useCliente()
+
 const form = reactive({
   cliente_id: null,
   agencia_id: '',
@@ -27,17 +33,10 @@ const form = reactive({
   fecha_venc: ''
 })
 
-/**
- * ====== BUSCADOR DE CLIENTE EXISTENTE ======
- * (Por ahora es front-only con data mock.
- * Luego lo conectamos con endpoint real /clientes/buscar?q=...
-)
- */
 const q = ref('')
 const isSearching = ref(false)
 const selectedCliente = ref(null)
 
-// MOCK: reemplazar luego por API
 const clientesMock = [
   { id: 1, documento: '12345678', nombres: 'Juan', apellidos: 'Pérez', telefono: '999111222' },
   { id: 2, documento: '10456789012', nombres: 'María', apellidos: 'López', telefono: '988777666' },
@@ -65,11 +64,7 @@ const clearCliente = () => {
   q.value = ''
 }
 
-/**
- * ====== CÁLCULOS PREVIEW (ajustamos después a tu lógica real) ======
- * total = monto + (monto * tasaInteres * plazo)
- * - tasa en porcentaje: ejemplo 3.500 => 3.5%
- */
+
 const totalPreview = computed(() => {
   const monto = parseFloat(form.monto || 0)
   const tasa = parseFloat(form.tasainteres || 0) / 100
@@ -97,12 +92,12 @@ const submit = () => {
   console.log('Enviar préstamo:', JSON.parse(JSON.stringify(form)))
   alert('OK (demo). Luego lo conectamos al POST real.')
 }
+onMounted(async () => {
+  await clientesPorEstado('REGISTRADO')
+})
 </script>
 
 <template>
-  <Head title="Registrar Préstamo" />
-
-  <MazerLayout>
     <div class="page-heading">
       <h3>Préstamos</h3>
       <p class="text-subtitle text-muted">Registro de préstamo para cliente existente</p>
@@ -110,10 +105,7 @@ const submit = () => {
 
     <div class="page-content">
       <section class="row">
-
-        <!-- IZQUIERDA: CLIENTE + PRÉSTAMO -->
-        <div class="col-12 col-lg-8">
-          <!-- Cliente -->
+        <div class="col-12 col-lg-4">
           <div class="card">
             <div class="card-header d-flex align-items-center justify-content-between">
               <h4 class="card-title mb-0">Cliente</h4>
@@ -133,7 +125,6 @@ const submit = () => {
                   :disabled="!!selectedCliente"
                 />
 
-                <!-- Dropdown resultados -->
                 <div
                   v-if="!selectedCliente && q.trim() && results.length"
                   class="list-group position-absolute w-100 shadow"
@@ -178,182 +169,73 @@ const submit = () => {
               </div>
             </div>
           </div>
-
-          <!-- Préstamo -->
+        </div>
+      </section>
+      <section class="row">
           <div class="card">
             <div class="card-header">
               <h4 class="card-title">Datos del préstamo</h4>
             </div>
 
             <div class="card-body">
-              <form @submit.prevent="submit">
-                <div class="row g-3">
+              <div class="col-12">
+                <div class="table-responsive">
+                  <table class="table table-bordered table-hover table-sm table-striped">
+                    <thead>
+                      <tr>
+                        <th colspan="8" class="text-center">Clientes</th>
+                      </tr>
+                      <tr>
+                        <th>#</th>
+                        <th>DNI</th>
+                        <th>RUC</th>
+                        <th>Cliente</th>
+                        <th>Celular</th>
+                        <th>Email</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                      </tr>
+                    </thead>
 
-                  <div class="col-12 col-md-4">
-                    <label class="form-label">Agencia (ID)</label>
-                    <input v-model="form.agencia_id" class="form-control" placeholder="Ej: 1" />
-                  </div>
+                    <tbody>
+                      <tr v-if="clientes.length == 0">
+                        <td class="text-danger text-center" colspan="8">
+                          -- Datos No Registrados - Tabla Vacía --
+                        </td>
+                      </tr>
 
-                  <div class="col-12 col-md-4">
-                    <label class="form-label">Asesor (ID)</label>
-                    <input v-model="form.asesor_id" class="form-control" placeholder="Ej: 3" />
-                  </div>
+                      <tr v-else v-for="(c, index) in clientes" :key="c.id">
+                        <td>{{ index + 1 }}</td>
+                        <td>{{ c.dni }}</td>
+                        <td>{{ c.ruc }}</td>
+                        <td>{{ c.apenom }}</td>
+                        <td>{{ c.celular }}</td>
+                        <td>{{ c.email }}</td>
+                        <td>
+                          <span class="badge" :class="c.estado === 'ACTIVO' ? 'bg-success' : 'bg-secondary'">
+                            {{ c.estado }}
+                          </span>
+                        </td>
+                        <td>
+                          <div class="btn-group">
+                            <button class="btn btn-warning btn-sm" title="Editar" @click.prevent="editar(c.id, $event)">
+                              <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-danger btn-sm" title="Enviar a Papelera" @click.prevent="eliminar(c.id)">
+                              <i class="fas fa-trash"></i>
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    </tbody>
 
-                  <div class="col-12 col-md-4">
-                    <label class="form-label">Estado</label>
-                    <select v-model="form.estado" class="form-select">
-                      <option value="ACTIVO">ACTIVO</option>
-                      <option value="PENDIENTE">PENDIENTE</option>
-                      <option value="CANCELADO">CANCELADO</option>
-                      <option value="MORA">MORA</option>
-                    </select>
-                  </div>
-
-                  <div class="col-12 col-md-4">
-                    <label class="form-label">Fecha registro</label>
-                    <input v-model="form.fecha_reg" type="date" class="form-control" />
-                  </div>
-
-                  <div class="col-12 col-md-4">
-                    <label class="form-label">Tipo</label>
-                    <input v-model="form.tipo" class="form-control" placeholder="Ej: NUEVO / RENOVACIÓN" />
-                  </div>
-
-                  <div class="col-12 col-md-4">
-                    <label class="form-label">Producto</label>
-                    <input v-model="form.producto" class="form-control" placeholder="Ej: PERSONAL" />
-                  </div>
-
-                  <div class="col-12 col-md-4">
-                    <label class="form-label">Monto</label>
-                    <input v-model="form.monto" type="number" step="0.01" class="form-control" placeholder="Ej: 5000" />
-                  </div>
-
-                  <div class="col-12 col-md-4">
-                    <label class="form-label">Frecuencia</label>
-                    <select v-model="form.frecuencia" class="form-select">
-                      <option value="DIARIO">DIARIO</option>
-                      <option value="SEMANAL">SEMANAL</option>
-                      <option value="QUINCENAL">QUINCENAL</option>
-                      <option value="MENSUAL">MENSUAL</option>
-                    </select>
-                  </div>
-
-                  <div class="col-12 col-md-4">
-                    <label class="form-label">Plazo</label>
-                    <input v-model="form.plazo" type="number" class="form-control" placeholder="Ej: 12" />
-                  </div>
-
-                  <div class="col-12 col-md-4">
-                    <label class="form-label">Tasa interés (%)</label>
-                    <input v-model="form.tasainteres" type="number" step="0.001" class="form-control" placeholder="Ej: 3.500" />
-                  </div>
-
-                  <div class="col-12 col-md-4">
-                    <label class="form-label">Costo mora</label>
-                    <input v-model="form.costomora" type="number" step="0.01" class="form-control" placeholder="Ej: 1.50" />
-                  </div>
-
-                  <div class="col-12 col-md-4">
-                    <label class="form-label">Total (preview)</label>
-                    <input v-model="form.total" class="form-control" readonly />
-                  </div>
-
-                  <div class="col-12 col-md-6">
-                    <label class="form-label">Medio origen</label>
-                    <input v-model="form.medioorigen" class="form-control" placeholder="Ej: REFERIDOS / FACEBOOK" />
-                  </div>
-
-                  <div class="col-12 col-md-6">
-                    <label class="form-label">Fuente recursos</label>
-                    <input v-model="form.fuenterecursos" class="form-control" placeholder="Ej: NEGOCIO / SUELDO" />
-                  </div>
-
-                  <div class="col-12 col-md-6">
-                    <label class="form-label">Dónde pagará</label>
-                    <input v-model="form.dondepagara" class="form-control" placeholder="Ej: NINGUNO / CAJA / BANCO" />
-                  </div>
-
-                  <div class="col-12 col-md-6">
-                    <label class="form-label">Fecha vencimiento (opcional)</label>
-                    <input v-model="form.fecha_venc" type="date" class="form-control" />
-                  </div>
-
-                  <div class="col-12">
-                    <label class="form-label">Mención</label>
-                    <input v-model="form.mencion" class="form-control" placeholder="Ej: PRINCIPAL" />
-                  </div>
-
+                  </table>
                 </div>
 
-                <div class="d-flex gap-2 mt-4">
-                  <button type="submit" class="btn btn-primary" :disabled="!form.cliente_id">
-                    <i class="bi bi-save me-1"></i> Guardar Préstamo
-                  </button>
-
-                  <button type="button" class="btn btn-light" @click="router.visit('/dashboard')">
-                    Cancelar
-                  </button>
-                </div>
-
-              </form>
-            </div>
-          </div>
-        </div>
-
-        <!-- DERECHA: RESUMEN -->
-        <div class="col-12 col-lg-4">
-          <div class="card">
-            <div class="card-header">
-              <h4 class="card-title">Resumen</h4>
-            </div>
-
-            <div class="card-body">
-              <div class="mb-2 text-muted small">Cliente</div>
-              <div class="mb-3">
-                <div class="fw-semibold" v-if="selectedCliente">
-                  {{ selectedCliente.nombres }} {{ selectedCliente.apellidos }}
-                </div>
-                <div class="text-muted" v-else>— Selecciona un cliente —</div>
-              </div>
-
-              <hr />
-
-              <div class="d-flex justify-content-between mb-2">
-                <span class="text-muted">Monto</span>
-                <span class="fw-semibold">S/ {{ Number(form.monto || 0).toFixed(2) }}</span>
-              </div>
-
-              <div class="d-flex justify-content-between mb-2">
-                <span class="text-muted">Tasa</span>
-                <span class="fw-semibold">{{ form.tasainteres || '0.000' }}%</span>
-              </div>
-
-              <div class="d-flex justify-content-between mb-2">
-                <span class="text-muted">Plazo</span>
-                <span class="fw-semibold">{{ form.plazo || 0 }}</span>
-              </div>
-
-              <div class="d-flex justify-content-between mb-2">
-                <span class="text-muted">Frecuencia</span>
-                <span class="fw-semibold">{{ form.frecuencia }}</span>
-              </div>
-
-              <hr />
-
-              <div class="d-flex justify-content-between">
-                <span class="text-muted">Total (preview)</span>
-                <span class="fw-bold">S/ {{ Number(form.total || 0).toFixed(2) }}</span>
-              </div>
-
-              <div class="alert alert-light mt-3 mb-0 small">
-                Este total es solo referencia. Luego lo conectamos a tu fórmula real y cronograma.
+          
               </div>
             </div>
           </div>
-        </div>
-
       </section>
     </div>
-  </MazerLayout>
 </template>

@@ -4,9 +4,11 @@ import LayoutLogin from '@/Layouts/AppLayoutLogin.vue'
 import LayoutDefault from '@/Layouts/AppLayoutDefault.vue'
 import Placeholder from '@/Pages/PlaceHolder.vue'
 import PrestamosInicio from '@/Pages/Prestamos/Inicio.vue'
+import PrestamosRegistrar from '@/Pages/Prestamos/Registrar.vue'
 import Principal from '@/Pages/Principal.vue'
 import RegistroClientes from '@/Pages/Clientes/Registro.vue'
 import Usuario from '@/Pages/Usuario/Inicio.vue'
+import PermisosInicio from '@/Pages/Permisos/Inicio.vue'
 import ClientesInicio from '@/Pages/Clientes/Inicio.vue'
 import RegistroPropiedades from '@/Pages/Propiedad/Inicio.vue'
 import Login from '@/Pages/Auth/Login.vue'
@@ -89,12 +91,12 @@ const routes = [
 
   { path: '/usuarios', name: 'Usuarios', component: Usuario, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Usuarios' } },
   { path: '/roles', name: 'Roles', component: Rol, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Roles' } },
-  { path: '/permisos', name: 'Permisos', component: RegistroClientes, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Permisos' } },
+  { path: '/permisos', name: 'Permisos', component: PermisosInicio, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Permisos' } },
   { path: '/configuracion', name: 'Configuracion', component: RegistroClientes, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Configuración' } },
   { path: '/propiedades', name: 'Propiedades', component: RegistroPropiedades, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Propiedades' } },
 
   // --- PRESTAMOS ---
-  { path: '/prestamos/registrar', name: 'PrestamosRegistrar', component: Placeholder, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Registrar Préstamo' } },
+  { path: '/prestamos/registrar', name: 'PrestamosRegistrar', component: PrestamosRegistrar, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Registrar Préstamo' } },
   { path: '/prestamos/simulacion', name: 'PrestamosSimulacion', component: Placeholder, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Simulación' } },
   { path: '/prestamos/cronograma-de-pagos', name: 'PrestamosCronograma', component: Placeholder, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Cronograma de Pagos' } },
   { path: '/prestamos/historial-de-prestamos', name: 'PrestamosHistorial', component: PrestamosInicio, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Historial de Préstamos' } },

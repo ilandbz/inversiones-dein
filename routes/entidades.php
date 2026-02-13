@@ -21,6 +21,7 @@ Route::group(['prefix' => 'cliente', 'middleware' => 'auth'], function () {
     Route::post('eliminar', [ClienteController::class, 'destroy']);
     Route::post('guardar', [ClienteController::class, 'store']);
     Route::get('listar', [ClienteController::class, 'listar']);
+    Route::get('clientes-por-estado', [ClienteController::class, 'clientesPorEstado']);
     Route::get('listar-clientes-posicion', [ClienteController::class, 'listarClientesPosicion']);
     Route::get('mostrar-dni', [ClienteController::class, 'mostrarPorDni']);
     Route::get('mostrar-con-registros-dni', [ClienteController::class, 'datosCreditoJuntaPorDni']);
