@@ -37,7 +37,12 @@ const {
 } = useUbigeo()
 
 const {
-  existeClientePorDni, existeCliente, errors: errorsCliente
+  agregarCliente,
+  actualizarCliente,
+  respuesta,
+  errors,
+  existeClientePorDni,
+  existeCliente
 } = useCliente()
 
 
@@ -252,8 +257,8 @@ watch(
   }
 )
 
-const onChangeTipoActividad = async () => {
-  const id = form.value.negocio.tipo_actividad_id
+const onChangeActividad = async () => {
+  const id = form.value.negocio.actividad_negocio_id
   if (!id) {
     detalleActividadNegocios.value = []
     form.value.negocio.detalle_actividad_id = ''
@@ -302,131 +307,62 @@ const parentescos = [
   'ESPOSO(A)','CONVIVIENTE','AMIGO(A)','VECINO(A)','COMPAÑERO(A) DE TRABAJO','OTRO'
 ]
 
-// --- Guardar ---
-const crud = {
-    'nuevo': async() => {
-        // La logica de guardado principal esta en ClienteController, pero aqui llamamos 
-        // al metodo que el padre nos pase o un emit. 
-        // El padre usa useCliente para guardar? Inicio.vue usa useCliente.
-        // Pero FormCliente usaba usePropiedad antes? Eso estaba raro.
-        // Asumiremos que FormCliente emite 'onListar' despues de guardar exitosamente.
-        // Pero espera, el codigo anterior usaba `agregarPropiedad`. 
-        // AHORA debemos usar `agregarCliente` probablemente, pero eso esta en el composable useCliente.
-        // El padre (Inicio.vue) parece manejar el editar, pero no el guardar nuevo completo?
-        // Ah, Inicio.vue tiene `agregarCliente` importado pero FormCliente tenia `agregarPropiedad`.
-        // Vamos a usar useCliente aqui directamente para guardar.
-        
-        const { agregarCliente, respuesta: rCli, errors: eCli, actualizarCliente } = useCliente()
-        
-        // Preparar FormData
-        const fd = new FormData()
-        // ... Llenar FormData similar a Registro.vue ...
-        // (Simplificado para el ejemplo, deberiamos usar una funcion helper si es complejo)
-        const appendIf = (k, v) => { if(v!=null && v!=='') fd.append(k,v) }
-        
-        for (const k in form.value) {
-           if(typeof form.value[k] !== 'object') appendIf(k, form.value[k])
-        }
-        if(esIndependiente.value) {
-            for(const k in form.value.negocio) appendIf(`negocio[${k}]`, form.value.negocio[k])
-        }
-        for(const k in form.value.referente) appendIf(`referente[${k}]`, form.value.referente[k])
-        
-        await agregarCliente(fd)
-        
-        if (eCli.value) {
-             form.value.errors = eCli.value
-        } else if (rCli.value.ok == 1) {
-            hideModal('#modalcliente')
-            Toast.fire({icon:'success', title: rCli.value.mensaje})
-            emit('onListar')
-        }
-    },
-    'editar': async() => {
-        const { actualizarCliente, respuesta: rCli, errors: eCli } = useCliente()
-         // Preparar FormData o JSON. Update suele aceptar JSON si no hay archivos.
-         // Pero actualizarCliente en composable usa FormData tmb?
-         // Revisemos useCliente... asumo que es similar.
-         // Por simplicidad, usaremos la misma logica de FormData o objeto directo segun el composable.
-         // Asumamos objeto directo para update si no hay archivos nuevos (foto).
-         
-         // NOTA: Para este refactor rapido, enviaremos todo el form.value a actualizarCliente
-         await actualizarCliente(form.value)
-         
-         if (eCli.value) {
-             form.value.errors = eCli.value
-        } else if (rCli.value.ok == 1) {
-            hideModal('#modalcliente')
-            Toast.fire({icon:'success', title: rCli.value.mensaje})
-            emit('onListar')
-        }
-    }
-}
 
-const guardar = () => {
-    //crud[form.value.estadoCrud]()
-    // Como el composable de Cliente no lo tengo a la mano completo, hare un emit con el FormData 
-    // O mejor, implemento aqui la llamada a useCliente que SI tengo importado.
-    
-    // IMPORTANTE: El `useCliente` debe ser importado.
-    // Voy a implementar una version robusta de guardar aqui.
-    
-    submitForm()
-}
+
+const guardar = () => submitForm()
 
 const submitForm = async () => {
-     const { agregarCliente, actualizarCliente, respuesta: rCli, errors: eCli } = useCliente()
-     
-     const fd = new FormData()
-     const plain = form.value
-     
-      const appendIfFilled = (fd, key, value) => {
-        if (value === null || value === undefined || value === '') return
-        fd.append(key, value)
-      }
+  const fd = new FormData()
 
-      for (const [k, v] of Object.entries(plain)) {
-        if (k === 'negocio' || k === 'referente' || k === 'errors') continue
-        appendIfFilled(fd, k, v)
-      }
+  const appendIfFilled = (key, value) => {
+    if (value === null || value === undefined || value === '') return
+    fd.append(key, value)
+  }
 
-      if (esIndependiente.value) {
-            for (const [k, v] of Object.entries(plain.negocio || {})) appendIfFilled(fd, `negocio[${k}]`, v)
-      } else {
-          // Si no es independiente, quizas tengamos que limpiar o enviar flag
-      }
+  const plain = form.value
 
-      for (const [k, v] of Object.entries(plain.referente || {})) appendIfFilled(fd, `referente[${k}]`, v)
-      
-      // Foto? Si hubiera input file. Por ahora no lo veo en el modal solicitado pero en Registro si estaba.
-      // Omitimos foto por espacio en modal, o lo agregamos despues.
-      
-      let res, err
-      
-      if (form.value.estadoCrud === 'nuevo') {
-          await agregarCliente(fd)
-          res = rCli
-          err = eCli
-      } else {
-          // update
-          // al update le pasamos el objeto request (que a veces es form.value direct y el composable lo maneja)
-          // Asumiremos que actualizarCliente maneja un objeto simple o FormData con _method PUT
-          fd.append('_method', 'PUT')
-          await actualizarCliente(fd) 
-          res = rCli
-          err = eCli
-      }
-      
-      if (err.value) {
-          form.value.errors = err.value
-      } else if (res.value?.ok == 1) {
-          form.value.errors = {}
-          hideModal('#modalcliente')
-          Toast.fire({icon:'success', title: res.value.mensaje})
-          emit('onListar')
-      }
+  for (const [k, v] of Object.entries(plain)) {
+    if (k === 'negocio' || k === 'referente' || k === 'errors') continue
+    appendIfFilled(k, v)
+  }
+
+  if (esIndependiente.value) {
+    for (const [k, v] of Object.entries(plain.negocio || {})) {
+      appendIfFilled(`negocio[${k}]`, v)
+    }
+  }
+
+  for (const [k, v] of Object.entries(plain.referente || {})) {
+    appendIfFilled(`referente[${k}]`, v)
+  }
+
+  if (plain.estadoCrud === 'nuevo') {
+    await agregarCliente(fd)
+  } else {
+    await actualizarCliente(fd)
+  }
+
+  if (eCli.value) {
+    form.value.errors = eCli.value
+    return
+  }
+
+  if (rCli.value?.ok == 1) {
+    form.value.errors = {}
+    hideModal('#modalcliente')
+    Toast.fire({ icon: 'success', title: rCli.value.mensaje })
+    emit('onListar')
+  }
 }
 
+watch(
+  () => form.value.negocio?.actividad_negocio_id,
+  async (id) => {
+    if (!id) return
+    await listaDetalleActividadNegocios(id)
+  },
+  { immediate: true }
+)
 // Eventos del modal
 const onHideHandler = () => {
     if (document.activeElement && modalEl.value?.contains(document.activeElement)) {
@@ -467,6 +403,7 @@ onBeforeUnmount(() => {
                         </div>
                         <div class="modal-body bg-light">
                             <!-- DATOS PERSONALES -->
+                             {{ form }}
                             <div class="card mb-3 shadow-sm border-0">
                                 <div class="card-header bg-white border-bottom-0 pt-3">
                                     <h6 class="text-primary mb-0"><i class="fas fa-user me-2"></i>Datos Personales</h6>
@@ -669,13 +606,14 @@ onBeforeUnmount(() => {
                                                     </div>
                                                     <div class="col-md-3">
                                                         <label class="small">Actividad</label>
-                                                        <select v-model="form.negocio.tipo_actividad_id" class="form-select form-select-sm" @change="onChangeTipoActividad">
+                                                        <select v-model="form.negocio.actividad_negocio_id" class="form-select form-select-sm" @change="onChangeActividad">
                                                             <option value="">Seleccione</option>
                                                             <option v-for="a in actividadNegocios" :key="a.id" :value="a.id">{{ a.nombre }}</option>
                                                         </select>
                                                     </div>
                                                      <div class="col-md-3">
                                                         <label class="small">Detalle Actividad</label>
+                                                        {{ form.negocio.detalle_actividad_id }}
                                                         <select v-model="form.negocio.detalle_actividad_id" class="form-select form-select-sm">
                                                             <option value="">Seleccione</option>
                                                             <option v-for="d in detalleActividadNegocios" :key="d.id" :value="d.id">{{ d.nombre }}</option>

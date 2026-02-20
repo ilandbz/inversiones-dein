@@ -202,13 +202,17 @@ class CreditoController extends Controller
     public function listar(Request $request)
     {
         $filters = $this->getUserFilters();
+        $estado = $request->estado;
         $buscar = mb_strtoupper($request->buscar ?? '');
         $paginacion = is_numeric($request->paginacion) ? $request->paginacion : 10; // Valor por defecto 10
         $query = Credito::with([
             'cliente:id,estado,persona_id',
             'asesor.user:id,name',
-            'cliente.persona:id,dni,ape_pat,ape_mat,primernombre,otrosnombres',
+            'cliente.persona:id,dni,ape_pat,ape_mat,primernombre,otrosnombres,celular,ruc',
         ]);
+        if (!empty($estado)) {
+            $query->where('estado', $estado);
+        }
 
         if (!empty($buscar)) {
             $query->whereHas('cliente.persona', function ($q) use ($buscar) {
@@ -224,49 +228,6 @@ class CreditoController extends Controller
             $query->where('asesor_id', $filters['user_id']);
         }
         return $query->orderBy('id', 'DESC')->paginate($paginacion);
-    }
-    public function listarCreditosPorEstado(Request $request)
-    {
-        $filters = $this->getUserFilters();
-        if ($request->estado == 'FINALIZADO') {
-            return $this->listaCreditosApagarMora($request);
-        }
-        if ($request->estado == 'DESEMBOLSADO' || $request->estado == 'CASTIGO') { //o castigo
-            return $this->listaCreditosApagar($request);
-        }
-        if ($request->estado == 'TODOS') {
-            return $this->listaCreditosDesembTodos($request);
-        }
-
-        $estado = $request->estado;
-        $agencia_id = $request->agencia_id;
-
-        $buscar = mb_strtoupper($request->buscar ?? '');
-        $paginacion = is_numeric($request->paginacion) ? $request->paginacion : 10; // Valor por defecto 10
-
-        $query = Credito::with([
-            'cliente:id,estado,persona_id',
-            'agencia:id,nombre',
-            'asesor:id,name',
-            'cliente.persona:id,dni,ape_pat,ape_mat,primernombre,otrosnombres',
-        ])->where('estado', $estado);
-        if (!empty($buscar)) {
-            $query->whereHas('cliente.persona', function ($q) use ($buscar) {
-                $q->whereRaw("UPPER(dni) LIKE ?", ["%$buscar%"])
-                    ->orWhereRaw("UPPER(ape_pat) LIKE ?", ["%$buscar%"])
-                    ->orWhereRaw("UPPER(ape_mat) LIKE ?", ["%$buscar%"])
-                    ->orWhereRaw("UPPER(primernombre) LIKE ?", ["%$buscar%"])
-                    ->orWhereRaw("UPPER(otrosnombres) LIKE ?", ["%$buscar%"])
-                    ->orWhereRaw("UPPER(CONCAT(personas.ape_pat, ' ', personas.ape_mat, ' ', personas.primernombre, ' ', IFNULL(personas.otrosnombres, ''))) LIKE ?", ['%' . $buscar . '%']);;
-            })->orwhere('id', $buscar);
-        }
-        if ($filters['role'] == 'COBRANZA HUANUCO') {
-            $query->whereIn('agencia_id', [1, 2, 3, 4]);
-        } elseif ($filters['role'] == 'GERENTE ZONAL' || $filters['role'] == 'OPERACIONES' || $filters['role'] == 'SUPER USUARIO') {
-        } else {
-            $query->where('agencia_id', $filters['agencia_id']);
-        }
-        return $query->orderBY('cliente_id', 'ASC')->paginate($paginacion);
     }
     public function cargarEvaluacionAnterior(Request $request)
     {
@@ -306,52 +267,9 @@ class CreditoController extends Controller
             'mensaje' => 'Evaluación anterior copiada correctamente',
         ], 200);
     }
-    private function replicarHijosBalance($balance, $nuevoCreditoId)
-    {
-        foreach ($balance->deudas as $hijo) {
-            $nuevo = $hijo->replicate();
-            $nuevo->credito_id = $nuevoCreditoId;
-            $nuevo->save();
-        }
-        foreach ($balance->muebles as $hijo) {
-            $nuevo = $hijo->replicate();
-            $nuevo->credito_id = $nuevoCreditoId;
-            $nuevo->save();
-        }
-        if ($balance->detinventarios) {
-            $nuevo = $balance->detinventarios->replicate();
-            $nuevo->credito_id = $nuevoCreditoId;
-            $nuevo->save();
-        }
-    }
-    private function replicarHijosPerdidas($perdidas, $nuevoCreditoId)
-    {
-        if ($perdidas->venta) {
-            $nuevaVenta = $perdidas->venta->replicate();
-            $nuevaVenta->credito_id = $nuevoCreditoId;
-            $nuevaVenta->save();
-            foreach ($perdidas->venta->detalles as $detalle) {
-                $nuevoDetalle = $detalle->replicate();
-                $nuevoDetalle->credito_id = $nuevoCreditoId;
-                $nuevoDetalle->save();
-            }
-        }
-        if ($perdidas->gasto_negocio) {
-            $nuevogastonegocio = $perdidas->gasto_negocio->replicate();
-            $nuevogastonegocio->credito_id = $nuevoCreditoId;
-            $nuevogastonegocio->save();
-        }
-
-        if ($perdidas->gasto_familiar) {
-            $nuevogasofamiliar = $perdidas->gasto_familiar->replicate();
-            $nuevogasofamiliar->credito_id = $nuevoCreditoId;
-            $nuevogasofamiliar->save();
-        }
-    }
     public function validarParaEvaluacion(Request $request)
     {
-        $solicitud = Credito::with(['analisis', 'balance', 'perdidas', 'propuesta'])
-            ->where('id', $request->id)->first();
+        $solicitud = Credito::where('id', $request->id)->first();
         if (!$solicitud) {
             return response()->json([
                 'ok' => 0,

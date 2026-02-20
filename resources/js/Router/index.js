@@ -18,6 +18,7 @@ import Desembolso from '@/Pages/Desembolso/Inicio.vue'
 import CambiarClave from '@/Pages/Usuario/CambiarClave.vue'
 import ActividadDeNegocio from '@/Pages/ActividadNegocio/Inicio.vue'
 import Rol from '@/Pages/Rol/Inicio.vue'
+import AutorizacionesInicio from '@/Pages/Autorizaciones/Inicio.vue'
 
 const routes = [
   {
@@ -117,7 +118,7 @@ const routes = [
 
   // --- GERENCIA ---
   { path: '/gerencia/reportes-gerenciales', name: 'GerenciaReportes', component: Placeholder, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Reportes Gerenciales' } },
-  { path: '/gerencia/autorizaciones', name: 'GerenciaAutorizaciones', component: Placeholder, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Autorizaciones' } },
+  { path: '/gerencia/autorizaciones', name: 'GerenciaAutorizaciones', component: AutorizacionesInicio, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Autorizaciones' } },
 
 ]
 const router = createRouter({

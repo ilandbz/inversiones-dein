@@ -137,7 +137,7 @@ onMounted(() => {
                         </td>
                         <td>
                           <div class="btn-group">
-                            <button class="btn btn-info btn-sm" v-if="c.estado === 'REGISTRADO'" title="Registrar" @click.prevent="abrirPrestamo(c)">
+                            <button class="btn btn-info btn-sm" v-if="c.estado === 'REGISTRADO'" title="Registrar Nuevo Prestamo" @click.prevent="abrirPrestamo(c)">
                               <i class="fas fa-plus"></i>
                             </button>
                           </div>

@@ -11,16 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('cronograma_pagos', function (Blueprint $table) {
+        Schema::create('evaluacion_prestamos', function (Blueprint $table) {
             $table->id();
             $table->foreignId('credito_id')->constrained('creditos')->cascadeOnDelete();
-            $table->integer('numero_cuota');
-            $table->date('fecha_vencimiento');
-            $table->decimal('capital', 10, 2);
-            $table->decimal('interes', 10, 2);
-            $table->decimal('mora', 10, 2)->default(0);
-            $table->decimal('total', 10, 2);
-            $table->enum('estado', ['PENDIENTE', 'PAGADO'])->default('PENDIENTE');
+            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
+            $table->string('cargo');
+            $table->string('estado');
+            $table->text('observacion')->nullable();
             $table->timestamps();
         });
     }
@@ -30,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('cronograma_pagos');
+        Schema::dropIfExists('evaluacion_prestamos');
     }
 };

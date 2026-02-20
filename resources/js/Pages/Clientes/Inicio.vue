@@ -27,21 +27,27 @@ const lastOpener = ref(null)
 
 const NEGOCIO_DEFAULT = () => ({
   id: '',
-  nombre: '',
-  rubro: '',
+  razonsocial: '',
+  ruc: '',
+  celular: '',
+  actividad_negocio_id: '',
+  detalle_actividad_id: '',
+  inicioactividad: '',
   direccion: '',
-  // ...lo que uses
 })
 const REFERENTE_DEFAULT = () => ({
   id: '',
   dni: '',
-  nombres: '',
-  parentesco: '',
+  ape_pat: '',
+  ape_mat: '',
+  primernombre: '',
+  otrosnombres: '',
   celular: '',
-  // ...lo que uses
+  parentesco: '',
+  direccion: '',
 })
 
-const form = ref({
+const FORM_DEFAULT = () => ({
   id: '',
   dni: '',
   ruc: '',
@@ -79,86 +85,67 @@ const form = ref({
   errors: {}
 })
 
+const form = ref(FORM_DEFAULT())
+
 const limpiar = () => {
-  form.value.id = ''
-  form.value.dni = ''
-  form.value.ruc = ''
-  form.value.celular = ''
-  form.value.celular2 = ''
-  form.value.email = ''
-
-  form.value.ape_pat = ''
-  form.value.ape_mat = ''
-  form.value.primernombre = ''
-  form.value.otrosnombres = ''
-
-  form.value.fecha_nac = ''
-  form.value.genero = 'M'
-  form.value.estado_civil = 'SOLTERO'
-  form.value.ubigeo_nac = ''
-  form.value.ubigeo_dom = ''
-
-  form.value.profesion = ''
-  form.value.grado_instr = ''
-  form.value.origen_labor = 'INDEPENDIENTE'
-  form.value.ocupacion = ''
-  form.value.institucion_lab = ''
-
-  form.value.direccion = ''
-  form.value.latitud_longitud = ''
-
-  form.value.negocio = NEGOCIO_DEFAULT()
-  form.value.referente = REFERENTE_DEFAULT()
-
-  form.value.estado = 'ACTIVO'
-  form.value.fecha_reg = ''
-  form.value.hora_reg = ''
-
-  form.value.estadoCrud = 'editar'
-  form.value.errors = {}
+  Object.assign(form.value, FORM_DEFAULT())
   errors.value = []
 }
 
 const obtenerDatos = async (id) => {
   await obtenerCliente(id)
 
-  if (cliente.value) {
-    const c = cliente.value
+  const c = cliente.value
+  if (!c) return
 
-    form.value.id = c.id ?? ''
-    form.value.dni = c.persona.dni ?? ''
-    form.value.ruc = c.persona.ruc ?? ''
-    form.value.celular = c.persona.celular ?? ''
-    form.value.celular2 = c.persona.celular2 ?? ''
-    form.value.email = c.persona.email ?? ''
+  const p = c.persona ?? {}
+  const n = c.negocio ?? {}
 
-    form.value.ape_pat = c.ape_pat ?? ''
-    form.value.ape_mat = c.ape_mat ?? ''
-    form.value.primernombre = c.primernombre ?? ''
-    form.value.otrosnombres = c.otrosnombres ?? ''
+  // IDs / estado cliente
+  form.value.id = c.id ?? ''
+  form.value.estado = c.estado ?? 'ACTIVO'
+  form.value.fecha_reg = c.fecha_reg ?? ''
+  form.value.hora_reg = c.hora_reg ?? ''
 
-    form.value.fecha_nac = c.fecha_nac ?? ''
-    form.value.genero = c.genero ?? 'M'
-    form.value.estado_civil = c.estado_civil ?? 'SOLTERO'
-    form.value.ubigeo_nac = c.ubigeo_nac ?? ''
-    form.value.ubigeo_dom = c.ubigeo_dom ?? ''
+  // PERSONA (OJO: todo viene aquí)
+  form.value.dni = p.dni ?? ''
+  form.value.ruc = p.ruc ?? ''
+  form.value.celular = p.celular ?? ''
+  form.value.celular2 = p.celular2 ?? ''
+  form.value.email = p.email ?? ''
 
-    form.value.profesion = c.profesion ?? ''
-    form.value.grado_instr = c.grado_instr ?? ''
-    form.value.origen_labor = c.origen_labor ?? 'INDEPENDIENTE'
-    form.value.ocupacion = c.ocupacion ?? ''
-    form.value.institucion_lab = c.institucion_lab ?? ''
+  form.value.ape_pat = p.ape_pat ?? ''
+  form.value.ape_mat = p.ape_mat ?? ''
+  form.value.primernombre = p.primernombre ?? ''
+  form.value.otrosnombres = p.otrosnombres ?? ''
 
-    form.value.direccion = c.direccion ?? ''
-    form.value.latitud_longitud = c.latitud_longitud ?? ''
+  form.value.fecha_nac = p.fecha_nac ?? ''
+  form.value.genero = p.genero ?? 'M'
+  form.value.estado_civil = p.estado_civil ?? 'SOLTERO'
+  form.value.ubigeo_nac = p.ubigeo_nac ?? ''
+  form.value.ubigeo_dom = p.ubigeo_dom ?? ''
 
-    form.value.negocio = c.negocio ?? NEGOCIO_DEFAULT()
-    form.value.referente = c.referente ?? REFERENTE_DEFAULT()
+  form.value.profesion = p.profesion ?? ''
+  form.value.grado_instr = p.grado_instr ?? ''
+  form.value.origen_labor = p.origen_labor ?? 'INDEPENDIENTE'
+  form.value.ocupacion = p.ocupacion ?? ''
+  form.value.institucion_lab = p.institucion_lab ?? ''
 
-    form.value.estado = c.estado ?? 'ACTIVO'
-    form.value.fecha_reg = c.fecha_reg ?? ''
-    form.value.hora_reg = c.hora_reg ?? ''
+  form.value.direccion = p.direccion ?? ''
+  form.value.latitud_longitud = p.latitud_longitud ?? ''
+
+  form.value.negocio = {
+    ...NEGOCIO_DEFAULT(),
+    ...(n ?? {}),
+    detalle_actividad_id: n?.detalle_actividad_id ?? '',
+    actividad_negocio_id: n?.detalle_actividad?.actividad_negocio_id ?? '',
   }
+
+  // Si tu API NO retorna objeto referente, no podrás llenar estos campos aquí
+  form.value.referente = c.referente ?? REFERENTE_DEFAULT()
+
+  // Si lo único que viene es parentesco:
+  form.value.referente.parentesco = c.referente_parentesco ?? form.value.referente.parentesco
 }
 
 
@@ -272,11 +259,11 @@ onMounted(() => {
 
                 <tr v-else v-for="(c, index) in clientes.data" :key="c.id">
                   <td>{{ index + clientes.from }}</td>
-                  <td>{{ c.dni }}</td>
-                  <td>{{ c.ruc }}</td>
-                  <td>{{ c.apenom }}</td>
-                  <td>{{ c.celular }}</td>
-                  <td>{{ c.email }}</td>
+                  <td>{{ c.persona.dni }}</td>
+                  <td>{{ c.persona.ruc }}</td>
+                  <td>{{ c.persona.apenom }}</td>
+                  <td>{{ c.persona.celular }}</td>
+                  <td>{{ c.persona.email }}</td>
                   <td>
                     <span class="badge" :class="c.estado === 'ACTIVO' ? 'bg-success' : 'bg-secondary'">
                       {{ c.estado }}

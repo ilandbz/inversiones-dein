@@ -21,4 +21,8 @@ class Negocio extends Model
         return $this->belongsTo(Cliente::class);
     }
 
+    public function detalle_actividad()
+    {
+        return $this->belongsTo(DetalleActividadNegocio::class);
+    }
 }

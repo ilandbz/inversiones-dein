@@ -32,7 +32,7 @@ export default function useCredito() {
         }
     }
     const obtenerCreditos = async (data) => {
-        let respuesta = await axios.get('/credito/listar' + getdataParamsPagination(data), getConfigHeader())
+        let respuesta = await axios.post('/credito/listar', data, getConfigHeader())
         creditos.value = respuesta.data
     }
     const actualizarCredito = async (data) => {
@@ -54,6 +54,20 @@ export default function useCredito() {
         if (respond.data.ok == 1) respuesta.value = respond.data
     }
 
+    const cambiarEstadoCredito = async (data) => {
+        errors.value = ''
+        try {
+            const respond = await axios.post('/credito/cambiar-estado', data, getConfigHeader())
+            errors.value = ''
+            if (respond.data.ok == 1) respuesta.value = respond.data
+        } catch (error) {
+            errors.value = ''
+            if (error?.response?.status === 422) {
+                errors.value = error.response.data.errors
+            }
+        }
+    }
+
     return {
         errors,
         respuesta,
@@ -65,5 +79,6 @@ export default function useCredito() {
         actualizarCredito,
         eliminarCredito,
         obtenerCreditos,
+        cambiarEstadoCredito,
     }
 }

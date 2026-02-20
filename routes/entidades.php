@@ -12,6 +12,7 @@ use App\Http\Controllers\CreditoController;
 use App\Http\Controllers\PropiedadController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\EvaluacionPrestamoController;
 use Illuminate\Support\Facades\Route;
 
 Route::group(['prefix' => 'cliente', 'middleware' => 'auth'], function () {
@@ -94,7 +95,7 @@ Route::group(['prefix' => 'plazo', 'middleware' => 'auth'], function () {
 Route::group(['prefix' => 'credito', 'middleware' => 'auth'], function () {
     Route::post('guardar', [CreditoController::class, 'store']);
     Route::post('actualizar', [CreditoController::class, 'update']);
-    Route::get('listar', [CreditoController::class, 'listar']);
+    Route::post('listar', [CreditoController::class, 'listar']);
     Route::get('mostrar', [CreditoController::class, 'show']);
     Route::post('eliminar', [CreditoController::class, 'destroy']);
     Route::get('tipo-credito-cliente', [CreditoController::class, 'obtenerTiposCreditoPorCiente']);
@@ -160,4 +161,15 @@ Route::group(['prefix' => 'usuario', 'middleware' => 'auth'], function () {
     Route::get('users-tipo-agencia', [UserController::class, 'obtenerPorTipo']);
     Route::post('cambiar-imagen', [UserController::class, 'cambiarImagen']);
     Route::get('obtener-usuarios-operaciones', [UserController::class, 'obtenerUsuariosOperadores']);
+});
+
+
+Route::group(['prefix' => 'evaluacion-prestamo', 'middleware' => 'auth'], function () {
+    Route::post('guardar', [EvaluacionPrestamoController::class, 'store']);
+    Route::post('actualizar', [EvaluacionPrestamoController::class, 'update']);
+    Route::post('eliminar', [EvaluacionPrestamoController::class, 'destroy']);
+    Route::get('mostrar', [EvaluacionPrestamoController::class, 'show']);
+    Route::get('todos', [EvaluacionPrestamoController::class, 'todos']);
+    Route::post('listar', [EvaluacionPrestamoController::class, 'listar']);
+    Route::get('por-credito', [EvaluacionPrestamoController::class, 'porCredito']);
 });

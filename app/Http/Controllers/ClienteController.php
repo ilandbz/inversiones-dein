@@ -133,9 +133,11 @@ class ClienteController extends Controller
     {
         $persona = Cliente::with(
             'persona',
+            'referente',
+            'negocio',
+            'negocio.detalle_actividad',
             'persona.conyugePersona',
             'usuario:id,name',
-            'aval:id,dni,ape_pat,ape_mat,primernombre,otrosnombres',
         )->where('id', $request->id)->first();
 
         return $persona;
@@ -212,94 +214,141 @@ class ClienteController extends Controller
     }
     public function update(UpdateClienteRequest $request)
     {
-        $cliente = Cliente::where('id', $request->id)->first();
-        $cliente->aval_id = $request->aval_id;
-        $cliente->save();
+        $filters = $this->getUserFilters();
+        $data = $request->validated();
 
-        $esconyugue = trim($request->estado_civil) === 'Casado' || trim($request->estado_civil) === 'Conviviente';
-        if ($esconyugue && empty($request->conyugue_id)) {
+        $cliente = Cliente::with(['persona', 'negocio']) // ajusta relaciones si el nombre cambia
+            ->where('id', $data['id']) // o $request->id
+            ->firstOrFail();
+
+        DB::beginTransaction();
+        try {
+
+            // 1) Foto (igual que store)
+            if ($request->hasFile('foto')) {
+                $file = $request->file('foto');
+                $manager = new ImageManager(new Driver());
+                $image = $manager->read($file)->scaleDown(width: 800, height: 1000);
+
+                $nombre_archivo = $data['dni'] . '.webp';
+                Storage::disk('fotos')->makeDirectory('clientes');
+                Storage::disk('fotos')->put('clientes/' . $nombre_archivo, (string) $image->toWebp(80));
+            }
+
+            // 2) Persona Cliente (aquí NO uses updateOrCreate por dni, actualiza por persona_id real)
+            $personaCliente = Persona::findOrFail($cliente->persona_id);
+            $personaCliente->update([
+                'dni' => $data['dni'], // si permites cambiar DNI
+                'ape_pat' => $data['ape_pat'],
+                'ape_mat' => $data['ape_mat'],
+                'primernombre' => $data['primernombre'],
+                'otrosnombres' => $data['otrosnombres'] ?? null,
+                'fecha_nac' => $data['fecha_nac'],
+                'ubigeo_nac' => $data['ubigeo_nac'],
+                'ubigeo_dom' => $data['ubigeo_dom'],
+                'genero' => $data['genero'],
+                'celular' => $data['celular'],
+                'celular2' => $data['celular2'] ?? null,
+                'email' => $data['email'] ?? null,
+                'ruc' => $data['ruc'] ?? null,
+                'estado_civil' => $data['estado_civil'],
+                'profesion' => $data['profesion'] ?? null,
+                'grado_instr' => $data['grado_instr'],
+                'origen_labor' => $data['origen_labor'],
+                'ocupacion' => $data['ocupacion'] ?? null,
+                'institucion_lab' => $data['institucion_lab'] ?? null,
+                'latitud_longitud' => $data['latitud_longitud'] ?? null,
+                'direccion' => $data['direccion'],
+            ]);
+
+            // 3) Referente (igual que store, pero OJO con dni null)
+            $ref = $data['referente'];
+
+            // Si tu referente.dni es nullable, NO uses updateOrCreate con ['dni' => null]
+            // porque te puede terminar "pisando" siempre el mismo registro null.
+            // Mejor: si viene DNI => updateOrCreate; si no viene => create nuevo.
+            if (!empty($ref['dni'])) {
+                $personaReferente = Persona::updateOrCreate(
+                    ['dni' => $ref['dni']],
+                    [
+                        'ape_pat'      => $ref['ape_pat'],
+                        'ape_mat'      => $ref['ape_mat'],
+                        'primernombre' => $ref['primernombre'],
+                        'otrosnombres' => $ref['otrosnombres'] ?? null,
+                        'celular'      => $ref['celular'],
+                        'email'        => $ref['email'] ?? null,
+                        'direccion'    => $ref['direccion'],
+
+                        // defaults
+                        'fecha_nac'    => '2000-01-01',
+                        'genero'       => 'M',
+                        'estado_civil' => 'SOLTERO',
+                        'origen_labor' => 'INDEPENDIENTE',
+                    ]
+                );
+            } else {
+                $personaReferente = Persona::create([
+                    'dni' => null,
+                    'ape_pat'      => $ref['ape_pat'],
+                    'ape_mat'      => $ref['ape_mat'],
+                    'primernombre' => $ref['primernombre'],
+                    'otrosnombres' => $ref['otrosnombres'] ?? null,
+                    'celular'      => $ref['celular'],
+                    'email'        => $ref['email'] ?? null,
+                    'direccion'    => $ref['direccion'],
+
+                    // defaults
+                    'fecha_nac'    => '2000-01-01',
+                    'genero'       => 'M',
+                    'estado_civil' => 'SOLTERO',
+                    'origen_labor' => 'INDEPENDIENTE',
+                ]);
+            }
+
+            // 4) Cliente (actualiza campos propios)
+            $cliente->update([
+                'usuario_id' => $filters['user_id'], // si quieres registrar quién editó
+                'referente_id' => $personaReferente->id,
+                'referente_parentesco' => $ref['parentesco'],
+                'estado' => $data['estado'] ?? $cliente->estado, // si lo manejas
+            ]);
+
+            // 5) Negocio (upsert / delete según origen_labor)
+            if ($data['origen_labor'] === 'INDEPENDIENTE') {
+                $neg = $data['negocio'];
+
+                Negocio::updateOrCreate(
+                    ['cliente_id' => $cliente->id],
+                    [
+                        'razonsocial'          => $neg['razonsocial'] ?? null,
+                        'ruc'                  => $neg['ruc'] ?? null,
+                        'celular'              => $neg['celular'] ?? null,
+                        'detalle_actividad_id' => $neg['detalle_actividad_id'],
+                        'inicioactividad'      => $neg['inicioactividad'] ?? null,
+                        'direccion'            => $neg['direccion'] ?? null,
+                    ]
+                );
+            } else {
+                // Si ahora es DEPENDIENTE, opcional: borrar negocio existente
+                Negocio::where('cliente_id', $cliente->id)->delete();
+            }
+
+            $cliente = $cliente->fresh()->load(['persona']); // si quieres devolver todo
+
+            DB::commit();
             return response()->json([
-                'errors' => [
-                    'dniconyugue' => ['DNI conyugue es necesario']
-                ]
-            ], 422);
+                'ok' => 1,
+                'mensaje' => 'Cliente modificado satisfactoriamente',
+                'cliente' => $cliente
+            ], 200);
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return response()->json([
+                'ok' => 0,
+                'mensaje' => 'Error al modificar cliente',
+                'error' => $e->getMessage()
+            ], 500);
         }
-        $file = $request->file('foto');
-        $persona = Persona::where('id', $request->persona_id)->first();
-        $persona->ape_pat = $request->ape_pat;
-        $persona->ape_mat = $request->ape_mat;
-        $persona->primernombre = $request->primernombre;
-        $persona->otrosnombres = $request->otrosnombres;
-        $persona->fecha_nac = $request->fecha_nac;
-        $persona->ubigeo_nac = $request->ubigeo;
-        $persona->genero = $request->genero;
-        $persona->celular = $request->celular;
-        $persona->email = $request->email;
-        $persona->ruc = $request->ruc;
-        $persona->estado_civil = $request->estado_civil;
-        $persona->profesion = $request->profesion;
-        $persona->nacionalidad = $request->nacionalidad;
-        $persona->grado_instr = $request->grado_instr;
-        $persona->tipo_trabajador = $request->tipo_trabajador;
-        $persona->ocupacion = $request->ocupacion;
-        $persona->institucion_lab = $request->institucion_lab;
-        $persona->conyugue  = $esconyugue ? $request->conyugue_id : null;
-        $persona->save();
-
-
-
-        if ($persona->ubicacion_domicilio_id) {
-            $domicilio = Ubicacion::find($persona->ubicacion_domicilio_id);
-        } else {
-            $domicilio = new Ubicacion();
-        }
-
-        $domicilio->tipo        = $request->tipodomicilio ?? 'NDF';
-        $domicilio->ubigeo      = $request->ubigeodomicilio;
-        $domicilio->tipovia     = $request->tipovia ?? 'S/N';
-        $domicilio->nombrevia   = $request->nombrevia;
-        $domicilio->nro         = $request->nro ?? 'S/N';
-        $domicilio->interior    = $request->interior ?? 'S/N';
-        $domicilio->mz          = $request->mz ?? 'S/N';
-        $domicilio->lote        = $request->lote ?? 'S/N';
-        $domicilio->tipozona    = $request->tipozona;
-        $domicilio->nombrezona  = $request->nombrezona;
-        $domicilio->referencia  = $request->referencia;
-        $domicilio->latitud     = $request->latitud;
-        $domicilio->longitud    = $request->longitud;
-        $domicilio->save();
-        if (!$persona->ubicacion_domicilio_id) {
-            $persona->ubicacion_domicilio_id = $domicilio->id;
-            $persona->save();
-        }
-        if ($file) {
-            $errores = [];
-            if ($file->getSize() > 2048 * 1024) {
-                $errores['foto'][] = 'El tamaño máximo permitido es 2MB.';
-            }
-            $manager = new ImageManager(new Driver());
-
-            $image = $manager->read($file);
-
-            if ($image->width() > 800 || $image->height() > 1000) {
-                $image->resize(800, 1000, function ($constraint) {
-                    $constraint->aspectRatio(); // conserva proporción original
-                    $constraint->upsize();      // evita agrandar imágenes pequeñas
-                });
-            }
-
-            if (!empty($errores)) {
-                return response()->json(['errors' => $errores], 422);
-            }
-
-            $nombre_archivo = $request->dni . '.webp';
-            Storage::disk('fotos')->makeDirectory('clientes');
-            Storage::disk('fotos')->put('clientes/' . $nombre_archivo, (string) $image->toWebp());
-        }
-        return response()->json([
-            'ok' => 1,
-            'mensaje' => 'Cliente modificado satisfactoriamente'
-        ], 200);
     }
     public function destroy(Request $request)
     {
@@ -417,7 +466,7 @@ class ClienteController extends Controller
         $paginacion = $request->paginacion ?? 10;
         $query = Cliente::with([
             'usuario:id,name',
-            'persona:id,dni,ape_pat,ape_mat,primernombre,otrosnombres,fecha_nac',
+            'persona:id,dni,ape_pat,ape_mat,primernombre,otrosnombres,fecha_nac,celular,ruc,email',
         ])
             ->join('personas', 'clientes.persona_id', '=', 'personas.id')
             ->where(function ($query) use ($buscar) {

@@ -11,7 +11,7 @@ const dato = ref({
     page: '',
     buscar: '',
     paginacion: 10,
-    estado: 'ACTIVO',
+    estado: 'REVISION',
 });
 
 const form = ref({
@@ -20,7 +20,7 @@ const form = ref({
     cliente_apenom : '',
     asesor_id: '',
     aval_id: '',
-    estado: 'ACTIVO',
+    estado: 'REVISION',
     fecha_reg: formatoFecha(null, "YYYY-MM-DD"),
     fecha_venc: '',
     tipo: '',
@@ -43,7 +43,7 @@ const limpiar = () => {
         cliente_id: '',
         asesor_id: '',
         aval_id: '',
-        estado: 'ACTIVO',
+        estado: 'REVISION',
         fecha_reg: formatoFecha(null, "YYYY-MM-DD"),
         fecha_venc: '',
         tipo: '',
@@ -306,7 +306,6 @@ onMounted(() => {
                                         <th>Cod</th>
                                         <th>Cliente</th>
                                         <th>Asesor</th>
-                                        <th>Aval ID</th>
                                         <th>Monto</th>
                                         <th>Tipo</th>
                                         <th>Fecha Reg</th>
@@ -319,73 +318,64 @@ onMounted(() => {
                                     </thead>
 
                                     <tbody>
-                                    <tr v-if="creditos.total == 0">
-                                        <td class="text-danger text-center" colspan="13">
-                                        -- Datos No Registrados - Tabla Vacía --
-                                        </td>
-                                    </tr>
+                                        <tr v-if="creditos.total == 0">
+                                            <td class="text-danger text-center" colspan="13">
+                                            -- Datos No Registrados - Tabla Vacía --
+                                            </td>
+                                        </tr>
 
-                                    <tr v-else v-for="(credito,index) in creditos.data" :key="credito.id">
-                                        <td>{{ index + creditos.from }}</td>
-                                        <td>{{ credito.id }}</td>
+                                        <tr v-else v-for="(credito,index) in creditos.data" :key="credito.id">
+                                            <td>{{ index + creditos.from }}</td>
+                                            <td>{{ credito.id }}</td>
 
-                                        <td>{{ credito.cliente.persona.apenom }}</td>
-                                        <td>{{ credito.asesor.user?.name }}</td>
-                                        <td>{{ credito.aval_id ?? '---' }}</td>
+                                            <td>{{ credito.cliente.persona.apenom }}</td>
+                                            <td>{{ credito.asesor.user?.name }}</td>
 
-                                        <td>{{ 'S/. ' + Number(credito.monto ?? 0).toFixed(2) }}</td>
-                                        <td>{{ credito.tipo }}</td>
-                                        <td>{{ credito.fecha_reg }}</td>
-                                        <td>{{ credito.fecha_venc }}</td>
-                                        <td>{{ credito.frecuencia }}</td>
-                                        <td>{{ credito.plazo }}</td>
-                                        <td>{{ credito.estado }}</td>
+                                            <td>{{ 'S/. ' + Number(credito.monto ?? 0).toFixed(2) }}</td>
+                                            <td>{{ credito.tipo }}</td>
+                                            <td>{{ credito.fecha_reg }}</td>
+                                            <td>{{ credito.fecha_venc }}</td>
+                                            <td>{{ credito.frecuencia }}</td>
+                                            <td>{{ credito.plazo }}</td>
+                                            <td>{{ credito.estado }}</td>
 
-                                        <td>
-                                            <div class="acciones-grid">
-                                            <!-- EDITAR -->
-                                            <button
-                                                class="btn btn-warning btn-sm"
-                                                v-if="credito.estado === 'PENDIENTE' || credito.estado === 'OBSERVADO'"
-                                                title="Editar"
-                                                @click.prevent="editar(credito.id)"
-                                            >
-                                                <i class="fas fa-edit"></i>
-                                            </button>
+                                            <td>
+                                                <div class="acciones-grid">
+                                                <button
+                                                    class="btn btn-info btn-sm"
+                                                    title="Ver"
+                                                    @click.prevent="ver(credito.id)"
+                                                >
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
 
-                                            <!-- ELIMINAR -->
-                                            <button
-                                                class="btn btn-danger btn-sm"
-                                                v-if="credito.estado === 'PENDIENTE'"
-                                                title="Eliminar"
-                                                @click.prevent="eliminar(credito.id)"
-                                            >
-                                                <i class="fas fa-trash"></i>
-                                            </button>
+                                                <button
+                                                    class="btn btn-success btn-sm"
+                                                    title="Aprobar"
+                                                    @click.prevent="aprobar(credito.id)"
+                                                >
+                                                    <i class="fas fa-check"></i>
+                                                </button>
 
-                                            <!-- EVALUACIÓN -->
-                                            <button
-                                                class="btn btn-primary btn-sm"
-                                                v-if="credito.estado === 'PENDIENTE'"
-                                                title="Evaluación"
-                                                @click.prevent="evaluacion(credito.id)"
-                                            >
-                                                <i class="fas fa-clipboard-check"></i>
-                                            </button>
+                                                <button
+                                                    class="btn btn-danger btn-sm"
+                                                    title="Rechazar"
+                                                    @click.prevent="rechazar(credito.id)"
+                                                >
+                                                    <i class="fas fa-times"></i>
+                                                </button>
 
-                                            <!-- ARCHIVOS -->
-                                            <button
-                                                class="btn btn-success btn-sm"
-                                                v-if="['PENDIENTE','EVALUACION','DESEMBOLSADO','FINALIZADO'].includes(credito.estado)"
-                                                title="Archivos"
-                                                @click.prevent="archivos(credito.id)"
-                                            >
-                                                <i class="fa-solid fa-file-pdf"></i>
-                                            </button>
-                                            </div>
+                                                <button
+                                                    class="btn btn-warning btn-sm"
+                                                    title="Archivos"
+                                                    @click.prevent="archivos(credito.id)"
+                                                >
+                                                    <i class="fa-solid fa-file-pdf"></i>
+                                                </button>
+                                                </div>
 
-                                        </td>
-                                    </tr>
+                                            </td>
+                                        </tr>
                                     </tbody>
 
                                 </table>
