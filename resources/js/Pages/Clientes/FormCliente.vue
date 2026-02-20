@@ -342,12 +342,7 @@ const submitForm = async () => {
     await actualizarCliente(fd)
   }
 
-  if (eCli.value) {
-    form.value.errors = eCli.value
-    return
-  }
-
-  if (rCli.value?.ok == 1) {
+  if (respuesta.value?.ok == 1) {
     form.value.errors = {}
     hideModal('#modalcliente')
     Toast.fire({ icon: 'success', title: rCli.value.mensaje })
@@ -403,7 +398,6 @@ onBeforeUnmount(() => {
                         </div>
                         <div class="modal-body bg-light">
                             <!-- DATOS PERSONALES -->
-                             {{ form }}
                             <div class="card mb-3 shadow-sm border-0">
                                 <div class="card-header bg-white border-bottom-0 pt-3">
                                     <h6 class="text-primary mb-0"><i class="fas fa-user me-2"></i>Datos Personales</h6>

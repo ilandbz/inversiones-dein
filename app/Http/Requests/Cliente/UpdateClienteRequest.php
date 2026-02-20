@@ -25,6 +25,7 @@ class UpdateClienteRequest extends FormRequest
         $adultoMin = now()->subYears(18)->format('Y-m-d');
         $personaId = $clienteId ? \App\Models\Cliente::whereKey($clienteId)->value('persona_id') : null;
         $rules = [
+            'id' => ['nullable', 'integer'],
             'dni' => [
                 'required',
                 'digits:8',
