@@ -294,13 +294,10 @@ const validateFront = () => {
 }
 
 const cerrarModalPrestamo = () => {
-  // 1) mueve el foco fuera del modal
   const modalEl = document.getElementById('prestamomodal')
   if (modalEl && modalEl.contains(document.activeElement)) {
     document.activeElement.blur()
   }
-
-  // 2) ahora sí cierra con tu helper
   hideModal('#prestamomodal')
 }
 
@@ -410,7 +407,7 @@ onMounted(() => {
                 Cliente: <b>{{ form.cliente_apenom }}</b>
               </div>
             </div>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <button type="button" class="btn-close" @click="cerrarModalPrestamo"></button>
           </div>
 
           <div class="modal-body">
@@ -669,13 +666,13 @@ onMounted(() => {
 
           <div class="modal-footer">
             <button type="button" class="btn btn-light" @click="limpiar">Limpiar</button>
-<button
-  type="button"
-  class="btn btn-secondary"
-  @click="cerrarModalPrestamo"
->
-  Cerrar
-</button>
+            <button
+              type="button"
+              class="btn btn-secondary"
+              @click="cerrarModalPrestamo"
+            >
+              Cerrar
+            </button>
             <button type="button" class="btn btn-primary" :disabled="isSaving" @click="guardar">
               <span v-if="isSaving" class="spinner-border spinner-border-sm me-2"></span>
               {{ (form.estadoCrud=='nuevo') ? 'Guardar' : 'Actualizar' }}

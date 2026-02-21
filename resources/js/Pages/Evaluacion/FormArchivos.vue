@@ -5,14 +5,21 @@ import useHelper from '@/Helpers';
 
 const props = defineProps({
   creditoId: [String, Number],
-  clienteNombre: String
+  clienteNombre: String,
+  form:Object
 });
 
-const { creditoId, clienteNombre } = toRefs(props);
-const { Toast, Swal, getConfigHeader } = useHelper();
+const { creditoId, clienteNombre, form } = toRefs(props);
+const { Toast, Swal, getConfigHeader, hideModal } = useHelper();
 
 const loadingPdf = ref(null);
-
+const cerrarModalArchivos = () => {
+  const modalEl = document.getElementById('archivosModal')
+  if (modalEl && modalEl.contains(document.activeElement)) {
+    document.activeElement.blur()
+  }
+  hideModal('#archivosModal')
+}
 const descargarPdf = async (tipo) => {
   if (!creditoId.value) return;
   
@@ -53,7 +60,15 @@ const pdfOptions = [
 
 <template>
   <teleport to="body">
-    <div class="modal fade" id="archivosModal" tabindex="-1" aria-labelledby="archivosModalLabel" aria-hidden="true" data-bs-backdrop="static">
+      <div
+        class="modal fade"
+        id="archivosModal"
+        tabindex="-1"
+        aria-labelledby="archivosModalLabel"
+        aria-hidden="true"
+        data-bs-backdrop="static"
+        data-bs-keyboard="false"
+      >
       <div class="modal-dialog modal-lg">
         <div class="modal-content text-dark">
           <div class="modal-header">
@@ -63,7 +78,7 @@ const pdfOptions = [
                 Cliente: <b>{{ clienteNombre }}</b>
               </div>
             </div>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <button type="button" class="btn-close" @click="cerrarModalArchivos"></button>
           </div>
           <div class="modal-body">
             <div class="row g-3">
@@ -99,7 +114,13 @@ const pdfOptions = [
             </div>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            <button
+              type="button"
+              class="btn btn-secondary"
+              @click="cerrarModalArchivos"
+            >
+              Cerrar
+            </button>
           </div>
         </div>
       </div>

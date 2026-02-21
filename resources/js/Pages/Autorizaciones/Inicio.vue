@@ -3,9 +3,14 @@ import { ref, onMounted, toRefs } from 'vue';
 import useCredito from '@/Composables/Credito';
 import Prestamo from '@/Pages/Prestamos/Form.vue'
 import Evaluacion from '@/Pages/Evaluacion/Evaluacion.vue'
+import FormAutorizacion from '@/Pages/Autorizaciones/FormAutorizacion.vue'
+import FormArchivos from '@/Pages/Evaluacion/FormArchivos.vue'
 import useHelper from '@/Helpers'; 
 const { obtenerCreditos, creditos, credito, obtenerCredito, eliminarCredito, errors, respuesta } = useCredito();
 const { openModal, Toast, Swal, formatoFecha } = useHelper();
+
+const selectedId = ref(null);
+const selectedClienteNombre = ref('');
 
 const dato = ref({
     page: '',
@@ -62,44 +67,83 @@ const limpiar = () => {
 }
 
 const obtenerDatos = async (id) => {
-    await obtenerCredito(id); // asumo que llena credito.value
-
+    await obtenerCredito(id);
     if (credito.value) {
         form.value.id = credito.value.id ?? '';
         form.value.cliente_id = credito.value.cliente_id ?? '';
         form.value.cliente_apenom = credito.value.cliente?.persona.apenom ?? '';
         form.value.asesor_id = credito.value.asesor_id ?? '';
         form.value.aval_id = credito.value.aval_id ?? '';
-
         form.value.estado = credito.value.estado ?? 'PENDIENTE';
         form.value.fecha_reg = credito.value.fecha_reg ?? formatoFecha(null, "YYYY-MM-DD");
         form.value.fecha_venc = credito.value.fecha_venc ?? '';
-
         form.value.tipo = credito.value.tipo ?? '';
         form.value.monto = Number(credito.value.monto ?? 0);
-
         form.value.origen_financiamiento_id = credito.value.origen_financiamiento_id ?? '';
         form.value.frecuencia = credito.value.frecuencia ?? 'DIARIO';
         form.value.plazo = Number(credito.value.plazo ?? 30);
-
-        form.value.tasainteres = Number(credito.value.tasainteres ?? 0.09);
+        form.value.tasainteres = Number(credito.value.tasainteres)*100
         form.value.total = Number(credito.value.total ?? 0);
         form.value.costomora = Number(credito.value.costomora ?? 0);
-
         form.value.created_at = credito.value.created_at ?? '';
         form.value.updated_at = credito.value.updated_at ?? '';
-
+        form.value.cliente_dni = credito.value.cliente?.persona?.dni ?? '';
     }
 };
 
-const editar = async(id) => {
+const ver = async(id) => {
     limpiar();
-    await obtenerDatos(id)
-    form.value.estadoCrud = 'editar'
-
-    document.getElementById("prestamomodalLabel").innerHTML = 'Editar credito';
-    openModal('#prestamomodal')
+    await obtenerDatos(id);
+    openModal('#autorizacionModal');
 }
+
+const archivos = async (id) => {
+    await obtenerDatos(id);
+    selectedId.value = id;
+    selectedClienteNombre.value = form.value.cliente_apenom;
+    openModal('#archivosModal');
+};
+
+const aprobar = async(id) => {
+    Swal.fire({
+        title: '¿Aprobar Crédito?',
+        text: "El estado cambiará a APROBADO",
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#28a745',
+        confirmButtonText: 'Sí, aprobar'
+    }).then(async (result) => {
+        if (result.isConfirmed) {
+            const { cambiarEstadoCredito } = useCredito();
+            await cambiarEstadoCredito({ id, estado: 'APROBADO' });
+            if (respuesta.value.ok == 1) {
+                Toast.fire({ icon: 'success', title: 'Crédito aprobado' });
+                listarCreditos(creditos.value.current_page);
+            }
+        }
+    })
+}
+
+const rechazar = async(id) => {
+     Swal.fire({
+        title: '¿Rechazar Crédito?',
+        text: "El estado cambiará a RECHAZADO",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc3545',
+        confirmButtonText: 'Sí, rechazar'
+    }).then(async (result) => {
+        if (result.isConfirmed) {
+            const { cambiarEstadoCredito } = useCredito();
+            await cambiarEstadoCredito({ id, estado: 'RECHAZADO' });
+            if (respuesta.value.ok == 1) {
+                Toast.fire({ icon: 'success', title: 'Crédito rechazado' });
+                listarCreditos(creditos.value.current_page);
+            }
+        }
+    })
+}
+
 const evaluacion = async(id) => {
     await obtenerDatos(id)
     formBalance.value.cliente_apenom = form.value.cliente_apenom;
@@ -307,6 +351,7 @@ onMounted(() => {
                                         <th>Cliente</th>
                                         <th>Asesor</th>
                                         <th>Monto</th>
+                                        <th>Tasa</th>
                                         <th>Tipo</th>
                                         <th>Fecha Reg</th>
                                         <th>Fecha Venc</th>
@@ -332,6 +377,7 @@ onMounted(() => {
                                             <td>{{ credito.asesor.user?.name }}</td>
 
                                             <td>{{ 'S/. ' + Number(credito.monto ?? 0).toFixed(2) }}</td>
+                                            <td>{{ Number(credito.tasainteres*100).toFixed(2) + '%' }}</td>
                                             <td>{{ credito.tipo }}</td>
                                             <td>{{ credito.fecha_reg }}</td>
                                             <td>{{ credito.fecha_venc }}</td>
@@ -433,6 +479,6 @@ onMounted(() => {
             </div>
         </div>
     </div>
-    <Prestamo :form="form" @cargar="listarCreditos" />
-    <Evaluacion :form="formBalance" />
+    <FormAutorizacion :form="form" @cargar="listarCreditos" />
+    <FormArchivos :form="form" />
 </template>
