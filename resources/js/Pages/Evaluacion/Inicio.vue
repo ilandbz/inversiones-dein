@@ -4,6 +4,7 @@ import useCredito from '@/Composables/Credito';
 import useEvaluacionPrestamo from '@/Composables/EvaluacionPrestamo';
 import useDatosSession from '@/Composables/session';
 import Prestamo from '@/Pages/Prestamos/Form.vue';
+import FormArchivos from '@/Pages/Evaluacion/FormArchivos.vue';
 import useHelper from '@/Helpers';
 
 const {
@@ -20,6 +21,9 @@ const {
 const { agregarEvaluacion, respuesta: respuestaEval } = useEvaluacionPrestamo();
 const { usuario } = useDatosSession();
 const { openModal, Toast, Swal, formatoFecha } = useHelper();
+
+const selectedId = ref(null);
+const selectedClienteNombre = ref('');
 
 const dato = ref({
   page: 1,
@@ -99,6 +103,13 @@ const editar = async (id) => {
   const el = document.getElementById('prestamomodalLabel');
   if (el) el.innerHTML = 'Editar credito';
   openModal('#prestamomodal');
+};
+
+const archivos = async (id) => {
+  await obtenerDatos(id);
+  selectedId.value = id;
+  selectedClienteNombre.value = form.value.cliente_apenom;
+  openModal('#archivosModal');
 };
 
 const eliminar = (id) => {
@@ -392,7 +403,6 @@ onMounted(() => {
                             <i class="fas fa-trash"></i>
                           </button>
 
-                          <!-- ARCHIVOS (se deja igual que tú) -->
                           <button
                             class="btn btn-success btn-sm"
                             v-if="['PENDIENTE','EVALUACION','DESEMBOLSADO','FINALIZADO'].includes(credito.estado)"
@@ -496,4 +506,5 @@ onMounted(() => {
   </div>
 
   <Prestamo :form="form" @cargar="listarCreditos" />
+  <FormArchivos :creditoId="selectedId" :clienteNombre="selectedClienteNombre" />
 </template>

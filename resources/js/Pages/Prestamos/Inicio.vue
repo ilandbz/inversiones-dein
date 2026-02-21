@@ -363,7 +363,6 @@ onMounted(() => {
                                                 <i class="fas fa-trash"></i>
                                             </button>
 
-                                            <!-- EVALUACIÓN -->
                                             <button
                                                 class="btn btn-primary btn-sm"
                                                 v-if="credito.estado === 'PENDIENTE'"
@@ -373,10 +372,8 @@ onMounted(() => {
                                                 <i class="fas fa-clipboard-check"></i>
                                             </button>
 
-                                            <!-- ARCHIVOS -->
                                             <button
                                                 class="btn btn-success btn-sm"
-                                                v-if="['PENDIENTE','EVALUACION','DESEMBOLSADO','FINALIZADO'].includes(credito.estado)"
                                                 title="Archivos"
                                                 @click.prevent="archivos(credito.id)"
                                             >

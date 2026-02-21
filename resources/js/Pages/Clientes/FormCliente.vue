@@ -19,7 +19,7 @@ const { form, currentPage, modalTitle } = toRefs(props)
 // Composables
 const {
     agregarPropiedad, respuesta: respuestaPropiedad, errors: errorsPropiedad, actualizarPropiedad
-} = usePropiedad(); // Mantengo esto por compatibilidad si se usaba, aunque parece ser de Propiedad
+} = usePropiedad(); 
 
 const {
   actividadNegocios,
@@ -345,7 +345,7 @@ const submitForm = async () => {
   if (respuesta.value?.ok == 1) {
     form.value.errors = {}
     hideModal('#modalcliente')
-    Toast.fire({ icon: 'success', title: rCli.value.mensaje })
+    Toast.fire({ icon: 'success', title: respuesta.value.mensaje })
     emit('onListar')
   }
 }
