@@ -4,83 +4,102 @@ import useCredito from '@/Composables/Credito.js'
 import useHelper from '@/Helpers'
 
 const props = defineProps({
-  form: Object,
+  form: { type: Object, required: true }
 })
+
 const { form } = toRefs(props)
 const emit = defineEmits(['cargar'])
 
-const { actualizarCredito, respuesta, errors: creditoErrors } = useCredito()
+const { actualizarCredito, respuesta } = useCredito()
 const { Toast, Swal, hideModal } = useHelper()
 
 const isSaving = ref(false)
 
-/* ----------------- NUM HELPERS ----------------- */
+/* ----------------- HELPERS NUMÉRICOS ----------------- */
 const toNumber = (v) => {
   const n = Number(String(v ?? '').replace(',', '.'))
   return Number.isFinite(n) ? n : 0
 }
-const toMoney2 = (n) => (Math.round((Number(n) + Number.EPSILON) * 100) / 100).toFixed(2)
 
-const totalCalc = computed(() => {
-  const monto = toNumber(form.value.monto)
-  const tasa = toNumber(form.value.tasainteres)
-  const total = monto + (monto * (tasa / 100))
-  return toMoney2(total)
+const toMoney2 = (n) =>
+  (Math.round((Number(n) + Number.EPSILON) * 100) / 100).toFixed(2)
+
+/* ----------------- TASA (%) EDITABLE ----------------- */
+const tasa = computed({
+  get: () => toNumber(form.value.tasainteres) * 100,
+  set: (val) => {
+    form.value.tasainteres = toNumber(val) / 100
+  }
 })
 
-watch(
-  () => [form.value.monto, form.value.tasainteres],
-  () => {
-    form.value.total = totalCalc.value
-  }
-)
+/* ----------------- TOTAL CALCULADO ----------------- */
+const totalCalc = computed(() => {
+  const monto = toNumber(form.value.monto)
+  return toMoney2(monto * (1 + tasa.value / 100))
+})
 
+/* Sin necesidad de watch: usamos otro computed */
+const totalMostrar = computed(() => totalCalc.value)
+
+/* ----------------- MODAL ----------------- */
 const cerrarModal = () => {
-  const modalEl = document.getElementById('autorizacionModal')
-  if (modalEl && modalEl.contains(document.activeElement)) {
-    document.activeElement.blur()
-  }
+  const active = document.activeElement
+  if (active instanceof HTMLElement) active.blur()
   hideModal('#autorizacionModal')
 }
 
+/* ----------------- GUARDAR ----------------- */
 const guardarTasa = async () => {
   isSaving.value = true
   try {
     await actualizarCredito(form.value)
-    if (respuesta.value.ok == 1) {
-      Toast.fire({ icon: 'success', title: 'Tasa actualizada correctamente' })
+
+    if (respuesta.value?.ok === 1) {
+      Toast.fire({
+        icon: 'success',
+        title: 'Tasa actualizada correctamente'
+      })
       emit('cargar')
       cerrarModal()
     } else {
-       Swal.fire({ icon: 'error', title: 'Error', text: respuesta.value.mensaje || 'No se pudo actualizar' })
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: respuesta.value?.mensaje || 'No se pudo actualizar'
+      })
     }
-  } catch (e) {
-    console.error(e)
-    Toast.fire({ icon: 'error', title: 'Error de servidor' })
+  } catch (error) {
+    console.error(error)
+    Toast.fire({
+      icon: 'error',
+      title: 'Error de servidor'
+    })
   } finally {
     isSaving.value = false
   }
 }
 
-const getBadgeClass = (estado) => {
-  switch (estado) {
-    case 'PENDIENTE': return 'bg-warning'
-    case 'REVISION': return 'bg-info'
-    case 'APROBADO': return 'bg-success'
-    case 'RECHAZADO': return 'bg-danger'
-    default: return 'bg-secondary'
-  }
+/* ----------------- BADGE ----------------- */
+const badgeMap = {
+  PENDIENTE: 'bg-warning',
+  REVISION: 'bg-info',
+  APROBADO: 'bg-success',
+  RECHAZADO: 'bg-danger'
 }
 
-const clientPhoto = computed(() => {
-    if (!form.value.cliente_dni) return '/storage/fotos/default.png';
-    return `/storage/fotos/clientes/${form.value.cliente_dni}.webp`;
-});
+const getBadgeClass = (estado) =>
+  badgeMap[estado] || 'bg-secondary'
 
-const handleImageError = (event) => {
-    event.target.src = "/storage/fotos/default.png";
+/* ----------------- FOTO CLIENTE ----------------- */
+const clientPhoto = computed(() =>
+  form.value.cliente_dni
+    ? `/storage/fotos/clientes/${form.value.cliente_dni}.webp`
+    : '/storage/fotos/default.png'
+)
+
+const handleImageError = (e) => {
+  e.target.src = '/storage/fotos/default.png'
 }
-
 </script>
 
 <template>
@@ -207,7 +226,7 @@ const handleImageError = (event) => {
                                 <input 
                                     type="number" 
                                     class="form-control fw-bold border-primary text-center px-0 fs-4" 
-                                    v-model="form.tasainteres"
+                                    v-model="tasa"
                                     step="0.01"
                                     min="0"
                                 >
@@ -219,7 +238,7 @@ const handleImageError = (event) => {
                         <div class="mt-auto pt-3 border-top">
                             <div class="p-4 bg-primary rounded-4 text-center text-white shadow">
                                 <h6 class="small mb-1 opacity-75 fw-bold">TOTAL A RETORNAR</h6>
-                                <h2 class="fw-bolder mb-0 display-6">S/ {{ form.total }}</h2>
+                                <h2 class="fw-bolder mb-0 display-6">S/ {{ totalMostrar }}</h2>
                             </div>
                         </div>
                       </div>

@@ -82,7 +82,7 @@ const obtenerDatos = async (id) => {
         form.value.origen_financiamiento_id = credito.value.origen_financiamiento_id ?? '';
         form.value.frecuencia = credito.value.frecuencia ?? 'DIARIO';
         form.value.plazo = Number(credito.value.plazo ?? 30);
-        form.value.tasainteres = Number(credito.value.tasainteres)*100
+        form.value.tasainteres = Number(credito.value.tasainteres)
         form.value.total = Number(credito.value.total ?? 0);
         form.value.costomora = Number(credito.value.costomora ?? 0);
         form.value.created_at = credito.value.created_at ?? '';
