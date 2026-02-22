@@ -29,12 +29,12 @@ const props = defineProps({
           class="nxl-link"
           :title="item.name"
         >
-          <span class="nxl-micon"><i :class="`bi bi-${item.icon}`"></i></span>
+          <span class="nxl-micon"><i :class="item.icon"></i></span>
           <span class="nxl-mtext">{{ item.name }}</span>
         </RouterLink>
 
         <a v-else href="javascript:void(0);" class="nxl-link" @click.prevent>
-          <span class="nxl-micon"><i :class="`bi bi-${item.icon}`"></i></span>
+          <span class="nxl-micon"><i :class="item.icon"></i></span>
           <span class="nxl-mtext">{{ item.name }}</span>
         </a>
       </li>
@@ -45,7 +45,7 @@ const props = defineProps({
         :class="{ active: openMenu === item.key }"
       >
         <a href="javascript:void(0);" class="nxl-link" @click.prevent="toggleMenu(item.key)">
-          <span class="nxl-micon"><i :class="`bi bi-${item.icon}`"></i></span>
+          <span class="nxl-micon"><i :class="item.icon"></i></span>
           <span class="nxl-mtext">{{ item.name }}</span>
           <span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
         </a>
@@ -62,8 +62,10 @@ const props = defineProps({
             class="nxl-item"
             :class="{ active: isActive(sub.url) }"
           >
-            <RouterLink :to="sub.url" class="nxl-link" :title="sub.name"
-            >{{ sub.name }}</RouterLink>
+            <RouterLink :to="sub.url" class="nxl-link" :title="sub.name">
+              <span class="nxl-micon"><i :class="sub.icon"></i></span>
+              <span class="nxl-mtext">{{ sub.name }}</span>
+            </RouterLink>
           </li>
         </ul>
       </li>

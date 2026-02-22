@@ -29,7 +29,8 @@ const dato = ref({
   page: 1,
   buscar: '',
   paginacion: 10,
-  estado: 'PENDIENTE',
+  //estado:'PENDIENTE',
+  estado: ['PENDIENTE', 'OBSERVADO'],
 });
 
 const defaultForm = () => ({
@@ -162,51 +163,25 @@ const buscar = () => listarCreditos(1);
 const cambiarPaginacion = () => listarCreditos(1);
 const cambiarPagina = (pagina) => listarCreditos(pagina);
 
-/**
- * PASAR A REVISION / OBSERVADO
- * - Si estado evaluación = OBSERVADO => crédito pasa a OBSERVADO (observación obligatoria)
- * - Si estado evaluación = APROBADO => crédito pasa a REVISION (observación opcional)
- */
 const pasarRevision = async (creditoId) => {
-  const { isConfirmed, value } = await Swal.fire({
-    title: 'Enviar / Observar crédito',
-    html: `
-      <div class="text-start">
-        <label class="form-label">Resultado de evaluación</label>
-        <select id="swal-estado" class="swal2-input" style="width:100%">
-          <option value="APROBADO">APROBADO (Enviar a REVISIÓN)</option>
-          <option value="OBSERVADO">OBSERVADO (Marcar como OBSERVADO)</option>
-        </select>
-
-        <label class="form-label mt-2">Observación (obligatoria si es OBSERVADO)</label>
-        <textarea id="swal-obs" class="swal2-textarea" placeholder="Escribe la observación..."></textarea>
-      </div>
-    `,
-    focusConfirm: false,
+  const { isConfirmed } = await Swal.fire({
+    title: '¿Enviar crédito a revisión?',
+    text: "El estado cambiará a REVISION para ser autorizado.",
+    icon: 'question',
     showCancelButton: true,
-    confirmButtonText: 'Confirmar',
-    cancelButtonText: 'Cancelar',
-    preConfirm: () => {
-      const estado = document.getElementById('swal-estado')?.value ?? 'APROBADO';
-      const obs = (document.getElementById('swal-obs')?.value ?? '').trim();
-
-      if (estado === 'OBSERVADO' && !obs) {
-        Swal.showValidationMessage('La observación es obligatoria cuando el estado es OBSERVADO.');
-        return;
-      }
-      return { estado, observacion: obs || null };
-    }
+    confirmButtonText: 'Sí, enviar',
+    cancelButtonText: 'Cancelar'
   });
 
   if (!isConfirmed) return;
 
-  // 1) Registrar evaluación
+  // 1) Registrar evaluación como APROBADO para el analista
   await agregarEvaluacion({
     credito_id: creditoId,
     user_id: usuario.value?.id,
     cargo: usuario.value?.cargo ?? 'ANALISTA',
-    estado: value.estado,              // APROBADO | OBSERVADO
-    observacion: value.observacion,    // null u obligatorio si observado
+    estado: 'APROBADO',
+    observacion: 'Enviado a revisión',
   });
 
   if (respuestaEval.value?.ok !== 1) {
@@ -214,13 +189,11 @@ const pasarRevision = async (creditoId) => {
     return;
   }
 
-  // 2) Estado del crédito según resultado
-  const nuevoEstadoCredito = value.estado === 'OBSERVADO' ? 'OBSERVADO' : 'REVISION';
-
-  await cambiarEstadoCredito({ id: creditoId, estado: nuevoEstadoCredito });
+  // 2) Estado del crédito a REVISION
+  await cambiarEstadoCredito({ id: creditoId, estado: 'REVISION' });
 
   if (respuesta.value?.ok === 1) {
-    Toast.fire({ icon: 'success', title: `Crédito actualizado a ${nuevoEstadoCredito}` });
+    Toast.fire({ icon: 'success', title: `Crédito enviado a revisión` });
     listarCreditos(creditos.value.current_page);
   } else {
     Toast.fire({ icon: 'error', title: 'Error al cambiar el estado del crédito' });
@@ -350,6 +323,7 @@ onMounted(() => {
                       <th>Cliente</th>
                       <th>Asesor</th>
                       <th>Monto</th>
+                      <th>Tasa</th>
                       <th>Tipo</th>
                       <th>Fecha Reg</th>
                       <th>Fecha Venc</th>
@@ -374,6 +348,7 @@ onMounted(() => {
                       <td>{{ credito.cliente.persona.apenom }}</td>
                       <td>{{ credito.asesor.user?.name }}</td>
                       <td>{{ 'S/. ' + Number(credito.monto ?? 0).toFixed(2) }}</td>
+                      <td>{{ Number(credito.tasainteres ?? 0.09).toFixed(2) + '%' }}</td>
                       <td>{{ credito.tipo }}</td>
                       <td>{{ credito.fecha_reg }}</td>
                       <td>{{ credito.fecha_venc }}</td>
@@ -426,7 +401,7 @@ onMounted(() => {
                       <td>
                         <button
                           class="btn btn-success btn-sm"
-                          title="Enviar a Revisión / Observar"
+                          title="Enviar a Revisión"
                           @click.prevent="pasarRevision(credito.id)"
                         >
                           <i class="fas fa-check"></i>

@@ -15,20 +15,10 @@
     <!-- <link rel="stylesheet" type="text/css" href="duralux/vendors/css/daterangepicker.min.css" /> -->
     <link rel="stylesheet" type="text/css" href="/duralux/css/theme.min.css" />
     <link rel="stylesheet" type="text/css" href="/duralux/css/custom.css" />
-
-
-
-
     @vite('resources/js/app.js')
 </head>
-
 <body>
-
     <main id="top"></main>
-
-
-
-
     <script src="/duralux/vendors/js/vendors.min.js"></script>
     <script src="/duralux/js/common-init.min.js"></script>
     <script src="/duralux/js/theme-customizer-init.min.js"></script>

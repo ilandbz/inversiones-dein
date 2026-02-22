@@ -3,15 +3,19 @@ import { ref, onMounted, toRefs } from 'vue';
 import useCredito from '@/Composables/Credito';
 import Prestamo from '@/Pages/Prestamos/Form.vue'
 import Evaluacion from '@/Pages/Evaluacion/Evaluacion.vue'
+import FormArchivos from '@/Pages/Evaluacion/FormArchivos.vue'
 import useHelper from '@/Helpers'; 
 const { obtenerCreditos, creditos, credito, obtenerCredito, eliminarCredito, errors, respuesta } = useCredito();
 const { openModal, Toast, Swal, formatoFecha } = useHelper();
+
+const selectedId = ref(null);
+const selectedClienteNombre = ref('');
 
 const dato = ref({
     page: '',
     buscar: '',
     paginacion: 10,
-    estado: 'ACTIVO',
+    estado: '',
 });
 
 const form = ref({
@@ -100,6 +104,13 @@ const editar = async(id) => {
     document.getElementById("prestamomodalLabel").innerHTML = 'Editar credito';
     openModal('#prestamomodal')
 }
+
+const archivos = async (id) => {
+    await obtenerDatos(id);
+    selectedId.value = id;
+    selectedClienteNombre.value = form.value.cliente_apenom;
+    openModal('#archivosModal');
+};
 const evaluacion = async(id) => {
     await obtenerDatos(id)
     formBalance.value.cliente_apenom = form.value.cliente_apenom;
@@ -442,4 +453,5 @@ onMounted(() => {
     </div>
     <Prestamo :form="form" @cargar="listarCreditos" />
     <Evaluacion :form="formBalance" />
+    <FormArchivos :creditoId="selectedId" :clienteNombre="selectedClienteNombre" />
 </template>

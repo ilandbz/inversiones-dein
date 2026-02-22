@@ -1,12 +1,16 @@
 <script setup>
 import { ref, onMounted, toRefs } from 'vue';
+import useEvaluacionPrestamo from '@/Composables/EvaluacionPrestamo';
+import useDatosSession from '@/Composables/session';
 import useCredito from '@/Composables/Credito';
 import Prestamo from '@/Pages/Prestamos/Form.vue'
 import Evaluacion from '@/Pages/Evaluacion/Evaluacion.vue'
 import FormAutorizacion from '@/Pages/Autorizaciones/FormAutorizacion.vue'
 import FormArchivos from '@/Pages/Evaluacion/FormArchivos.vue'
 import useHelper from '@/Helpers'; 
-const { obtenerCreditos, creditos, credito, obtenerCredito, eliminarCredito, errors, respuesta } = useCredito();
+const { obtenerCreditos, creditos, credito, obtenerCredito, eliminarCredito, errors, respuesta, cambiarEstadoCredito } = useCredito();
+const { agregarEvaluacion, respuesta: respuestaEval } = useEvaluacionPrestamo();
+const { usuario } = useDatosSession();
 const { openModal, Toast, Swal, formatoFecha } = useHelper();
 
 const selectedId = ref(null);
@@ -104,25 +108,63 @@ const archivos = async (id) => {
     openModal('#archivosModal');
 };
 
-const aprobar = async(id) => {
-    Swal.fire({
-        title: '¿Aprobar Crédito?',
-        text: "El estado cambiará a APROBADO",
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonColor: '#28a745',
-        confirmButtonText: 'Sí, aprobar'
-    }).then(async (result) => {
-        if (result.isConfirmed) {
-            const { cambiarEstadoCredito } = useCredito();
-            await cambiarEstadoCredito({ id, estado: 'APROBADO' });
-            if (respuesta.value.ok == 1) {
-                Toast.fire({ icon: 'success', title: 'Crédito aprobado' });
-                listarCreditos(creditos.value.current_page);
-            }
-        }
-    })
-}
+const pasarRevision = async (creditoId) => {
+  const { isConfirmed, value } = await Swal.fire({
+    title: 'Aprobar / Observar crédito',
+    html: `
+      <div class="text-start">
+        <label class="form-label">Resultado de autorización</label>
+        <select id="swal-estado" class="swal2-input" style="width:100%">
+          <option value="APROBADO">APROBADO</option>
+          <option value="OBSERVADO">OBSERVADO</option>
+        </select>
+
+        <label class="form-label mt-2">Observación (obligatoria si es OBSERVADO)</label>
+        <textarea id="swal-obs" class="swal2-textarea" placeholder="Escribe la observación..."></textarea>
+      </div>
+    `,
+    focusConfirm: false,
+    showCancelButton: true,
+    confirmButtonText: 'Confirmar',
+    cancelButtonText: 'Cancelar',
+    preConfirm: () => {
+      const estado = document.getElementById('swal-estado')?.value ?? 'APROBADO';
+      const obs = (document.getElementById('swal-obs')?.value ?? '').trim();
+
+      if (estado === 'OBSERVADO' && !obs) {
+        Swal.showValidationMessage('La observación es obligatoria cuando el estado es OBSERVADO.');
+        return;
+      }
+      return { estado, observacion: obs || null };
+    }
+  });
+
+  if (!isConfirmed) return;
+
+  // 1) Registrar evaluación
+  await agregarEvaluacion({
+    credito_id: creditoId,
+    user_id: usuario.value?.id,
+    cargo: usuario.value?.cargo ?? 'AUTORIZADOR',
+    estado: value.estado,              // APROBADO | OBSERVADO
+    observacion: value.observacion,    // null u obligatorio si observado
+  });
+
+  if (respuestaEval.value?.ok !== 1) {
+    Toast.fire({ icon: 'error', title: 'No se pudo registrar la evaluación' });
+    return;
+  }
+
+  // 2) Estado del crédito según resultado
+  await cambiarEstadoCredito({ id: creditoId, estado: value.estado });
+
+  if (respuesta.value?.ok === 1) {
+    Toast.fire({ icon: 'success', title: `Crédito actualizado a ${value.estado}` });
+    listarCreditos(creditos.value.current_page);
+  } else {
+    Toast.fire({ icon: 'error', title: 'Error al cambiar el estado del crédito' });
+  }
+};
 
 const rechazar = async(id) => {
      Swal.fire({
@@ -397,8 +439,8 @@ onMounted(() => {
 
                                                 <button
                                                     class="btn btn-success btn-sm"
-                                                    title="Aprobar"
-                                                    @click.prevent="aprobar(credito.id)"
+                                                    title="Aprobar / Observar"
+                                                    @click.prevent="pasarRevision(credito.id)"
                                                 >
                                                     <i class="fas fa-check"></i>
                                                 </button>

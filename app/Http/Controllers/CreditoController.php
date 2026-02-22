@@ -211,9 +211,12 @@ class CreditoController extends Controller
             'cliente.persona:id,dni,ape_pat,ape_mat,primernombre,otrosnombres,celular,ruc',
         ]);
         if (!empty($estado)) {
-            $query->where('estado', $estado);
+            if (is_array($estado)) {
+                $query->whereIn('estado', $estado);
+            } else {
+                $query->where('estado', $estado);
+            }
         }
-
         if (!empty($buscar)) {
             $query->whereHas('cliente.persona', function ($q) use ($buscar) {
                 $q->whereRaw("UPPER(dni) LIKE ?", ["%$buscar%"])

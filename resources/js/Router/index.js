@@ -19,6 +19,7 @@ import CambiarClave from '@/Pages/Usuario/CambiarClave.vue'
 import ActividadDeNegocio from '@/Pages/ActividadNegocio/Inicio.vue'
 import Rol from '@/Pages/Rol/Inicio.vue'
 import AutorizacionesInicio from '@/Pages/Autorizaciones/Inicio.vue'
+import Desembolsar from '@/Pages/Caja/Desembolsar.vue'
 
 const routes = [
   {
@@ -111,6 +112,7 @@ const routes = [
   { path: '/caja/cobros', name: 'CajaCobros', component: Placeholder, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Cobros' } },
   { path: '/caja/pagos', name: 'CajaPagos', component: Placeholder, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Pagos' } },
   { path: '/caja/cierre-de-caja', name: 'CajaCierre', component: Placeholder, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Cierre de Caja' } },
+  { path: '/caja/desembolsar', name: 'CajaDesembolsar', component: Desembolsar, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Desembolsar' } },
 
   // --- RIESGOS ---
   { path: '/riesgos/mora-y-castigos', name: 'RiesgosMora', component: Placeholder, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Mora y Castigos' } },
