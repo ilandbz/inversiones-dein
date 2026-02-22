@@ -13,6 +13,7 @@ use App\Http\Controllers\PropiedadController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\EvaluacionPrestamoController;
+use App\Http\Controllers\DesembolsoController;
 use Illuminate\Support\Facades\Route;
 
 Route::group(['prefix' => 'cliente', 'middleware' => 'auth'], function () {
@@ -172,4 +173,13 @@ Route::group(['prefix' => 'evaluacion-prestamo', 'middleware' => 'auth'], functi
     Route::get('todos', [EvaluacionPrestamoController::class, 'todos']);
     Route::post('listar', [EvaluacionPrestamoController::class, 'listar']);
     Route::get('por-credito', [EvaluacionPrestamoController::class, 'porCredito']);
+});
+
+Route::group(['prefix' => 'desembolso', 'middleware' => 'auth'], function () {
+    Route::get('todos', [DesembolsoController::class, 'todos']);
+    Route::get('mostrar', [DesembolsoController::class, 'show']);
+    Route::post('actualizar', [DesembolsoController::class, 'update']);
+    Route::post('eliminar', [DesembolsoController::class, 'destroy']);
+    Route::post('guardar', [DesembolsoController::class, 'store']);
+    Route::get('listar', [DesembolsoController::class, 'listar']);
 });
