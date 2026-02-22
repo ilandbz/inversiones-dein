@@ -1,11 +1,15 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import useCredito from '@/Composables/Credito';
+import useDesembolso from '@/Composables/Desembolso';
+import useDatosSession from '@/Composables/session';
 import FormArchivos from '@/Pages/Evaluacion/FormArchivos.vue';
 import useHelper from '@/Helpers';
 
 const { obtenerCreditos, creditos, cambiarEstadoCredito, respuesta } = useCredito();
-const { openModal, Toast, Swal } = useHelper();
+const { agregarDesembolso, respuesta: respuestaDesem } = useDesembolso();
+const { usuario } = useDatosSession();
+const { openModal, Toast, Swal, formatoFecha } = useHelper();
 
 const selectedId = ref(null);
 const selectedClienteNombre = ref('');
@@ -28,21 +32,60 @@ const archivos = (credito) => {
     openModal('#archivosModal');
 };
 
-const desembolsar = async (id) => {
-    const { isConfirmed } = await Swal.fire({
-        title: '¿Confirmar Desembolso?',
-        text: "El estado del crédito cambiará a DESEMBOLSADO",
-        icon: 'warning',
+const desembolsar = async (creditoObj) => {
+    const { isConfirmed, value } = await Swal.fire({
+        title: 'Realizar Desembolso',
+        html: `
+            <div class="text-start">
+                <p><b>Cliente:</b> ${creditoObj.cliente.persona.apenom}</p>
+                <p><b>Monto Crédito:</b> S/. ${Number(creditoObj.monto).toFixed(2)}</p>
+                
+                <div class="mb-2">
+                    <label class="form-label">Fecha de Desembolso</label>
+                    <input id="swal-fecha" type="date" class="form-control" value="${formatoFecha(null, "YYYY-MM-DD")}">
+                </div>
+
+                <div class="mb-2">
+                    <label class="form-label">Descontado (S/.)</label>
+                    <input id="swal-descontado" type="number" step="0.01" class="form-control" value="0.00">
+                </div>
+
+                <div class="mb-2">
+                    <label class="form-label">Total Entregado (S/.)</label>
+                    <input id="swal-totalentregado" type="number" step="0.01" class="form-control" value="${Number(creditoObj.monto).toFixed(2)}">
+                </div>
+            </div>
+        `,
+        focusConfirm: false,
         showCancelButton: true,
-        confirmButtonColor: '#28a745',
-        confirmButtonText: 'Sí, desembolsar',
-        cancelButtonText: 'Cancelar'
+        confirmButtonText: 'Confirmar Desembolso',
+        cancelButtonText: 'Cancelar',
+        preConfirm: () => {
+            const fecha = document.getElementById('swal-fecha').value;
+            const descontado = document.getElementById('swal-descontado').value;
+            const totalentregado = document.getElementById('swal-totalentregado').value;
+
+            if (!fecha || !totalentregado) {
+                Swal.showValidationMessage('La fecha y el total entregado son obligatorios');
+                return;
+            }
+
+            return {
+                credito_id: creditoObj.id,
+                fecha: fecha,
+                hora: new Date().toLocaleTimeString('it-IT'), // HH:mm:ss
+                user_id: usuario.value.id,
+                descontado: descontado,
+                totalentregado: totalentregado,
+                rcsdebe: 'PAGO'
+            };
+        }
     });
 
     if (isConfirmed) {
-        await cambiarEstadoCredito({ id, estado: 'DESEMBOLSADO' });
-        if (respuesta.value?.ok === 1) {
-            Toast.fire({ icon: 'success', title: 'Crédito desembolsado correctamente' });
+        await agregarDesembolso(value);
+        if (respuestaDesem.value?.ok === 1) {
+            Toast.fire({ icon: 'success', title: 'Desembolso realizado correctamente' });
             listarCreditos(creditos.value.current_page);
         } else {
             Toast.fire({ icon: 'error', title: 'Error al procesar el desembolso' });
@@ -156,7 +199,7 @@ onMounted(() => {
                                     <td><span class="badge bg-success">{{ credito.estado }}</span></td>
                                     <td>
                                         <div class="d-flex gap-1">
-                                            <button class="btn btn-success btn-sm" title="Desembolsar" @click.prevent="desembolsar(credito.id)">
+                                            <button class="btn btn-success btn-sm" title="Desembolsar" @click.prevent="desembolsar(credito)">
                                                 <i class="fas fa-money-bill-wave"></i> Desembolsar
                                             </button>
                                             <button class="btn btn-info btn-sm" title="Archivos" @click.prevent="archivos(credito)">

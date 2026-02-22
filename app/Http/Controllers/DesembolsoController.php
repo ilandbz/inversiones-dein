@@ -25,14 +25,9 @@ class DesembolsoController extends Controller
                     'descontado'     => $request->descontado,
                     'totalentregado' => $request->totalentregado,
                 ]);
-
-                // Actualizar el estado del crédito
                 $credito = Credito::findOrFail($request->credito_id);
                 $credito->update(['estado' => 'DESEMBOLSADO']);
-
-                // Actualizar el estado del cliente si es necesario
                 Cliente::where('id', $credito->cliente_id)->update(['estado' => 'VIGENTE']);
-
                 return response()->json([
                     'ok' => 1,
                     'msg' => 'Desembolso realizado exitosamente',
