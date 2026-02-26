@@ -12,8 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('desembolsos', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('credito_id')->constrained('creditos')->onUpdate('cascade')->onDelete('cascade');
+            $table->unsignedBigInteger('credito_id')->primary();
+            $table->foreign('credito_id')->references('id')->on('creditos')->onDelete('cascade')->onUpdate('cascade');
             $table->date('fecha');
             $table->time('hora');
             $table->foreignId('user_id')->constrained('users')->onUpdate('cascade')->onDelete('cascade');

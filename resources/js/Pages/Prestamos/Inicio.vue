@@ -453,5 +453,5 @@ onMounted(() => {
     </div>
     <Prestamo :form="form" @cargar="listarCreditos" />
     <Evaluacion :form="formBalance" />
-    <FormArchivos :creditoId="selectedId" :clienteNombre="selectedClienteNombre" />
+    <FormArchivos :creditoId="selectedId" :clienteNombre="selectedClienteNombre" :form="form" />
 </template>

@@ -1,13 +1,14 @@
 import axios from 'axios'
 import { ref } from 'vue'
-import { getConfigHeader } from '@/Helpers'
+
+import { getConfigHeader, getConfigHeaderpdf } from '@/Helpers'
 
 export default function useDesembolso() {
     const desembolsos = ref([])
     const desembolso = ref({})
     const errors = ref('')
     const respuesta = ref([])
-
+    const pdfUrl = ref('')
     const obtenerDesembolso = async (id) => {
         const respond = await axios.get('/desembolso/mostrar?id=' + id, getConfigHeader())
         desembolso.value = respond.data
@@ -28,6 +29,22 @@ export default function useDesembolso() {
             errors.value = ''
             if (error?.response?.status === 422) {
                 errors.value = error.response.data.errors
+            }
+        }
+    }
+
+    const generarPdf = async (data) => {
+        errors.value = "";
+        try {
+            let response = await axios.post("/desembolso/generar-pdf", data, getConfigHeaderpdf());
+
+            const file = new Blob([response.data], { type: "application/pdf" });
+            pdfUrl.value = URL.createObjectURL(file);
+
+        } catch (error) {
+            console.error("Error al generar el PDF:", error);
+            if (error.response && error.response.status === 422) {
+                errors.value = error.response.data.errors;
             }
         }
     }
@@ -67,5 +84,7 @@ export default function useDesembolso() {
         actualizarDesembolso,
         eliminarDesembolso,
         obtenerDesembolsos,
+        generarPdf,
+        pdfUrl,
     }
 }

@@ -104,6 +104,7 @@ Route::group(['prefix' => 'credito', 'middleware' => 'auth'], function () {
     Route::get('validar-evaluacion-asesor', [CreditoController::class, 'validarParaEvaluacion']);
     Route::post('cambiar-estado', [CreditoController::class, 'cambiarEstado']);
     Route::post('generar-pdf', [CreditoController::class, 'generarPDF']);
+    Route::post('generar-pdf-desembolso', [DesembolsoController::class, 'generarPDF']);
     Route::post('listar-estado-agencia', [CreditoController::class, 'listarCreditosPorEstado']);
     Route::get('obtener-creditos-cancelar', [CreditoController::class, 'obtenerSolicitudesCancelar']);
     Route::get('todos-tipo-creditos', [CreditoController::class, 'todosTipoCreditos']);
@@ -182,4 +183,5 @@ Route::group(['prefix' => 'desembolso', 'middleware' => 'auth'], function () {
     Route::post('eliminar', [DesembolsoController::class, 'destroy']);
     Route::post('guardar', [DesembolsoController::class, 'store']);
     Route::get('listar', [DesembolsoController::class, 'listar']);
+    Route::post('generar-pdf', [DesembolsoController::class, 'generarPDF']);
 });

@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Credito extends Model
 {
@@ -38,9 +39,9 @@ class Credito extends Model
     {
         return $this->belongsTo(Persona::class, 'aval_id');
     }
-    public function desembolsos(): HasMany
+    public function desembolso(): HasOne
     {
-        return $this->hasMany(Desembolso::class, 'credito_id');
+        return $this->hasOne(Desembolso::class, 'credito_id');
     }
     public function pagos(): HasMany
     {
@@ -49,5 +50,9 @@ class Credito extends Model
     public function balance()
     {
         return $this->hasOne(Balance::class, 'credito_id');
+    }
+    public function cronogramas(): HasMany
+    {
+        return $this->hasMany(CronogramaPago::class, 'credito_id');
     }
 }

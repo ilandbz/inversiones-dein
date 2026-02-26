@@ -205,18 +205,6 @@ onMounted(() => {
 });
 </script>
 
-<style scoped>
-.acciones-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 4px;
-}
-.acciones-grid .btn {
-  width: 100%;
-  padding: 4px 0;
-}
-</style>
-
 <template>
   <div class="page-content">
     <div class="container-fluid">
@@ -481,5 +469,17 @@ onMounted(() => {
   </div>
 
   <Prestamo :form="form" @cargar="listarCreditos" />
-  <FormArchivos :creditoId="selectedId" :clienteNombre="selectedClienteNombre" />
+  <FormArchivos :creditoId="selectedId" :clienteNombre="selectedClienteNombre" :form="form" />
 </template>
+
+<style scoped>
+.acciones-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 4px;
+}
+.acciones-grid .btn {
+  width: 100%;
+  padding: 4px 0;
+}
+</style>
