@@ -1,7 +1,7 @@
 <!-- src/Components/MenusRenderer.vue -->
 <script setup>
 import { RouterLink } from 'vue-router'
-
+const isMini = () => document.documentElement.classList.contains('minimenu')
 const props = defineProps({
   menuUI: { type: Array, default: () => [] },
   openMenu: { type: String, default: null },
@@ -39,23 +39,31 @@ const props = defineProps({
         </a>
       </li>
 
-      <li
-        v-else
-        class="nxl-item nxl-hasmenu"
-        :class="{ active: openMenu === item.key }"
-      >
-        <a href="javascript:void(0);" class="nxl-link" @click.prevent="toggleMenu(item.key)">
+        <li
+          v-else
+          class="nxl-item nxl-hasmenu"
+          :class="{
+            active: !isMini() && openMenu === item.key,
+            open: !isMini() && openMenu === item.key,
+          }"
+        >
+        <a
+          href="javascript:void(0);"
+          class="nxl-link"
+          @click.prevent="isMini() ? null : toggleMenu(item.key)"
+        >
           <span class="nxl-micon"><i :class="item.icon"></i></span>
           <span class="nxl-mtext">{{ item.name }}</span>
           <span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
         </a>
 
-        <ul
-          class="nxl-submenu"
-          :class="{ active: openMenu === item.key }"
-          :ref="el => { if (el) submenuRefs[item.key] = el }"
-          :style="openMenu === item.key ? '' : 'max-height:0; overflow:hidden; transition:max-height .25s ease;'"
-        >
+          <ul
+            class="nxl-submenu"
+            :ref="el => { if (el) submenuRefs[item.key] = el }"
+            :style="isMini()
+              ? 'display:none;'
+              : 'max-height:0; overflow:hidden; transition:max-height .25s ease;'"
+          >
           <li
             v-for="sub in item.submenu"
             :key="sub.key"

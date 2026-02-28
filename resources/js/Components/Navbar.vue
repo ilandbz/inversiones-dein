@@ -15,8 +15,8 @@ const { menuUI, openMenu, submenuRefs, toggleMenu, isActive } = useMenuUI(menusR
       <!-- Header -->
       <div class="m-header">
         <RouterLink to="/" class="b-brand">
-          <img src="/imagenes/logo_navbar.jpeg" alt="Logo" class="logo logo-lg" />
-          <img src="/imagenes/logo_navbar.jpeg" alt="Logo" class="logo logo-sm" />
+          <img src="/imagenes/logo_mod.png" alt="Logo" class="logo logo-lg" />
+          <img src="/imagenes/logo_redondo.png" alt="Logo" class="logo logo-sm" />
         </RouterLink>
       </div>
 

@@ -1,5 +1,5 @@
 // src/Composables/useMenuUI.js
-import { computed, ref, watch, nextTick, onMounted } from 'vue'
+import { computed, ref, watch, nextTick, onMounted, reactive } from 'vue'
 import { useRoute } from 'vue-router'
 
 export default function useMenuUI(menusRef) {
@@ -99,17 +99,17 @@ export default function useMenuUI(menusRef) {
 
     // Open/Close submenus
     const openMenu = ref(null)
-    const submenuRefs = ref({})
+    const submenuRefs = reactive({})
 
     const setSubmenuMaxHeight = async (key) => {
         await nextTick()
-        const el = submenuRefs.value[key]
+        const el = submenuRefs[key]
         if (!el) return
         el.style.maxHeight = el.scrollHeight + 'px'
     }
 
     const closeSubmenuMaxHeight = (key) => {
-        const el = submenuRefs.value[key]
+        const el = submenuRefs[key]
         if (!el) return
         el.style.maxHeight = '0px'
     }

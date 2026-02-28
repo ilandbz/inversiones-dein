@@ -1,6 +1,51 @@
 /* ==========================================================
-   MINIMENU (html.minimenu) — solo íconos + submenu flotante
-   (bloque ÚNICO, sin duplicados)
+   NEXEL / WRAPCODERS - Custom Sidebar Behavior
+   - html.minimenu  : sidebar mini (desktop)
+   - html.nav-open  : sidebar overlay open (mobile/tablet)
+========================================================== */
+
+
+/* ==========================================================
+   Branding: logo grande vs logo pequeño (NEXEL style)
+========================================================== */
+
+/* Header SIEMPRE visible */
+.nxl-navigation .m-header {
+    display: block;
+    padding: 14px 16px !important;
+}
+
+/* Brand layout */
+.nxl-navigation .b-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Logos por defecto (sidebar normal) */
+.nxl-navigation .logo.logo-lg {
+    display: inline-block;
+}
+
+.nxl-navigation .logo.logo-sm {
+    display: none;
+}
+
+/* Tamaños */
+.nxl-navigation .logo.logo-lg {
+    height: 48px;
+    width: auto;
+    max-width: 200px;
+}
+
+.nxl-navigation .logo.logo-sm {
+    height: 34px;
+    width: auto;
+}
+
+
+/* ==========================================================
+   1) MINIMENU (html.minimenu)
 ========================================================== */
 
 html.minimenu #sidebar,
@@ -9,11 +54,26 @@ html.minimenu .nxl-navigation {
     flex: 0 0 84px !important;
 }
 
-/* Ocultar header/logo y títulos */
-html.minimenu .nxl-navigation .m-header,
-html.minimenu .nxl-navigation .b-brand,
-html.minimenu .nxl-navigation .nxl-caption {
+/* Minimenu: mostrar logo pequeño y ocultar el grande */
+html.minimenu .nxl-navigation .logo.logo-lg {
     display: none !important;
+}
+
+html.minimenu .nxl-navigation .logo.logo-sm {
+    display: inline-block !important;
+}
+
+/* Minimenu: centra el header */
+html.minimenu .nxl-navigation .m-header {
+    padding: 12px 0 !important;
+    display: flex !important;
+    justify-content: center !important;
+}
+
+html.minimenu .nxl-navigation .b-brand {
+    display: flex !important;
+    justify-content: center !important;
+    width: 100% !important;
 }
 
 /* Contenedor del menú */
@@ -23,27 +83,35 @@ html.minimenu .nxl-navigation .navbar-content {
     overflow-y: auto !important;
 }
 
-/* Cada item ocupa todo el ancho */
+/* Permitir que NO se corte */
+html.minimenu .nxl-navigation,
+html.minimenu .nxl-navigation .navbar-wrapper,
+html.minimenu .nxl-navigation .navbar-content {
+    overflow: visible !important;
+}
+
+/* Ocultar títulos de grupos (caption) en minimenu */
+html.minimenu .nxl-navigation .nxl-caption {
+    display: none !important;
+}
+
+/* Items */
 html.minimenu .nxl-navigation .nxl-item {
     width: 100% !important;
     position: relative !important;
 }
 
-/* Link: centrado, alto fijo, SIN recortes (no overflow hidden) */
+/* Link: iconos columna + alto fijo */
 html.minimenu .nxl-navigation .nxl-link {
     display: flex !important;
     align-items: center !important;
-    justify-content: center !important;
+    justify-content: flex-start !important;
     width: 100% !important;
     height: 48px !important;
-    padding: 0 !important;
-
+    padding: 0 0 0 14px !important;
     overflow: visible !important;
-    /* ✅ clave */
     white-space: normal !important;
-    /* ✅ clave */
     text-overflow: clip !important;
-    /* ✅ clave */
 }
 
 /* Ocultar texto y flecha en minimenu */
@@ -52,44 +120,66 @@ html.minimenu .nxl-navigation .nxl-arrow {
     display: none !important;
 }
 
-/* Ícono centrado */
+/* Columna del icono */
 html.minimenu .nxl-navigation .nxl-micon {
+    width: 36px !important;
+    min-width: 36px !important;
     display: flex !important;
     align-items: center !important;
-    justify-content: center !important;
-    width: 100% !important;
+    justify-content: flex-start !important;
     margin: 0 !important;
 }
 
 html.minimenu .nxl-navigation .nxl-micon i {
     font-size: 20px;
     line-height: 1;
+    margin-left: 2px;
 }
 
-/* ✅ IMPORTANTE: permitir que el submenu “salga” del sidebar */
-html.minimenu .nxl-navigation,
-html.minimenu .navbar-wrapper,
-html.minimenu .navbar-content {
-    overflow: visible !important;
+/* Pill del item en minimenu (evita bloque gigante) */
+html.minimenu .nxl-navigation .nxl-item>.nxl-link {
+    border-radius: 10px !important;
+    margin: 4px 8px !important;
+    width: calc(100% - 16px) !important;
 }
 
-/* =========================
-   Submenu flotante al hover
-========================= */
+html.minimenu .nxl-navigation .nxl-item.active>.nxl-link,
+html.minimenu .nxl-navigation .nxl-item.open>.nxl-link {
+    background: rgba(0, 0, 0, .06) !important;
+}
 
-/* Cuando el sidebar se expande por hover (tu template lo hace), deja que se vea el contenido */
+html.minimenu .nxl-navigation .nxl-item>.nxl-link:hover {
+    background: rgba(0, 0, 0, .05) !important;
+}
+
+/* Hover expand: cuando pasas mouse por el sidebar, muestra texto */
 html.minimenu .nxl-navigation:hover .navbar-content {
     overflow-y: auto !important;
 }
 
-/* ✅ FORZAR submenu visible en hover del item */
+html.minimenu .nxl-navigation:hover .nxl-mtext {
+    display: inline !important;
+}
+
+html.minimenu .nxl-navigation:hover .nxl-link {
+    justify-content: flex-start !important;
+    padding-left: 14px !important;
+}
+
+/* IMPORTANTÍSIMO:
+   En minimenu NO mostramos submenus por defecto,
+   solo el del item hovered. */
+html.minimenu .nxl-navigation .nxl-submenu {
+    display: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border-left: 0 !important;
+}
+
 html.minimenu .nxl-navigation .nxl-item.nxl-hasmenu:hover>.nxl-submenu {
     display: block !important;
-    /* pisa display:none inline */
     position: static !important;
-    /* dentro del panel expandido */
     max-height: none !important;
-    /* pisa max-height:0 */
     height: auto !important;
     overflow: visible !important;
     padding: 6px 0 8px 0 !important;
@@ -97,78 +187,67 @@ html.minimenu .nxl-navigation .nxl-item.nxl-hasmenu:hover>.nxl-submenu {
     border-left: 2px solid rgba(0, 0, 0, .06);
 }
 
-/* Estilo de cada item del submenu */
-html.minimenu .nxl-navigation .nxl-item.nxl-hasmenu:hover>.nxl-submenu .nxl-link {
-    justify-content: flex-start !important;
-    padding: 10px 14px !important;
-    height: auto !important;
-    white-space: normal !important;
-}
-
-/* En minimenu normalmente ocultas .nxl-mtext; acá lo mostramos cuando el sidebar está hover (expandido) */
-html.minimenu .nxl-navigation:hover .nxl-mtext {
-    display: inline !important;
-}
-
-/* Mantener los iconos alineados (más a la izquierda cuando expandido) */
-html.minimenu .nxl-navigation:hover .nxl-link {
-    justify-content: flex-start !important;
-    padding-left: 14px !important;
-}
-
-/* Icono con ancho fijo para que quede “columna” bonita */
-html.minimenu .nxl-navigation .nxl-micon {
-    width: 44px !important;
-    min-width: 44px !important;
-    display: flex !important;
-    justify-content: center !important;
-}
-
-/* Links dentro del panel flotante: alineados a la izquierda */
 html.minimenu .nxl-navigation .nxl-item.nxl-hasmenu:hover>.nxl-submenu .nxl-link {
     justify-content: flex-start !important;
     height: auto !important;
     padding: 10px 12px !important;
-
     overflow: visible !important;
-    /* ✅ */
     white-space: normal !important;
-    /* ✅ */
 }
 
-/* Evitar que el submenu se “corte” por z-index */
 html.minimenu .nxl-navigation .nxl-item.nxl-hasmenu:hover {
     z-index: 10000 !important;
 }
 
 
 /* ==========================================================
-   MINIMENU: iconos más a la izquierda
+   2) MOBILE OVERLAY SIDEBAR (html.nav-open)
 ========================================================== */
 
-/* 1) Minimenu cerrado: mueve el icono un poco a la izquierda */
-html.minimenu .nxl-navigation .nxl-link {
-    justify-content: flex-start !important;
-    padding-left: 14px !important;
-    /* ajusta: 10-18 */
+@media (max-width: 1199.98px) {
+    .nxl-navigation {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100vh;
+        z-index: 2000;
+        transform: translateX(-110%);
+        transition: transform .25s ease;
+        will-change: transform;
+    }
+
+    html.nav-open .nxl-navigation {
+        transform: translateX(0);
+    }
+
+    html.nav-open::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, .35);
+        z-index: 1999;
+    }
+
+    /* En mobile NO queremos minimenu */
+    html.minimenu .nxl-navigation {
+        width: 280px !important;
+        flex: 0 0 280px !important;
+    }
+
+    html.minimenu .nxl-navigation .m-header,
+    html.minimenu .nxl-navigation .b-brand,
+    html.minimenu .nxl-navigation .nxl-caption,
+    html.minimenu .nxl-navigation .nxl-mtext,
+    html.minimenu .nxl-navigation .nxl-arrow {
+        display: initial !important;
+    }
 }
 
-/* 2) Columna del icono: en vez de 100% centrado, ancho fijo */
-html.minimenu .nxl-navigation .nxl-micon {
-    width: 36px !important;
-    /* ajusta: 32-44 */
-    min-width: 36px !important;
-    justify-content: flex-start !important;
-}
-
-/* 3) Icono: empújalo un poco desde la izquierda */
-html.minimenu .nxl-navigation .nxl-micon i {
-    margin-left: 2px;
-    /* ajusta 0-6 */
-}
-
-/* 4) Cuando el sidebar se expande por hover, también mantenlo alineado */
-html.minimenu .nxl-navigation:hover .nxl-link {
-    justify-content: flex-start !important;
-    padding-left: 14px !important;
+/* Fallback: en modo normal el texto debe ser visible */
+.nxl-navigation .nxl-mtext {
+    display: inline !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    font-size: 13px !important;
+    color: inherit !important;
 }

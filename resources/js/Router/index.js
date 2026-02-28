@@ -20,6 +20,7 @@ import ActividadDeNegocio from '@/Pages/ActividadNegocio/Inicio.vue'
 import Rol from '@/Pages/Rol/Inicio.vue'
 import AutorizacionesInicio from '@/Pages/Autorizaciones/Inicio.vue'
 import Desembolsar from '@/Pages/Caja/Desembolsar.vue'
+import HistorialClienteInicio from '@/Pages/HistorialCliente/Inicio.vue'
 
 const routes = [
   {
@@ -78,9 +79,8 @@ const routes = [
     meta: { layout: LayoutLogin, title: 'Login' }
   },
 
-  { path: '/clientes/posicion-del-cliente', name: 'ClientesPosicion', component: Placeholder, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Posición del Cliente' } },
   { path: '/clientes/listado-de-clientes', name: 'ClientesListado', component: ClientesInicio, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Listado del Cliente' } },
-  { path: '/clientes/historial-del-cliente', name: 'ClientesHistorial', component: Placeholder, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Historial del Cliente' } },
+  { path: '/clientes/historial-del-cliente', name: 'ClientesHistorial', component: HistorialClienteInicio, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Historial del Cliente' } },
 
   // --- ASESORES ---
   { path: '/asesores/metas', name: 'AsesoresMetas', component: Placeholder, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Metas' } },

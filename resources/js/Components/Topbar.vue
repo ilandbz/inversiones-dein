@@ -46,20 +46,21 @@ const cerrarSesion = async () => {
     <header class="nxl-header">
         <div class="header-wrapper">
             <div class="header-left d-flex align-items-center gap-4">
-                <a href="javascript:void(0);" class="nxl-head-mobile-toggler" id="mobile-collapse">
-                    <div class="hamburger hamburger--arrowturn">
-                        <div class="hamburger-box">
-                            <div class="hamburger-inner"></div>
-                        </div>
+                <a
+                href="javascript:void(0);"
+                class="nxl-head-mobile-toggler"
+                @click.prevent="emit('toggleMobile')"
+                >
+                <div class="hamburger hamburger--arrowturn">
+                    <div class="hamburger-box">
+                    <div class="hamburger-inner"></div>
                     </div>
+                </div>
                 </a>
                 <!-- ESTO FUNCIONA EN DESKTOP -->
-                <div class="nxl-navigation-toggle">
-                    <a href="javascript:void(0);" id="menu-mini-button">
+                <div class="nxl-navigation-toggle d-none d-xl-flex">
+                    <a href="javascript:void(0);" @click.prevent="emit('toggleSidebar')">
                         <i class="feather-align-left"></i>
-                    </a>
-                    <a href="javascript:void(0);" id="menu-expend-button" style="display: none">
-                        <i class="feather-arrow-right"></i>
                     </a>
                 </div>
 

@@ -31,7 +31,6 @@ class MenuSeeder extends Seeder
                             "submenu" => [
                                 ["nombre" => "Registro de Clientes", "slug" => "registro-de-clientes", "icono" => "fas fa-user-plus", "url" => "/clientes/registro-de-clientes"],
                                 ["nombre" => "Listado de Clientes", "slug" => "listado-de-clientes", "icono" => "fas fa-list", "url" => "/clientes/listado-de-clientes"],
-                                ["nombre" => "Posición del Cliente", "slug" => "posicion-del-cliente", "icono" => "fas fa-location-dot", "url" => "/clientes/posicion-del-cliente"],
                                 ["nombre" => "Historial del Cliente", "slug" => "historial-del-cliente", "icono" => "fas fa-history", "url" => "/clientes/historial-del-cliente"],
                             ],
                         ],
