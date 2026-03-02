@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests\Cargo;
+namespace App\Http\Requests\KardexCredito;
 
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -38,5 +38,4 @@ class StoreCargoRequest extends FormRequest
             'unique' => 'El valor ya existe'
         ];
     }
-
 }

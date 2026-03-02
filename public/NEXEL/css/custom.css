@@ -4,6 +4,34 @@
    - html.nav-open  : sidebar overlay open (mobile/tablet)
 ========================================================== */
 
+/* ==========================================================
+   Gap between sidebar and content (expanded & minimenu)
+========================================================== */
+
+/* Expanded: sidebar = 280px → add 16px gap */
+@media (min-width: 1200px) {
+    .nxl-container {
+        margin-left: 296px !important;
+        transition: margin-left .3s ease;
+    }
+
+    .nxl-header {
+        left: 296px !important;
+        transition: left .3s ease;
+    }
+
+    /* Minimenu: sidebar = 84px → add 16px gap */
+    html.minimenu .nxl-container {
+        margin-left: 100px !important;
+        transition: margin-left .3s ease;
+    }
+
+    html.minimenu .nxl-header {
+        left: 100px !important;
+        transition: left .3s ease;
+    }
+}
+
 
 /* ==========================================================
    Branding: logo grande vs logo pequeño (NEXEL style)

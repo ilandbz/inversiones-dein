@@ -11,17 +11,25 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::dropIfExists('cronograma_pagos');
-        Schema::create('cronograma_pagos', function (Blueprint $table) {
+        Schema::create('kardex_creditos', function (Blueprint $table) {
             $table->id();
+
             $table->unsignedBigInteger('credito_id');
             $table->foreign('credito_id')->references('credito_id')->on('desembolsos')->onDelete('cascade')->onUpdate('cascade');
-            $table->unsignedInteger('nrocuota');
-            $table->date('fecha_prog');
-            $table->string('nombredia', 10);
-            $table->decimal('cuota', 9, 2);
-            $table->decimal('saldo', 9, 2);
-            $table->unique(['credito_id', 'nrocuota']);
+
+            $table->unsignedInteger('nro');
+            $table->date('fecha');
+            $table->time('hora');
+
+            $table->decimal('montopagado', 9, 2);
+
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade')->onUpdate('cascade');
+
+            $table->string('mediopago', 35);
+
+            $table->unique(['credito_id', 'nro'], 'uk_kardex_credito_nro');
+
+            $table->timestamps();
         });
     }
 
@@ -30,6 +38,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('cronograma_pagos');
+        Schema::dropIfExists('kardex_creditos');
     }
 };

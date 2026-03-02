@@ -188,30 +188,32 @@ class ClienteController extends Controller
     {
         $dni = $request->dni;
         $cliente = Cliente::with([
-            'persona:id,dni,ape_pat,ape_mat,primernombre,otrosnombres,ubicacion_domicilio_id',
-            'persona.ubicacion:id,tipo,ubigeo,tipovia,nombrevia,nro,interior,mz,lote,tipozona,nombrezona,referencia',
-            'negocios',
-            'negocios.tipo_actividad:id,nombre',
+            'persona:id,dni,ape_pat,ape_mat,primernombre,otrosnombres',
         ])->whereHas('persona', function ($q) use ($dni) {
             $q->where('dni', $dni);
-        })->first();
+        })
+            ->with('ahorros', 'creditos')
+            ->first();
         return $cliente;
     }
-    public function datosCreditoJuntaPorDni(Request $request)
+    public function mostrarPorBusqueda(Request $request)
     {
-        $dni = $request->dni;
-        $cliente = Cliente::with('persona:id,dni,ape_pat,ape_mat,primernombre,otrosnombres')
-            ->whereHas('persona', function ($q) use ($dni) {
-                $q->where('dni', $dni);
-            })->first();
-        $creditos = Desembolso::obtenerResumenPagosPorCliente($cliente->id, 'DESEMBOLSADO');
-        $juntas = Junta::obtenerResumenPagosPorCliente($cliente->id);
-        return response()->json([
-            'cliente'    => $cliente,
-            'creditos'   => $creditos,
-            'juntas'     => $juntas,
-        ], 200);
+        $busqueda = $request->busqueda;
+        $cliente = Cliente::with([
+            'persona:id,dni,ape_pat,ape_mat,primernombre,otrosnombres',
+        ])->whereHas('persona', function ($q) use ($busqueda) {
+            $q->whereRaw('UPPER(dni) LIKE ?', ['%' . $busqueda . '%'])
+                ->orWhereRaw('UPPER(ape_pat) LIKE ?', ['%' . $busqueda . '%'])
+                ->orWhereRaw('UPPER(ape_mat) LIKE ?', ['%' . $busqueda . '%'])
+                ->orWhereRaw('UPPER(primernombre) LIKE ?', ['%' . $busqueda . '%'])
+                ->orWhereRaw('UPPER(otrosnombres) LIKE ?', ['%' . $busqueda . '%'])
+                ->orWhereRaw("UPPER(CONCAT(ape_pat, ' ', ape_mat, ' ', primernombre, ' ', IFNULL(otrosnombres, ''))) LIKE ?", ['%' . $busqueda . '%']);
+        })
+            ->with('ahorros', 'creditos')
+            ->first();
+        return $cliente;
     }
+
     public function update(UpdateClienteRequest $request)
     {
         $filters = $this->getUserFilters();

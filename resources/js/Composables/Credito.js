@@ -68,6 +68,16 @@ export default function useCredito() {
         }
     }
 
+    const obtenerCronograma = async (creditoId) => {
+        try {
+            const res = await axios.get(`/credito/cronograma?credito_id=${creditoId}`, getConfigHeader())
+            return res.data
+        } catch (e) {
+            console.error(e)
+            return []
+        }
+    }
+
     return {
         errors,
         respuesta,
@@ -80,5 +90,6 @@ export default function useCredito() {
         eliminarCredito,
         obtenerCreditos,
         cambiarEstadoCredito,
+        obtenerCronograma,
     }
 }

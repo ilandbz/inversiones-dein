@@ -9,6 +9,7 @@ use App\Models\Credito;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use App\Http\Traits\UserFilters;
+use App\Models\CronogramaPago;
 
 class CreditoController extends Controller
 {
@@ -19,7 +20,7 @@ class CreditoController extends Controller
     {
         $fechaInicio = Carbon::now();
         switch (strtoupper($request->frecuencia)) {
-            case 'DIARIO':
+            case 'DIARIA':
                 $fechaVenc = $fechaInicio->addDays($request->plazo);
                 break;
 
@@ -504,5 +505,10 @@ class CreditoController extends Controller
                 'total_deuda' => $total_saldo + $total_mora,
             ],
         ]);
+    }
+
+    public function cronograma(Request $request)
+    {
+        return response()->json(CronogramaPago::where('credito_id', $request->credito_id)->orderBy('nrocuota')->get());
     }
 }

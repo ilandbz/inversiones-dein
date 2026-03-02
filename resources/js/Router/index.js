@@ -9,7 +9,7 @@ import Principal from '@/Pages/Principal.vue'
 import RegistroClientes from '@/Pages/Clientes/Registro.vue'
 import Usuario from '@/Pages/Usuario/Inicio.vue'
 import PermisosInicio from '@/Pages/Permisos/Inicio.vue'
-import ClientesInicio from '@/Pages/Clientes/Inicio.vue'
+import ClientesListado from '@/Pages/Clientes/Listado.vue'
 import RegistroPropiedades from '@/Pages/Propiedad/Inicio.vue'
 import Login from '@/Pages/Auth/Login.vue'
 import Perfil from '@/Pages/Usuario/Perfil.vue'
@@ -20,7 +20,9 @@ import ActividadDeNegocio from '@/Pages/ActividadNegocio/Inicio.vue'
 import Rol from '@/Pages/Rol/Inicio.vue'
 import AutorizacionesInicio from '@/Pages/Autorizaciones/Inicio.vue'
 import Desembolsar from '@/Pages/Caja/Desembolsar.vue'
-import HistorialClienteInicio from '@/Pages/HistorialCliente/Inicio.vue'
+import ClienteHistoria from '@/Pages/Clientes/Historia.vue'
+import CajaPagos from '@/Pages/Caja/Pagos.vue'
+
 
 const routes = [
   {
@@ -79,8 +81,9 @@ const routes = [
     meta: { layout: LayoutLogin, title: 'Login' }
   },
 
-  { path: '/clientes/listado-de-clientes', name: 'ClientesListado', component: ClientesInicio, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Listado del Cliente' } },
-  { path: '/clientes/historial-del-cliente', name: 'ClientesHistorial', component: HistorialClienteInicio, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Historial del Cliente' } },
+  { path: '/clientes/listado-de-clientes', name: 'ClientesListado', component: ClientesListado, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Listado del Cliente' } },
+  { path: '/clientes/historial-del-cliente', name: 'ClientesHistorial', component: ClienteHistoria, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Historial del Cliente' } },
+
 
   // --- ASESORES ---
   { path: '/asesores/metas', name: 'AsesoresMetas', component: Placeholder, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Metas' } },
@@ -110,7 +113,7 @@ const routes = [
 
   // --- CAJA ---
   { path: '/caja/cobros', name: 'CajaCobros', component: Placeholder, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Cobros' } },
-  { path: '/caja/pagos', name: 'CajaPagos', component: Placeholder, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Pagos' } },
+  { path: '/caja/pagos', name: 'CajaPagos', component: CajaPagos, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Pagos' } },
   { path: '/caja/cierre-de-caja', name: 'CajaCierre', component: Placeholder, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Cierre de Caja' } },
   { path: '/caja/desembolsar', name: 'CajaDesembolsar', component: Desembolsar, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Desembolsar' } },
 

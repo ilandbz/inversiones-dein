@@ -20,6 +20,10 @@ export default function useCliente() {
         let respuesta = await axios.get('/cliente/mostrar-dni?dni=' + dni, getConfigHeader())
         cliente.value = respuesta.data
     }
+    const obtenerClientePorBusqueda = async (busqueda) => {
+        let respuesta = await axios.get('/cliente/mostrar-busqueda?busqueda=' + busqueda, getConfigHeader())
+        cliente.value = respuesta.data
+    }
     const existeClientePorDni = async (dni) => {
         let respuesta = await axios.get('/cliente/mostrar-dni?dni=' + dni, getConfigHeader())
         existeCliente.value = respuesta.data.dni ? true : false
@@ -124,6 +128,6 @@ export default function useCliente() {
         errors, clientes, listaClientes, cliente, obtenerCliente, obtenerClientes, obtenerDatosParaNuevoCredito,
         agregarCliente, actualizarCliente, eliminarCliente, respuesta, obtenerClientePorDni, datos, obtenerClientesPosicion,
         datosCreditoJuntaPorDni, creditos, juntas, asignarAsesorMasivo, obtenerClienteReciente, obtenerClienteRecientePdf, pdfUrl,
-        existeClientePorDni, existeCliente, clientesPorEstado
+        existeClientePorDni, existeCliente, clientesPorEstado, obtenerClientePorBusqueda
     }
 }

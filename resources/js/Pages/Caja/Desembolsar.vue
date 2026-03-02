@@ -176,6 +176,7 @@ onMounted(() => {
                                     <th>Cliente</th>
                                     <th>Asesor</th>
                                     <th>Monto</th>
+                                    <th>Frecuencia</th>
                                     <th>Tasa</th>
                                     <th>Tipo</th>
                                     <th>Fecha Reg</th>
@@ -193,6 +194,7 @@ onMounted(() => {
                                     <td>{{ credito.cliente.persona.apenom }}</td>
                                     <td>{{ credito.asesor.user?.name }}</td>
                                     <td>{{ 'S/. ' + Number(credito.monto ?? 0).toFixed(2) }}</td>
+                                    <td>{{ credito.frecuencia }}</td>
                                     <td>{{ Number(credito.tasainteres * 100).toFixed(2) + '%' }}</td>
                                     <td>{{ credito.tipo }}</td>
                                     <td>{{ credito.fecha_reg }}</td>

@@ -178,7 +178,7 @@ const cerrarSesion = async () => {
                                     <div class="d-flex align-items-center justify-content-between mb-4">
                                         <div class="d-flex align-items-center gap-3">
                                             <div class="avatar-image rounded">
-                                                <img src="/duralux/images/avatar/1.png" alt="" class="img-fluid" />
+                                                <img src="/NEXEL/images/avatar/1.png" alt="" class="img-fluid" />
                                             </div>
                                             <div>
                                                 <a href="javascript:void(0);" class="font-body fw-bold d-block mb-1">Alexandra Della</a>
@@ -192,7 +192,7 @@ const cerrarSesion = async () => {
                                     <div class="d-flex align-items-center justify-content-between mb-4">
                                         <div class="d-flex align-items-center gap-3">
                                             <div class="avatar-image rounded">
-                                                <img src="/duralux/images/avatar/2.png" alt="" class="img-fluid" />
+                                                <img src="/NEXEL/images/avatar/2.png" alt="" class="img-fluid" />
                                             </div>
                                             <div>
                                                 <a href="javascript:void(0);" class="font-body fw-bold d-block mb-1">Green Cute</a>
@@ -206,7 +206,7 @@ const cerrarSesion = async () => {
                                     <div class="d-flex align-items-center justify-content-between mb-4">
                                         <div class="d-flex align-items-center gap-3">
                                             <div class="avatar-image rounded">
-                                                <img src="/duralux/images/avatar/3.png" alt="" class="img-fluid" />
+                                                <img src="/NEXEL/images/avatar/3.png" alt="" class="img-fluid" />
                                             </div>
                                             <div>
                                                 <a href="javascript:void(0);" class="font-body fw-bold d-block mb-1">Malanie Hanvey</a>
@@ -220,7 +220,7 @@ const cerrarSesion = async () => {
                                     <div class="d-flex align-items-center justify-content-between mb-4">
                                         <div class="d-flex align-items-center gap-3">
                                             <div class="avatar-image rounded">
-                                                <img src="/duralux/images/avatar/4.png" alt="" class="img-fluid" />
+                                                <img src="/NEXEL/images/avatar/4.png" alt="" class="img-fluid" />
                                             </div>
                                             <div>
                                                 <a href="javascript:void(0);" class="font-body fw-bold d-block mb-1">Kenneth Hune</a>
@@ -234,7 +234,7 @@ const cerrarSesion = async () => {
                                     <div class="d-flex align-items-center justify-content-between mb-0">
                                         <div class="d-flex align-items-center gap-3">
                                             <div class="avatar-image rounded">
-                                                <img src="/duralux/images/avatar/5.png" alt="" class="img-fluid" />
+                                                <img src="/NEXEL/images/avatar/5.png" alt="" class="img-fluid" />
                                             </div>
                                             <div>
                                                 <a href="javascript:void(0);" class="font-body fw-bold d-block mb-1">Archie Cantones</a>
@@ -252,7 +252,7 @@ const cerrarSesion = async () => {
                                     <div class="d-flex align-items-center justify-content-between mb-4">
                                         <div class="d-flex align-items-center gap-3">
                                             <div class="avatar-image bg-gray-200 rounded">
-                                                <img src="/duralux/images/file-icons/css.png" alt="" class="img-fluid" />
+                                                <img src="/NEXEL/images/file-icons/css.png" alt="" class="img-fluid" />
                                             </div>
                                             <div>
                                                 <a href="javascript:void(0);" class="font-body fw-bold d-block mb-1">Project Style CSS</a>
@@ -266,7 +266,7 @@ const cerrarSesion = async () => {
                                     <div class="d-flex align-items-center justify-content-between mb-4">
                                         <div class="d-flex align-items-center gap-3">
                                             <div class="avatar-image bg-gray-200 rounded">
-                                                <img src="/duralux/images/file-icons/zip.png" alt="" class="img-fluid" />
+                                                <img src="/NEXEL/images/file-icons/zip.png" alt="" class="img-fluid" />
                                             </div>
                                             <div>
                                                 <a href="javascript:void(0);" class="font-body fw-bold d-block mb-1">Dashboard Project Zip</a>
@@ -280,7 +280,7 @@ const cerrarSesion = async () => {
                                     <div class="d-flex align-items-center justify-content-between mb-0">
                                         <div class="d-flex align-items-center gap-3">
                                             <div class="avatar-image bg-gray-200 rounded">
-                                                <img src="/duralux/images/file-icons/pdf.png" alt="" class="img-fluid" />
+                                                <img src="/NEXEL/images/file-icons/pdf.png" alt="" class="img-fluid" />
                                             </div>
                                             <div>
                                                 <a href="javascript:void(0);" class="font-body fw-bold d-block mb-1">Project Document PDF</a>
@@ -315,12 +315,12 @@ const cerrarSesion = async () => {
                     </div>
                     <div class="dropdown nxl-h-item">
                         <a href="javascript:void(0);" data-bs-toggle="dropdown" role="button" data-bs-auto-close="outside">
-                            <img src="/duralux/images/avatar/1.png" alt="user-image" class="img-fluid user-avtar me-0" />
+                            <img src="/NEXEL/images/avatar/1.png" alt="user-image" class="img-fluid user-avtar me-0" />
                         </a>
                         <div class="dropdown-menu dropdown-menu-end nxl-h-dropdown nxl-user-dropdown">
                             <div class="dropdown-header">
                                 <div class="d-flex align-items-center">
-                                    <img src="/duralux/images/avatar/1.png" alt="user-image" class="img-fluid user-avtar" />
+                                    <img src="/NEXEL/images/avatar/1.png" alt="user-image" class="img-fluid user-avtar" />
                                     <div>
                                         <h6 class="text-dark mb-0">Alexandra Della <span class="badge bg-soft-success text-success ms-1">PRO</span></h6>
                                         <span class="fs-12 fw-medium text-muted">alex@example.com</span>

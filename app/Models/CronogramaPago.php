@@ -17,9 +17,8 @@ class CronogramaPago extends Model
 
     public $timestamps = false;
 
-    protected $primaryKey = ['credito_id', 'nrocuota'];
-
-    public $incrementing = false;
+    // protected $primaryKey = ['credito_id', 'nrocuota']; // Removed as user added id() in migration
+    // public $incrementing = false; // Removed as user added id() in migration
 
     public function credito()
     {

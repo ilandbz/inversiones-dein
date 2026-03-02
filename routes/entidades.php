@@ -14,6 +14,9 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\EvaluacionPrestamoController;
 use App\Http\Controllers\DesembolsoController;
+use App\Http\Controllers\NegocioController;
+use App\Http\Controllers\AhorroController;
+use App\Http\Controllers\KardexCreditoController;
 use Illuminate\Support\Facades\Route;
 
 Route::group(['prefix' => 'cliente', 'middleware' => 'auth'], function () {
@@ -31,6 +34,7 @@ Route::group(['prefix' => 'cliente', 'middleware' => 'auth'], function () {
     Route::post('asignar-asesor-masivo', [ClienteController::class, 'asignarAsesorMasivo']);
     Route::get('obtener-cliente-reciente', [ClienteController::class, 'obtenerClienteReciente']);
     Route::post('obtener-cliente-reciente-pdf', [ClienteController::class, 'obtenerClienteRecientePdf']);
+    Route::get('mostrar-busqueda', [ClienteController::class, 'mostrarPorBusqueda']);
 });
 
 Route::group(['prefix' => 'actividadnegocio', 'middleware' => 'auth'], function () {
@@ -43,6 +47,23 @@ Route::group(['prefix' => 'actividadnegocio', 'middleware' => 'auth'], function 
     Route::get('detalleactividadnegocio', [ActividadNegocioController::class, 'todosPorActividad']);
 });
 
+
+Route::group(['prefix' => 'negocio', 'middleware' => 'auth'], function () {
+    Route::get('por-cliente', [NegocioController::class, 'porCliente']);
+    Route::get('mostrar', [NegocioController::class, 'show']);
+    Route::post('guardar', [NegocioController::class, 'store']);
+    Route::post('actualizar', [NegocioController::class, 'update']);
+    Route::post('eliminar', [NegocioController::class, 'destroy']);
+});
+
+Route::group(['prefix' => 'ahorro', 'middleware' => 'auth'], function () {
+    Route::get('por-cliente', [AhorroController::class, 'porCliente']);
+    Route::get('mostrar', [AhorroController::class, 'show']);
+    Route::post('guardar', [AhorroController::class, 'store']);
+    // Using handleUpdate if they prefer post with _method=PUT or just post as per Negocio pattern
+    Route::post('actualizar', [AhorroController::class, 'update']);
+    Route::post('eliminar', [AhorroController::class, 'destroy']);
+});
 
 Route::group(['prefix' => 'ubigeo', 'middleware' => 'auth'], function () {
     Route::get('obtener', [UbicacionController::class, 'obtenerPorUbigeo']);
@@ -109,6 +130,7 @@ Route::group(['prefix' => 'credito', 'middleware' => 'auth'], function () {
     Route::get('obtener-creditos-cancelar', [CreditoController::class, 'obtenerSolicitudesCancelar']);
     Route::get('todos-tipo-creditos', [CreditoController::class, 'todosTipoCreditos']);
     Route::get('datos-evaluar', [CreditoController::class, 'obtenerDatosCreditoEvaluar']);
+    Route::get('cronograma', [CreditoController::class, 'cronograma']);
 });
 
 Route::group(['prefix' => 'balance', 'middleware' => 'auth'], function () {
@@ -184,4 +206,13 @@ Route::group(['prefix' => 'desembolso', 'middleware' => 'auth'], function () {
     Route::post('guardar', [DesembolsoController::class, 'store']);
     Route::get('listar', [DesembolsoController::class, 'listar']);
     Route::post('generar-pdf', [DesembolsoController::class, 'generarPDF']);
+});
+
+Route::group(['prefix' => 'kardex-credito', 'middleware' => 'auth'], function () {
+    Route::get('todos', [KardexCreditoController::class, 'todos']);
+    Route::get('mostrar', [KardexCreditoController::class, 'show']);
+    Route::post('actualizar', [KardexCreditoController::class, 'update']);
+    Route::post('eliminar', [KardexCreditoController::class, 'destroy']);
+    Route::post('guardar', [KardexCreditoController::class, 'store']);
+    Route::get('listar', [KardexCreditoController::class, 'listar']);
 });

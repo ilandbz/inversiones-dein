@@ -10,21 +10,21 @@
     <meta name="author" content="flexilecode" />
     <!--! The above 6 meta tags *must* come first in the head; any other head content must come *after* these tags !-->
     <!--! BEGIN: Apps Title-->
-    <title>Duralux || Dashboard</title>
+    <title>NEXEL || Dashboard</title>
     <!--! END:  Apps Title-->
     <!--! BEGIN: Favicon-->
-    <link rel="shortcut icon" type="image/x-icon" href="duralux/images/favicon.ico" />
+    <link rel="shortcut icon" type="image/x-icon" href="NEXEL/images/favicon.ico" />
     <!--! END: Favicon-->
     <!--! BEGIN: Bootstrap CSS-->
-    <link rel="stylesheet" type="text/css" href="duralux/css/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="NEXEL/css/bootstrap.min.css" />
     <!--! END: Bootstrap CSS-->
     <!--! BEGIN: Vendors CSS-->
-    <link rel="stylesheet" type="text/css" href="duralux/vendors/css/vendors.min.css" />
-    <link rel="stylesheet" type="text/css" href="duralux/vendors/css/daterangepicker.min.css" />
+    <link rel="stylesheet" type="text/css" href="NEXEL/vendors/css/vendors.min.css" />
+    <link rel="stylesheet" type="text/css" href="NEXEL/vendors/css/daterangepicker.min.css" />
     <!--! END: Vendors CSS-->
     <!--! BEGIN: Custom CSS-->
-    <link rel="stylesheet" type="text/css" href="duralux/css/theme.min.css" />
-    <link rel="stylesheet" type="text/css" href="duralux/css/custom.css" />
+    <link rel="stylesheet" type="text/css" href="NEXEL/css/theme.min.css" />
+    <link rel="stylesheet" type="text/css" href="NEXEL/css/custom.css" />
     <!--! END: Custom CSS-->
     <!--! HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries !-->
     <!--! WARNING: Respond.js doesn"t work if you view the page via file: !-->
@@ -45,8 +45,8 @@
                     <!-- ========   change your logo hear   ============ -->
                     <img src="imagenes/logo_navbar.jpeg" alt="" class="logo logo-lg" />
                     <img src="imagenes/logo_navbar.jpeg" alt="" class="logo logo-sm" />
-                    <!-- <img src="duralux/images/logo-full.png" alt="" class="logo logo-lg" />
-                    <img src="duralux/images/logo-abbr.png" alt="" class="logo logo-sm" /> -->
+                    <!-- <img src="NEXEL/images/logo-full.png" alt="" class="logo logo-lg" />
+                    <img src="NEXEL/images/logo-abbr.png" alt="" class="logo logo-sm" /> -->
 
 
                 </a>
@@ -266,8 +266,8 @@
                     <div class="card-body">
                         <i class="feather-sunrise fs-4 text-dark"></i>
                         <h6 class="mt-4 text-dark fw-bolder">Downloading Center</h6>
-                        <p class="fs-11 my-3 text-dark">Duralux is a production ready CRM to get started up and running easily.</p>
-                        <a href="https://www.themewagon.com/themes/Duralux-admin" target="_blank" class="btn btn-primary text-dark w-100">Download Now</a>
+                        <p class="fs-11 my-3 text-dark">NEXEL is a production ready CRM to get started up and running easily.</p>
+                        <a href="https://www.themewagon.com/themes/NEXEL-admin" target="_blank" class="btn btn-primary text-dark w-100">Download Now</a>
                     </div>
                 </div>
             </div>
@@ -759,10 +759,10 @@
                                         <!--! [Start] v-pills-general !-->
                                         <div class="tab-pane fade show active" id="v-pills-general" role="tabpanel">
                                             <div class="mb-4 rounded-3 border">
-                                                <img src="duralux/images/banner/mockup.png" alt="" class="img-fluid rounded-3" />
+                                                <img src="NEXEL/images/banner/mockup.png" alt="" class="img-fluid rounded-3" />
                                             </div>
-                                            <h6 class="fw-bolder">Duralux - Admin Dashboard UiKit</h6>
-                                            <p class="fs-12 fw-normal text-muted text-truncate-3-line">Get started Duralux with Duralux up and running. Duralux bootstrap template docs helps you to get started with simple html codes.</p>
+                                            <h6 class="fw-bolder">NEXEL - Admin Dashboard UiKit</h6>
+                                            <p class="fs-12 fw-normal text-muted text-truncate-3-line">Get started NEXEL with NEXEL up and running. NEXEL bootstrap template docs helps you to get started with simple html codes.</p>
                                             <a href="javascript:void(0);" class="fs-13 fw-bold text-primary">Get Started &rarr;</a>
                                         </div>
                                         <!--! [End] v-pills-general !-->
@@ -798,7 +798,7 @@
                                                 </div>
                                                 <div class="col-lg-6">
                                                     <div class="nxl-mega-menu-image">
-                                                        <img src="duralux/images/general/full-avatar.png" alt="" class="img-fluid full-user-avtar" />
+                                                        <img src="NEXEL/images/general/full-avatar.png" alt="" class="img-fluid full-user-avtar" />
                                                     </div>
                                                 </div>
                                             </div>
@@ -829,7 +829,7 @@
                                                 <div class="col-lg-4">
                                                     <a href="javascript:void(0);" class="dropdown-item">
                                                         <div class="menu-item-icon">
-                                                            <img src="duralux/images/brand/app-store.png" alt="" class="img-fluid" />
+                                                            <img src="NEXEL/images/brand/app-store.png" alt="" class="img-fluid" />
                                                         </div>
                                                         <div class="menu-item-title">App Store</div>
                                                         <div class="menu-item-arrow">
@@ -838,7 +838,7 @@
                                                     </a>
                                                     <a href="javascript:void(0);" class="dropdown-item">
                                                         <div class="menu-item-icon">
-                                                            <img src="duralux/images/brand/spotify.png" alt="" class="img-fluid" />
+                                                            <img src="NEXEL/images/brand/spotify.png" alt="" class="img-fluid" />
                                                         </div>
                                                         <div class="menu-item-title">Spotify</div>
                                                         <div class="menu-item-arrow">
@@ -847,7 +847,7 @@
                                                     </a>
                                                     <a href="javascript:void(0);" class="dropdown-item">
                                                         <div class="menu-item-icon">
-                                                            <img src="duralux/images/brand/figma.png" alt="" class="img-fluid" />
+                                                            <img src="NEXEL/images/brand/figma.png" alt="" class="img-fluid" />
                                                         </div>
                                                         <div class="menu-item-title">Figma</div>
                                                         <div class="menu-item-arrow">
@@ -856,7 +856,7 @@
                                                     </a>
                                                     <a href="javascript:void(0);" class="dropdown-item">
                                                         <div class="menu-item-icon">
-                                                            <img src="duralux/images/brand/shopify.png" alt="" class="img-fluid" />
+                                                            <img src="NEXEL/images/brand/shopify.png" alt="" class="img-fluid" />
                                                         </div>
                                                         <div class="menu-item-title">Shopify</div>
                                                         <div class="menu-item-arrow">
@@ -865,7 +865,7 @@
                                                     </a>
                                                     <a href="javascript:void(0);" class="dropdown-item">
                                                         <div class="menu-item-icon">
-                                                            <img src="duralux/images/brand/paypal.png" alt="" class="img-fluid" />
+                                                            <img src="NEXEL/images/brand/paypal.png" alt="" class="img-fluid" />
                                                         </div>
                                                         <div class="menu-item-title">Paypal</div>
                                                         <div class="menu-item-arrow">
@@ -876,7 +876,7 @@
                                                 <div class="col-lg-4">
                                                     <a href="javascript:void(0);" class="dropdown-item">
                                                         <div class="menu-item-icon">
-                                                            <img src="duralux/images/brand/gmail.png" alt="" class="img-fluid" />
+                                                            <img src="NEXEL/images/brand/gmail.png" alt="" class="img-fluid" />
                                                         </div>
                                                         <div class="menu-item-title">Gmail</div>
                                                         <div class="menu-item-arrow">
@@ -885,7 +885,7 @@
                                                     </a>
                                                     <a href="javascript:void(0);" class="dropdown-item">
                                                         <div class="menu-item-icon">
-                                                            <img src="duralux/images/brand/dropbox.png" alt="" class="img-fluid" />
+                                                            <img src="NEXEL/images/brand/dropbox.png" alt="" class="img-fluid" />
                                                         </div>
                                                         <div class="menu-item-title">Dropbox</div>
                                                         <div class="menu-item-arrow">
@@ -894,7 +894,7 @@
                                                     </a>
                                                     <a href="javascript:void(0);" class="dropdown-item">
                                                         <div class="menu-item-icon">
-                                                            <img src="duralux/images/brand/google-drive.png" alt="" class="img-fluid" />
+                                                            <img src="NEXEL/images/brand/google-drive.png" alt="" class="img-fluid" />
                                                         </div>
                                                         <div class="menu-item-title">Google Drive</div>
                                                         <div class="menu-item-arrow">
@@ -903,7 +903,7 @@
                                                     </a>
                                                     <a href="javascript:void(0);" class="dropdown-item">
                                                         <div class="menu-item-icon">
-                                                            <img src="duralux/images/brand/github.png" alt="" class="img-fluid" />
+                                                            <img src="NEXEL/images/brand/github.png" alt="" class="img-fluid" />
                                                         </div>
                                                         <div class="menu-item-title">Github</div>
                                                         <div class="menu-item-arrow">
@@ -912,7 +912,7 @@
                                                     </a>
                                                     <a href="javascript:void(0);" class="dropdown-item">
                                                         <div class="menu-item-icon">
-                                                            <img src="duralux/images/brand/gitlab.png" alt="" class="img-fluid" />
+                                                            <img src="NEXEL/images/brand/gitlab.png" alt="" class="img-fluid" />
                                                         </div>
                                                         <div class="menu-item-title">Gitlab</div>
                                                         <div class="menu-item-arrow">
@@ -923,7 +923,7 @@
                                                 <div class="col-lg-4">
                                                     <a href="javascript:void(0);" class="dropdown-item">
                                                         <div class="menu-item-icon">
-                                                            <img src="duralux/images/brand/facebook.png" alt="" class="img-fluid" />
+                                                            <img src="NEXEL/images/brand/facebook.png" alt="" class="img-fluid" />
                                                         </div>
                                                         <div class="menu-item-title">Facebook</div>
                                                         <div class="menu-item-arrow">
@@ -932,7 +932,7 @@
                                                     </a>
                                                     <a href="javascript:void(0);" class="dropdown-item">
                                                         <div class="menu-item-icon">
-                                                            <img src="duralux/images/brand/pinterest.png" alt="" class="img-fluid" />
+                                                            <img src="NEXEL/images/brand/pinterest.png" alt="" class="img-fluid" />
                                                         </div>
                                                         <div class="menu-item-title">Pinterest</div>
                                                         <div class="menu-item-arrow">
@@ -941,7 +941,7 @@
                                                     </a>
                                                     <a href="javascript:void(0);" class="dropdown-item">
                                                         <div class="menu-item-icon">
-                                                            <img src="duralux/images/brand/instagram.png" alt="" class="img-fluid" />
+                                                            <img src="NEXEL/images/brand/instagram.png" alt="" class="img-fluid" />
                                                         </div>
                                                         <div class="menu-item-title">Instagram</div>
                                                         <div class="menu-item-arrow">
@@ -950,7 +950,7 @@
                                                     </a>
                                                     <a href="javascript:void(0);" class="dropdown-item">
                                                         <div class="menu-item-icon">
-                                                            <img src="duralux/images/brand/twitter.png" alt="" class="img-fluid" />
+                                                            <img src="NEXEL/images/brand/twitter.png" alt="" class="img-fluid" />
                                                         </div>
                                                         <div class="menu-item-title">Twitter</div>
                                                         <div class="menu-item-arrow">
@@ -959,7 +959,7 @@
                                                     </a>
                                                     <a href="javascript:void(0);" class="dropdown-item">
                                                         <div class="menu-item-icon">
-                                                            <img src="duralux/images/brand/youtube.png" alt="" class="img-fluid" />
+                                                            <img src="NEXEL/images/brand/youtube.png" alt="" class="img-fluid" />
                                                         </div>
                                                         <div class="menu-item-title">Youtube</div>
                                                         <div class="menu-item-arrow">
@@ -1008,10 +1008,10 @@
                                                 </div>
                                                 <div class="col-xl-4">
                                                     <div class="nxl-mega-menu-image">
-                                                        <img src="duralux/images/banner/1.jpg" alt="" class="img-fluid" />
+                                                        <img src="NEXEL/images/banner/1.jpg" alt="" class="img-fluid" />
                                                     </div>
                                                     <div class="mt-4">
-                                                        <a href="mailto:flexilecode@gmail.com" class="fs-13 fw-bold">View all resources on Duralux &rarr;</a>
+                                                        <a href="mailto:flexilecode@gmail.com" class="fs-13 fw-bold">View all resources on NEXEL &rarr;</a>
                                                     </div>
                                                 </div>
                                             </div>
@@ -1118,7 +1118,7 @@
                                                         <div class="carousel-inner rounded-3">
                                                             <div class="carousel-item active">
                                                                 <div class="nxl-mega-menu-image">
-                                                                    <img src="duralux/images/banner/6.jpg" alt="" class="img-fluid d-block w-100" />
+                                                                    <img src="NEXEL/images/banner/6.jpg" alt="" class="img-fluid d-block w-100" />
                                                                 </div>
                                                                 <div class="carousel-caption">
                                                                     <h5 class="carousel-caption-title text-truncate-1-line">Shopify eCommerce Store</h5>
@@ -1127,7 +1127,7 @@
                                                             </div>
                                                             <div class="carousel-item">
                                                                 <div class="nxl-mega-menu-image">
-                                                                    <img src="duralux/images/banner/5.jpg" alt="" class="img-fluid d-block w-100" />
+                                                                    <img src="NEXEL/images/banner/5.jpg" alt="" class="img-fluid d-block w-100" />
                                                                 </div>
                                                                 <div class="carousel-caption">
                                                                     <h5 class="carousel-caption-title text-truncate-1-line">iOS Apps Development</h5>
@@ -1136,7 +1136,7 @@
                                                             </div>
                                                             <div class="carousel-item">
                                                                 <div class="nxl-mega-menu-image">
-                                                                    <img src="duralux/images/banner/4.jpg" alt="" class="img-fluid d-block w-100" />
+                                                                    <img src="NEXEL/images/banner/4.jpg" alt="" class="img-fluid d-block w-100" />
                                                                 </div>
                                                                 <div class="carousel-caption">
                                                                     <h5 class="carousel-caption-title text-truncate-1-line">Figma Dashboard Design</h5>
@@ -1145,7 +1145,7 @@
                                                             </div>
                                                             <div class="carousel-item">
                                                                 <div class="nxl-mega-menu-image">
-                                                                    <img src="duralux/images/banner/3.jpg" alt="" class="img-fluid d-block w-100" />
+                                                                    <img src="NEXEL/images/banner/3.jpg" alt="" class="img-fluid d-block w-100" />
                                                                 </div>
                                                                 <div class="carousel-caption">
                                                                     <h5 class="carousel-caption-title text-truncate-1-line">React Dashboard Design</h5>
@@ -1154,7 +1154,7 @@
                                                             </div>
                                                             <div class="carousel-item">
                                                                 <div class="nxl-mega-menu-image">
-                                                                    <img src="duralux/images/banner/2.jpg" alt="" class="img-fluid d-block w-100" />
+                                                                    <img src="NEXEL/images/banner/2.jpg" alt="" class="img-fluid d-block w-100" />
                                                                 </div>
                                                                 <div class="carousel-caption">
                                                                     <h5 class="carousel-caption-title text-truncate-1-line">Standup Team Meeting</h5>
@@ -1163,7 +1163,7 @@
                                                             </div>
                                                             <div class="carousel-item">
                                                                 <div class="nxl-mega-menu-image">
-                                                                    <img src="duralux/images/banner/1.jpg" alt="" class="img-fluid d-block w-100" />
+                                                                    <img src="NEXEL/images/banner/1.jpg" alt="" class="img-fluid d-block w-100" />
                                                                 </div>
                                                                 <div class="carousel-caption">
                                                                     <h5 class="carousel-caption-title text-truncate-1-line">Zoom Team Meeting</h5>
@@ -1239,7 +1239,7 @@
                                                                 <div class="col-xl-6">
                                                                     <div class="d-lg-flex align-items-center gap-3">
                                                                         <div class="wd-150 rounded-3">
-                                                                            <img src="duralux/images/banner/1.jpg" alt="" class="img-fluid rounded-3" />
+                                                                            <img src="NEXEL/images/banner/1.jpg" alt="" class="img-fluid rounded-3" />
                                                                         </div>
                                                                         <div class="mt-3 mt-lg-0 ms-lg-3 item-text">
                                                                             <a href="javascript:void(0);">
@@ -1248,7 +1248,7 @@
                                                                             <p class="fs-12 fw-normal text-muted mb-0 text-truncate-2-line">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Sint nam ullam iure eum sed rerum libero quis doloremque maiores veritatis?</p>
                                                                             <div class="hstack gap-2 mt-3">
                                                                                 <div class="avatar-image avatar-sm">
-                                                                                    <img src="duralux/images/avatar/1.png" alt="" class="img-fluid" />
+                                                                                    <img src="NEXEL/images/avatar/1.png" alt="" class="img-fluid" />
                                                                                 </div>
                                                                                 <a href="javascript:void(0);" class="fs-12">Alexandra Della</a>
                                                                             </div>
@@ -1258,7 +1258,7 @@
                                                                 <div class="col-xl-6">
                                                                     <div class="d-lg-flex align-items-center gap-3">
                                                                         <div class="wd-150 rounded-3">
-                                                                            <img src="duralux/images/banner/2.jpg" alt="" class="img-fluid rounded-3" />
+                                                                            <img src="NEXEL/images/banner/2.jpg" alt="" class="img-fluid rounded-3" />
                                                                         </div>
                                                                         <div class="mt-3 mt-lg-0 ms-lg-3 item-text">
                                                                             <a href="javascript:void(0);">
@@ -1267,7 +1267,7 @@
                                                                             <p class="fs-12 fw-normal text-muted mb-0 text-truncate-2-line">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Sint nam ullam iure eum sed rerum libero quis doloremque maiores veritatis?</p>
                                                                             <div class="hstack gap-2 mt-3">
                                                                                 <div class="avatar-image avatar-sm">
-                                                                                    <img src="duralux/images/avatar/2.png" alt="" class="img-fluid" />
+                                                                                    <img src="NEXEL/images/avatar/2.png" alt="" class="img-fluid" />
                                                                                 </div>
                                                                                 <a href="javascript:void(0);" class="fs-12">Green Cute</a>
                                                                             </div>
@@ -1277,7 +1277,7 @@
                                                                 <div class="col-xl-6">
                                                                     <div class="d-lg-flex align-items-center gap-3">
                                                                         <div class="wd-150 rounded-3">
-                                                                            <img src="duralux/images/banner/3.jpg" alt="" class="img-fluid rounded-3" />
+                                                                            <img src="NEXEL/images/banner/3.jpg" alt="" class="img-fluid rounded-3" />
                                                                         </div>
                                                                         <div class="mt-3 mt-lg-0 ms-lg-3 item-text">
                                                                             <a href="javascript:void(0);">
@@ -1286,7 +1286,7 @@
                                                                             <p class="fs-12 fw-normal text-muted mb-0 text-truncate-2-line">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Sint nam ullam iure eum sed rerum libero quis doloremque maiores veritatis?</p>
                                                                             <div class="hstack gap-2 mt-3">
                                                                                 <div class="avatar-image avatar-sm">
-                                                                                    <img src="duralux/images/avatar/3.png" alt="" class="img-fluid" />
+                                                                                    <img src="NEXEL/images/avatar/3.png" alt="" class="img-fluid" />
                                                                                 </div>
                                                                                 <a href="javascript:void(0);" class="fs-12">Malanie Hanvey</a>
                                                                             </div>
@@ -1296,7 +1296,7 @@
                                                                 <div class="col-xl-6">
                                                                     <div class="d-lg-flex align-items-center gap-3">
                                                                         <div class="wd-150 rounded-3">
-                                                                            <img src="duralux/images/banner/4.jpg" alt="" class="img-fluid rounded-3" />
+                                                                            <img src="NEXEL/images/banner/4.jpg" alt="" class="img-fluid rounded-3" />
                                                                         </div>
                                                                         <div class="mt-3 mt-lg-0 ms-lg-3 item-text">
                                                                             <a href="javascript:void(0);">
@@ -1305,7 +1305,7 @@
                                                                             <p class="fs-12 fw-normal text-muted mb-0 text-truncate-2-line">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Sint nam ullam iure eum sed rerum libero quis doloremque maiores veritatis?</p>
                                                                             <div class="hstack gap-2 mt-3">
                                                                                 <div class="avatar-image avatar-sm">
-                                                                                    <img src="duralux/images/avatar/4.png" alt="" class="img-fluid" />
+                                                                                    <img src="NEXEL/images/avatar/4.png" alt="" class="img-fluid" />
                                                                                 </div>
                                                                                 <a href="javascript:void(0);" class="fs-12">Kenneth Hune</a>
                                                                             </div>
@@ -1402,7 +1402,7 @@
                                                                     <div class="p-3 bg-soft-dark text-dark rounded d-lg-flex align-items-center justify-content-between">
                                                                         <div class="fs-13">
                                                                             <i class="feather-star me-2"></i>
-                                                                            <span>View all services on Duralux.</span>
+                                                                            <span>View all services on NEXEL.</span>
                                                                         </div>
                                                                         <div class="mt-2 mt-lg-0">
                                                                             <a href="javascript:void(0);" class="fs-13 text-primary">Learn More &rarr;</a>
@@ -1424,7 +1424,7 @@
                                                                 <div class="carousel-inner rounded-3">
                                                                     <div class="carousel-item active">
                                                                         <div class="nxl-mega-menu-image">
-                                                                            <img src="duralux/images/banner/6.jpg" alt="" class="img-fluid d-block w-100" />
+                                                                            <img src="NEXEL/images/banner/6.jpg" alt="" class="img-fluid d-block w-100" />
                                                                         </div>
                                                                         <div class="carousel-caption">
                                                                             <h5 class="carousel-caption-title text-truncate-1-line">Shopify eCommerce Store</h5>
@@ -1433,7 +1433,7 @@
                                                                     </div>
                                                                     <div class="carousel-item">
                                                                         <div class="nxl-mega-menu-image">
-                                                                            <img src="duralux/images/banner/5.jpg" alt="" class="img-fluid d-block w-100" />
+                                                                            <img src="NEXEL/images/banner/5.jpg" alt="" class="img-fluid d-block w-100" />
                                                                         </div>
                                                                         <div class="carousel-caption">
                                                                             <h5 class="carousel-caption-title text-truncate-1-line">iOS Apps Development</h5>
@@ -1442,7 +1442,7 @@
                                                                     </div>
                                                                     <div class="carousel-item">
                                                                         <div class="nxl-mega-menu-image">
-                                                                            <img src="duralux/images/banner/4.jpg" alt="" class="img-fluid d-block w-100" />
+                                                                            <img src="NEXEL/images/banner/4.jpg" alt="" class="img-fluid d-block w-100" />
                                                                         </div>
                                                                         <div class="carousel-caption">
                                                                             <h5 class="carousel-caption-title text-truncate-1-line">Figma Dashboard Design</h5>
@@ -1451,7 +1451,7 @@
                                                                     </div>
                                                                     <div class="carousel-item">
                                                                         <div class="nxl-mega-menu-image">
-                                                                            <img src="duralux/images/banner/3.jpg" alt="" class="img-fluid d-block w-100" />
+                                                                            <img src="NEXEL/images/banner/3.jpg" alt="" class="img-fluid d-block w-100" />
                                                                         </div>
                                                                         <div class="carousel-caption">
                                                                             <h5 class="carousel-caption-title text-truncate-1-line">React Dashboard Design</h5>
@@ -1460,7 +1460,7 @@
                                                                     </div>
                                                                     <div class="carousel-item">
                                                                         <div class="nxl-mega-menu-image">
-                                                                            <img src="duralux/images/banner/2.jpg" alt="" class="img-fluid d-block w-100" />
+                                                                            <img src="NEXEL/images/banner/2.jpg" alt="" class="img-fluid d-block w-100" />
                                                                         </div>
                                                                         <div class="carousel-caption">
                                                                             <h5 class="carousel-caption-title text-truncate-1-line">Standup Team Meeting</h5>
@@ -1469,7 +1469,7 @@
                                                                     </div>
                                                                     <div class="carousel-item">
                                                                         <div class="nxl-mega-menu-image">
-                                                                            <img src="duralux/images/banner/1.jpg" alt="" class="img-fluid d-block w-100" />
+                                                                            <img src="NEXEL/images/banner/1.jpg" alt="" class="img-fluid d-block w-100" />
                                                                         </div>
                                                                         <div class="carousel-caption">
                                                                             <h5 class="carousel-caption-title text-truncate-1-line">Zoom Team Meeting</h5>
@@ -1575,10 +1575,10 @@
                                                         </div>
                                                         <div class="col-xxl-3 offset-xxl-1 col-xl-4">
                                                             <div class="nxl-mega-menu-image">
-                                                                <img src="duralux/images/banner/1.jpg" alt="" class="img-fluid" />
+                                                                <img src="NEXEL/images/banner/1.jpg" alt="" class="img-fluid" />
                                                             </div>
                                                             <div class="mt-4">
-                                                                <a href="mailto:flexilecode@gmail.com" class="fs-13 fw-bold">View all features on Duralux &rarr;</a>
+                                                                <a href="mailto:flexilecode@gmail.com" class="fs-13 fw-bold">View all features on NEXEL &rarr;</a>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -1599,7 +1599,7 @@
                                                                 <div class="col-xxl-4 col-lg-6">
                                                                     <div class="d-flex align-items-center gap-3">
                                                                         <div class="wd-100 rounded-3">
-                                                                            <img src="duralux/images/banner/1.jpg" alt="" class="img-fluid rounded-3 border border-3" />
+                                                                            <img src="NEXEL/images/banner/1.jpg" alt="" class="img-fluid rounded-3 border border-3" />
                                                                         </div>
                                                                         <div>
                                                                             <a href="javascript:void(0);">
@@ -1613,7 +1613,7 @@
                                                                 <div class="col-xxl-4 col-lg-6">
                                                                     <div class="d-flex align-items-center gap-3">
                                                                         <div class="wd-100 rounded-3">
-                                                                            <img src="duralux/images/banner/2.jpg" alt="" class="img-fluid rounded-3 border border-3" />
+                                                                            <img src="NEXEL/images/banner/2.jpg" alt="" class="img-fluid rounded-3 border border-3" />
                                                                         </div>
                                                                         <div>
                                                                             <a href="javascript:void(0);">
@@ -1627,7 +1627,7 @@
                                                                 <div class="col-xxl-4 col-lg-6">
                                                                     <div class="d-flex align-items-center gap-3">
                                                                         <div class="wd-100 rounded-3">
-                                                                            <img src="duralux/images/banner/3.jpg" alt="" class="img-fluid rounded-3 border border-3" />
+                                                                            <img src="NEXEL/images/banner/3.jpg" alt="" class="img-fluid rounded-3 border border-3" />
                                                                         </div>
                                                                         <div>
                                                                             <a href="javascript:void(0);">
@@ -1641,7 +1641,7 @@
                                                                 <div class="col-xxl-4 col-lg-6">
                                                                     <div class="d-flex align-items-center gap-3">
                                                                         <div class="wd-100 rounded-3">
-                                                                            <img src="duralux/images/banner/4.jpg" alt="" class="img-fluid rounded-3 border border-3" />
+                                                                            <img src="NEXEL/images/banner/4.jpg" alt="" class="img-fluid rounded-3 border border-3" />
                                                                         </div>
                                                                         <div>
                                                                             <a href="javascript:void(0);">
@@ -1655,7 +1655,7 @@
                                                                 <div class="col-xxl-4 col-lg-6">
                                                                     <div class="d-flex align-items-center gap-3">
                                                                         <div class="wd-100 rounded-3">
-                                                                            <img src="duralux/images/banner/5.jpg" alt="" class="img-fluid rounded-3 border border-3" />
+                                                                            <img src="NEXEL/images/banner/5.jpg" alt="" class="img-fluid rounded-3 border border-3" />
                                                                         </div>
                                                                         <div>
                                                                             <a href="javascript:void(0);">
@@ -1669,7 +1669,7 @@
                                                                 <div class="col-xxl-4 col-lg-6">
                                                                     <div class="d-flex align-items-center gap-3">
                                                                         <div class="wd-100 rounded-3">
-                                                                            <img src="duralux/images/banner/6.jpg" alt="" class="img-fluid rounded-3 border border-3" />
+                                                                            <img src="NEXEL/images/banner/6.jpg" alt="" class="img-fluid rounded-3 border border-3" />
                                                                         </div>
                                                                         <div>
                                                                             <a href="javascript:void(0);">
@@ -1798,7 +1798,7 @@
                                     <div class="d-flex align-items-center justify-content-between mb-4">
                                         <div class="d-flex align-items-center gap-3">
                                             <div class="avatar-image rounded">
-                                                <img src="duralux/images/avatar/1.png" alt="" class="img-fluid" />
+                                                <img src="NEXEL/images/avatar/1.png" alt="" class="img-fluid" />
                                             </div>
                                             <div>
                                                 <a href="javascript:void(0);" class="font-body fw-bold d-block mb-1">Alexandra Della</a>
@@ -1812,7 +1812,7 @@
                                     <div class="d-flex align-items-center justify-content-between mb-4">
                                         <div class="d-flex align-items-center gap-3">
                                             <div class="avatar-image rounded">
-                                                <img src="duralux/images/avatar/2.png" alt="" class="img-fluid" />
+                                                <img src="NEXEL/images/avatar/2.png" alt="" class="img-fluid" />
                                             </div>
                                             <div>
                                                 <a href="javascript:void(0);" class="font-body fw-bold d-block mb-1">Green Cute</a>
@@ -1826,7 +1826,7 @@
                                     <div class="d-flex align-items-center justify-content-between mb-4">
                                         <div class="d-flex align-items-center gap-3">
                                             <div class="avatar-image rounded">
-                                                <img src="duralux/images/avatar/3.png" alt="" class="img-fluid" />
+                                                <img src="NEXEL/images/avatar/3.png" alt="" class="img-fluid" />
                                             </div>
                                             <div>
                                                 <a href="javascript:void(0);" class="font-body fw-bold d-block mb-1">Malanie Hanvey</a>
@@ -1840,7 +1840,7 @@
                                     <div class="d-flex align-items-center justify-content-between mb-4">
                                         <div class="d-flex align-items-center gap-3">
                                             <div class="avatar-image rounded">
-                                                <img src="duralux/images/avatar/4.png" alt="" class="img-fluid" />
+                                                <img src="NEXEL/images/avatar/4.png" alt="" class="img-fluid" />
                                             </div>
                                             <div>
                                                 <a href="javascript:void(0);" class="font-body fw-bold d-block mb-1">Kenneth Hune</a>
@@ -1854,7 +1854,7 @@
                                     <div class="d-flex align-items-center justify-content-between mb-0">
                                         <div class="d-flex align-items-center gap-3">
                                             <div class="avatar-image rounded">
-                                                <img src="duralux/images/avatar/5.png" alt="" class="img-fluid" />
+                                                <img src="NEXEL/images/avatar/5.png" alt="" class="img-fluid" />
                                             </div>
                                             <div>
                                                 <a href="javascript:void(0);" class="font-body fw-bold d-block mb-1">Archie Cantones</a>
@@ -1872,7 +1872,7 @@
                                     <div class="d-flex align-items-center justify-content-between mb-4">
                                         <div class="d-flex align-items-center gap-3">
                                             <div class="avatar-image bg-gray-200 rounded">
-                                                <img src="duralux/images/file-icons/css.png" alt="" class="img-fluid" />
+                                                <img src="NEXEL/images/file-icons/css.png" alt="" class="img-fluid" />
                                             </div>
                                             <div>
                                                 <a href="javascript:void(0);" class="font-body fw-bold d-block mb-1">Project Style CSS</a>
@@ -1886,7 +1886,7 @@
                                     <div class="d-flex align-items-center justify-content-between mb-4">
                                         <div class="d-flex align-items-center gap-3">
                                             <div class="avatar-image bg-gray-200 rounded">
-                                                <img src="duralux/images/file-icons/zip.png" alt="" class="img-fluid" />
+                                                <img src="NEXEL/images/file-icons/zip.png" alt="" class="img-fluid" />
                                             </div>
                                             <div>
                                                 <a href="javascript:void(0);" class="font-body fw-bold d-block mb-1">Dashboard Project Zip</a>
@@ -1900,7 +1900,7 @@
                                     <div class="d-flex align-items-center justify-content-between mb-0">
                                         <div class="d-flex align-items-center gap-3">
                                             <div class="avatar-image bg-gray-200 rounded">
-                                                <img src="duralux/images/file-icons/pdf.png" alt="" class="img-fluid" />
+                                                <img src="NEXEL/images/file-icons/pdf.png" alt="" class="img-fluid" />
                                             </div>
                                             <div>
                                                 <a href="javascript:void(0);" class="font-body fw-bold d-block mb-1">Project Document PDF</a>
@@ -1919,7 +1919,7 @@
                     </div>
                     <div class="dropdown nxl-h-item nxl-header-language d-none d-sm-flex">
                         <a href="javascript:void(0);" class="nxl-head-link me-0 nxl-language-link" data-bs-toggle="dropdown" data-bs-auto-close="outside">
-                            <img src="duralux/vendors/img/flags/4x3/us.svg" alt="" class="img-fluid wd-20" />
+                            <img src="NEXEL/vendors/img/flags/4x3/us.svg" alt="" class="img-fluid wd-20" />
                         </a>
                         <div class="dropdown-menu dropdown-menu-end nxl-h-dropdown nxl-language-dropdown">
                             <div class="dropdown-divider mt-0"></div>
@@ -1937,73 +1937,73 @@
                                 <div class="row px-4 pt-3">
                                     <div class="col-sm-4 col-6 language_select">
                                         <a href="javascript:void(0);" class="d-flex align-items-center gap-2">
-                                            <div class="avatar-image avatar-sm"><img src="duralux/vendors/img/flags/1x1/sa.svg" alt="" class="img-fluid" /></div>
+                                            <div class="avatar-image avatar-sm"><img src="NEXEL/vendors/img/flags/1x1/sa.svg" alt="" class="img-fluid" /></div>
                                             <span>Arabic</span>
                                         </a>
                                     </div>
                                     <div class="col-sm-4 col-6 language_select">
                                         <a href="javascript:void(0);" class="d-flex align-items-center gap-2">
-                                            <div class="avatar-image avatar-sm"><img src="duralux/vendors/img/flags/1x1/bd.svg" alt="" class="img-fluid" /></div>
+                                            <div class="avatar-image avatar-sm"><img src="NEXEL/vendors/img/flags/1x1/bd.svg" alt="" class="img-fluid" /></div>
                                             <span>Bengali</span>
                                         </a>
                                     </div>
                                     <div class="col-sm-4 col-6 language_select">
                                         <a href="javascript:void(0);" class="d-flex align-items-center gap-2">
-                                            <div class="avatar-image avatar-sm"><img src="duralux/vendors/img/flags/1x1/ch.svg" alt="" class="img-fluid" /></div>
+                                            <div class="avatar-image avatar-sm"><img src="NEXEL/vendors/img/flags/1x1/ch.svg" alt="" class="img-fluid" /></div>
                                             <span>Chinese</span>
                                         </a>
                                     </div>
                                     <div class="col-sm-4 col-6 language_select">
                                         <a href="javascript:void(0);" class="d-flex align-items-center gap-2">
-                                            <div class="avatar-image avatar-sm"><img src="duralux/vendors/img/flags/1x1/nl.svg" alt="" class="img-fluid" /></div>
+                                            <div class="avatar-image avatar-sm"><img src="NEXEL/vendors/img/flags/1x1/nl.svg" alt="" class="img-fluid" /></div>
                                             <span>Dutch</span>
                                         </a>
                                     </div>
                                     <div class="col-sm-4 col-6 language_select active">
                                         <a href="javascript:void(0);" class="d-flex align-items-center gap-2">
-                                            <div class="avatar-image avatar-sm"><img src="duralux/vendors/img/flags/1x1/us.svg" alt="" class="img-fluid" /></div>
+                                            <div class="avatar-image avatar-sm"><img src="NEXEL/vendors/img/flags/1x1/us.svg" alt="" class="img-fluid" /></div>
                                             <span>English</span>
                                         </a>
                                     </div>
                                     <div class="col-sm-4 col-6 language_select">
                                         <a href="javascript:void(0);" class="d-flex align-items-center gap-2">
-                                            <div class="avatar-image avatar-sm"><img src="duralux/vendors/img/flags/1x1/fr.svg" alt="" class="img-fluid" /></div>
+                                            <div class="avatar-image avatar-sm"><img src="NEXEL/vendors/img/flags/1x1/fr.svg" alt="" class="img-fluid" /></div>
                                             <span>French</span>
                                         </a>
                                     </div>
                                     <div class="col-sm-4 col-6 language_select">
                                         <a href="javascript:void(0);" class="d-flex align-items-center gap-2">
-                                            <div class="avatar-image avatar-sm"><img src="duralux/vendors/img/flags/1x1/de.svg" alt="" class="img-fluid" /></div>
+                                            <div class="avatar-image avatar-sm"><img src="NEXEL/vendors/img/flags/1x1/de.svg" alt="" class="img-fluid" /></div>
                                             <span>German</span>
                                         </a>
                                     </div>
                                     <div class="col-sm-4 col-6 language_select">
                                         <a href="javascript:void(0);" class="d-flex align-items-center gap-2">
-                                            <div class="avatar-image avatar-sm"><img src="duralux/vendors/img/flags/1x1/in.svg" alt="" class="img-fluid" /></div>
+                                            <div class="avatar-image avatar-sm"><img src="NEXEL/vendors/img/flags/1x1/in.svg" alt="" class="img-fluid" /></div>
                                             <span>Hindi</span>
                                         </a>
                                     </div>
                                     <div class="col-sm-4 col-6 language_select">
                                         <a href="javascript:void(0);" class="d-flex align-items-center gap-2">
-                                            <div class="avatar-image avatar-sm"><img src="duralux/vendors/img/flags/1x1/ru.svg" alt="" class="img-fluid" /></div>
+                                            <div class="avatar-image avatar-sm"><img src="NEXEL/vendors/img/flags/1x1/ru.svg" alt="" class="img-fluid" /></div>
                                             <span>Russian</span>
                                         </a>
                                     </div>
                                     <div class="col-sm-4 col-6 language_select">
                                         <a href="javascript:void(0);" class="d-flex align-items-center gap-2">
-                                            <div class="avatar-image avatar-sm"><img src="duralux/vendors/img/flags/1x1/es.svg" alt="" class="img-fluid" /></div>
+                                            <div class="avatar-image avatar-sm"><img src="NEXEL/vendors/img/flags/1x1/es.svg" alt="" class="img-fluid" /></div>
                                             <span>Spanish</span>
                                         </a>
                                     </div>
                                     <div class="col-sm-4 col-6 language_select">
                                         <a href="javascript:void(0);" class="d-flex align-items-center gap-2">
-                                            <div class="avatar-image avatar-sm"><img src="duralux/vendors/img/flags/1x1/tr.svg" alt="" class="img-fluid" /></div>
+                                            <div class="avatar-image avatar-sm"><img src="NEXEL/vendors/img/flags/1x1/tr.svg" alt="" class="img-fluid" /></div>
                                             <span>Turkish</span>
                                         </a>
                                     </div>
                                     <div class="col-sm-4 col-6 language_select">
                                         <a href="javascript:void(0);" class="d-flex align-items-center gap-2">
-                                            <div class="avatar-image avatar-sm"><img src="duralux/vendors/img/flags/1x1/pk.svg" alt="" class="img-fluid" /></div>
+                                            <div class="avatar-image avatar-sm"><img src="NEXEL/vendors/img/flags/1x1/pk.svg" alt="" class="img-fluid" /></div>
                                             <span>Urdo</span>
                                         </a>
                                     </div>
@@ -2064,7 +2064,7 @@
                                 </a>
                             </div>
                             <div class="notifications-item">
-                                <img src="duralux/images/avatar/2.png" alt="" class="rounded me-3 border" />
+                                <img src="NEXEL/images/avatar/2.png" alt="" class="rounded me-3 border" />
                                 <div class="notifications-desc">
                                     <a href="javascript:void(0);" class="font-body text-truncate-2-line"> <span class="fw-semibold text-dark">Malanie Hanvey</span> We should talk about that at lunch!</a>
                                     <div class="d-flex justify-content-between align-items-center">
@@ -2079,7 +2079,7 @@
                                 </div>
                             </div>
                             <div class="notifications-item">
-                                <img src="duralux/images/avatar/3.png" alt="" class="rounded me-3 border" />
+                                <img src="NEXEL/images/avatar/3.png" alt="" class="rounded me-3 border" />
                                 <div class="notifications-desc">
                                     <a href="javascript:void(0);" class="font-body text-truncate-2-line"> <span class="fw-semibold text-dark">Valentine Maton</span> You can download the latest invoices now.</a>
                                     <div class="d-flex justify-content-between align-items-center">
@@ -2094,7 +2094,7 @@
                                 </div>
                             </div>
                             <div class="notifications-item">
-                                <img src="duralux/images/avatar/4.png" alt="" class="rounded me-3 border" />
+                                <img src="NEXEL/images/avatar/4.png" alt="" class="rounded me-3 border" />
                                 <div class="notifications-desc">
                                     <a href="javascript:void(0);" class="font-body text-truncate-2-line"> <span class="fw-semibold text-dark">Archie Cantones</span> Don't forget to pickup Jeremy after school!</a>
                                     <div class="d-flex justify-content-between align-items-center">
@@ -2115,12 +2115,12 @@
                     </div>
                     <div class="dropdown nxl-h-item">
                         <a href="javascript:void(0);" data-bs-toggle="dropdown" role="button" data-bs-auto-close="outside">
-                            <img src="duralux/images/avatar/1.png" alt="user-image" class="img-fluid user-avtar me-0" />
+                            <img src="NEXEL/images/avatar/1.png" alt="user-image" class="img-fluid user-avtar me-0" />
                         </a>
                         <div class="dropdown-menu dropdown-menu-end nxl-h-dropdown nxl-user-dropdown">
                             <div class="dropdown-header">
                                 <div class="d-flex align-items-center">
-                                    <img src="duralux/images/avatar/1.png" alt="user-image" class="img-fluid user-avtar" />
+                                    <img src="NEXEL/images/avatar/1.png" alt="user-image" class="img-fluid user-avtar" />
                                     <div>
                                         <h6 class="text-dark mb-0">Alexandra Della <span class="badge bg-soft-success text-success ms-1">PRO</span></h6>
                                         <span class="fs-12 fw-medium text-muted">alex@example.com</span>
@@ -2582,7 +2582,7 @@
                                 <div class="d-flex align-items-center justify-content-between">
                                     <div class="hstack gap-3">
                                         <div class="avatar-image avatar-lg p-2 rounded">
-                                            <img class="img-fluid" src="duralux/images/brand/shopify.png" alt="" />
+                                            <img class="img-fluid" src="NEXEL/images/brand/shopify.png" alt="" />
                                         </div>
                                         <div>
                                             <a href="javascript:void(0);" class="d-block">Shopify eCommerce Store</a>
@@ -2598,7 +2598,7 @@
                                 <div class="d-flex align-items-center justify-content-between">
                                     <div class="hstack gap-3">
                                         <div class="avatar-image avatar-lg p-2 rounded">
-                                            <img class="img-fluid" src="duralux/images/brand/app-store.png" alt="" />
+                                            <img class="img-fluid" src="NEXEL/images/brand/app-store.png" alt="" />
                                         </div>
                                         <div>
                                             <a href="javascript:void(0);" class="d-block">iOS Apps Development</a>
@@ -2614,7 +2614,7 @@
                                 <div class="d-flex align-items-center justify-content-between">
                                     <div class="hstack gap-3">
                                         <div class="avatar-image avatar-lg p-2 rounded">
-                                            <img class="img-fluid" src="duralux/images/brand/figma.png" alt="" />
+                                            <img class="img-fluid" src="NEXEL/images/brand/figma.png" alt="" />
                                         </div>
                                         <div>
                                             <a href="javascript:void(0);" class="d-block">Figma Dashboard Design</a>
@@ -2851,7 +2851,7 @@
                                                 <td>
                                                     <div class="d-flex align-items-center gap-3">
                                                         <div class="avatar-image">
-                                                            <img src="duralux/images/avatar/2.png" alt="" class="img-fluid" />
+                                                            <img src="NEXEL/images/avatar/2.png" alt="" class="img-fluid" />
                                                         </div>
                                                         <a href="javascript:void(0);">
                                                             <span class="d-block">Archie Cantones</span>
@@ -2874,7 +2874,7 @@
                                                 <td>
                                                     <div class="d-flex align-items-center gap-3">
                                                         <div class="avatar-image">
-                                                            <img src="duralux/images/avatar/3.png" alt="" class="img-fluid" />
+                                                            <img src="NEXEL/images/avatar/3.png" alt="" class="img-fluid" />
                                                         </div>
                                                         <a href="javascript:void(0);">
                                                             <span class="d-block">Holmes Cherryman</span>
@@ -2897,7 +2897,7 @@
                                                 <td>
                                                     <div class="d-flex align-items-center gap-3">
                                                         <div class="avatar-image">
-                                                            <img src="duralux/images/avatar/4.png" alt="" class="img-fluid" />
+                                                            <img src="NEXEL/images/avatar/4.png" alt="" class="img-fluid" />
                                                         </div>
                                                         <a href="javascript:void(0);">
                                                             <span class="d-block">Malanie Hanvey</span>
@@ -2920,7 +2920,7 @@
                                                 <td>
                                                     <div class="d-flex align-items-center gap-3">
                                                         <div class="avatar-image">
-                                                            <img src="duralux/images/avatar/5.png" alt="" class="img-fluid" />
+                                                            <img src="NEXEL/images/avatar/5.png" alt="" class="img-fluid" />
                                                         </div>
                                                         <a href="javascript:void(0);">
                                                             <span class="d-block">Kenneth Hune</span>
@@ -2943,7 +2943,7 @@
                                                 <td>
                                                     <div class="d-flex align-items-center gap-3">
                                                         <div class="avatar-image">
-                                                            <img src="duralux/images/avatar/6.png" alt="" class="img-fluid" />
+                                                            <img src="NEXEL/images/avatar/6.png" alt="" class="img-fluid" />
                                                         </div>
                                                         <a href="javascript:void(0);">
                                                             <span class="d-block">Valentine Maton</span>
@@ -3037,16 +3037,16 @@
                                         </div>
                                         <div class="img-group lh-0 ms-3 justify-content-start d-none d-sm-flex">
                                             <a href="javascript:void(0)" class="avatar-image avatar-md" data-bs-toggle="tooltip" data-bs-trigger="hover" title="Janette Dalton">
-                                                <img src="duralux/images/avatar/2.png" class="img-fluid" alt="image" />
+                                                <img src="NEXEL/images/avatar/2.png" class="img-fluid" alt="image" />
                                             </a>
                                             <a href="javascript:void(0)" class="avatar-image avatar-md" data-bs-toggle="tooltip" data-bs-trigger="hover" title="Michael Ksen">
-                                                <img src="duralux/images/avatar/3.png" class="img-fluid" alt="image" />
+                                                <img src="NEXEL/images/avatar/3.png" class="img-fluid" alt="image" />
                                             </a>
                                             <a href="javascript:void(0)" class="avatar-image avatar-md" data-bs-toggle="tooltip" data-bs-trigger="hover" title="Socrates Itumay">
-                                                <img src="duralux/images/avatar/4.png" class="img-fluid" alt="image" />
+                                                <img src="NEXEL/images/avatar/4.png" class="img-fluid" alt="image" />
                                             </a>
                                             <a href="javascript:void(0)" class="avatar-image avatar-md" data-bs-toggle="tooltip" data-bs-trigger="hover" title="Marianne Audrey">
-                                                <img src="duralux/images/avatar/6.png" class="img-fluid" alt="image" />
+                                                <img src="NEXEL/images/avatar/6.png" class="img-fluid" alt="image" />
                                             </a>
                                             <a href="javascript:void(0)" class="avatar-text avatar-md" data-bs-toggle="tooltip" data-bs-trigger="hover" title="Explorer More">
                                                 <i class="feather-more-horizontal"></i>
@@ -3069,16 +3069,16 @@
                                         </div>
                                         <div class="img-group lh-0 ms-3 justify-content-start d-none d-sm-flex">
                                             <a href="javascript:void(0)" class="avatar-image avatar-md" data-bs-toggle="tooltip" data-bs-trigger="hover" title="Janette Dalton">
-                                                <img src="duralux/images/avatar/2.png" class="img-fluid" alt="image" />
+                                                <img src="NEXEL/images/avatar/2.png" class="img-fluid" alt="image" />
                                             </a>
                                             <a href="javascript:void(0)" class="avatar-image avatar-md" data-bs-toggle="tooltip" data-bs-trigger="hover" title="Michael Ksen">
-                                                <img src="duralux/images/avatar/3.png" class="img-fluid" alt="image" />
+                                                <img src="NEXEL/images/avatar/3.png" class="img-fluid" alt="image" />
                                             </a>
                                             <a href="javascript:void(0)" class="avatar-image avatar-md" data-bs-toggle="tooltip" data-bs-trigger="hover" title="Marianne Audrey">
-                                                <img src="duralux/images/avatar/5.png" class="img-fluid" alt="image" />
+                                                <img src="NEXEL/images/avatar/5.png" class="img-fluid" alt="image" />
                                             </a>
                                             <a href="javascript:void(0)" class="avatar-image avatar-md" data-bs-toggle="tooltip" data-bs-trigger="hover" title="Marianne Audrey">
-                                                <img src="duralux/images/avatar/6.png" class="img-fluid" alt="image" />
+                                                <img src="NEXEL/images/avatar/6.png" class="img-fluid" alt="image" />
                                             </a>
                                             <a href="javascript:void(0)" class="avatar-text avatar-md" data-bs-toggle="tooltip" data-bs-trigger="hover" title="Explorer More">
                                                 <i class="feather-more-horizontal"></i>
@@ -3101,16 +3101,16 @@
                                         </div>
                                         <div class="img-group lh-0 ms-3 justify-content-start d-none d-sm-flex">
                                             <a href="javascript:void(0)" class="avatar-image avatar-md" data-bs-toggle="tooltip" data-bs-trigger="hover" title="Janette Dalton">
-                                                <img src="duralux/images/avatar/2.png" class="img-fluid" alt="image" />
+                                                <img src="NEXEL/images/avatar/2.png" class="img-fluid" alt="image" />
                                             </a>
                                             <a href="javascript:void(0)" class="avatar-image avatar-md" data-bs-toggle="tooltip" data-bs-trigger="hover" title="Michael Ksen">
-                                                <img src="duralux/images/avatar/3.png" class="img-fluid" alt="image" />
+                                                <img src="NEXEL/images/avatar/3.png" class="img-fluid" alt="image" />
                                             </a>
                                             <a href="javascript:void(0)" class="avatar-image avatar-md" data-bs-toggle="tooltip" data-bs-trigger="hover" title="Socrates Itumay">
-                                                <img src="duralux/images/avatar/4.png" class="img-fluid" alt="image" />
+                                                <img src="NEXEL/images/avatar/4.png" class="img-fluid" alt="image" />
                                             </a>
                                             <a href="javascript:void(0)" class="avatar-image avatar-md" data-bs-toggle="tooltip" data-bs-trigger="hover" title="Marianne Audrey">
-                                                <img src="duralux/images/avatar/5.png" class="img-fluid" alt="image" />
+                                                <img src="NEXEL/images/avatar/5.png" class="img-fluid" alt="image" />
                                             </a>
                                             <a href="javascript:void(0)" class="avatar-text avatar-md" data-bs-toggle="tooltip" data-bs-trigger="hover" title="Explorer More">
                                                 <i class="feather-more-horizontal"></i>
@@ -3133,16 +3133,16 @@
                                         </div>
                                         <div class="img-group lh-0 ms-3 justify-content-start d-none d-sm-flex">
                                             <a href="javascript:void(0)" class="avatar-image avatar-md" data-bs-toggle="tooltip" data-bs-trigger="hover" title="Janette Dalton">
-                                                <img src="duralux/images/avatar/2.png" class="img-fluid" alt="image" />
+                                                <img src="NEXEL/images/avatar/2.png" class="img-fluid" alt="image" />
                                             </a>
                                             <a href="javascript:void(0)" class="avatar-image avatar-md" data-bs-toggle="tooltip" data-bs-trigger="hover" title="Socrates Itumay">
-                                                <img src="duralux/images/avatar/4.png" class="img-fluid" alt="image" />
+                                                <img src="NEXEL/images/avatar/4.png" class="img-fluid" alt="image" />
                                             </a>
                                             <a href="javascript:void(0)" class="avatar-image avatar-md" data-bs-toggle="tooltip" data-bs-trigger="hover" title="Marianne Audrey">
-                                                <img src="duralux/images/avatar/5.png" class="img-fluid" alt="image" />
+                                                <img src="NEXEL/images/avatar/5.png" class="img-fluid" alt="image" />
                                             </a>
                                             <a href="javascript:void(0)" class="avatar-image avatar-md" data-bs-toggle="tooltip" data-bs-trigger="hover" title="Marianne Audrey">
-                                                <img src="duralux/images/avatar/6.png" class="img-fluid" alt="image" />
+                                                <img src="NEXEL/images/avatar/6.png" class="img-fluid" alt="image" />
                                             </a>
                                             <a href="javascript:void(0)" class="avatar-text avatar-md" data-bs-toggle="tooltip" data-bs-trigger="hover" title="Explorer More">
                                                 <i class="feather-more-horizontal"></i>
@@ -3194,7 +3194,7 @@
                                 <div class="mb-3">
                                     <div class="mb-4 pb-1 d-flex">
                                         <div class="d-flex w-50 align-items-center me-3">
-                                            <img src="duralux/images/brand/app-store.png" alt="laravel-logo" class="me-3" width="35" />
+                                            <img src="NEXEL/images/brand/app-store.png" alt="laravel-logo" class="me-3" width="35" />
                                             <div>
                                                 <a href="javascript:void(0);" class="text-truncate-1-line">Apps Development</a>
                                                 <div class="fs-11 text-muted">Applications</div>
@@ -3210,7 +3210,7 @@
                                     <hr class="border-dashed my-3" />
                                     <div class="mb-4 pb-1 d-flex">
                                         <div class="d-flex w-50 align-items-center me-3">
-                                            <img src="duralux/images/brand/figma.png" alt="figma-logo" class="me-3" width="35" />
+                                            <img src="NEXEL/images/brand/figma.png" alt="figma-logo" class="me-3" width="35" />
                                             <div>
                                                 <a href="javascript:void(0);" class="text-truncate-1-line">Dashboard Design</a>
                                                 <div class="fs-11 text-muted">App UI Kit</div>
@@ -3226,7 +3226,7 @@
                                     <hr class="border-dashed my-3" />
                                     <div class="mb-4 pb-1 d-flex">
                                         <div class="d-flex w-50 align-items-center me-3">
-                                            <img src="duralux/images/brand/facebook.png" alt="vue-logo" class="me-3" width="35" />
+                                            <img src="NEXEL/images/brand/facebook.png" alt="vue-logo" class="me-3" width="35" />
                                             <div>
                                                 <a href="javascript:void(0);" class="text-truncate-1-line">Facebook Marketing</a>
                                                 <div class="fs-11 text-muted">Marketing</div>
@@ -3242,7 +3242,7 @@
                                     <hr class="border-dashed my-3" />
                                     <div class="mb-4 pb-1 d-flex">
                                         <div class="d-flex w-50 align-items-center me-3">
-                                            <img src="duralux/images/brand/github.png" alt="react-logo" class="me-3" width="35" />
+                                            <img src="NEXEL/images/brand/github.png" alt="react-logo" class="me-3" width="35" />
                                             <div>
                                                 <a href="javascript:void(0);" class="text-truncate-1-line">React Dashboard Github</a>
                                                 <div class="fs-11 text-muted">Dashboard</div>
@@ -3258,7 +3258,7 @@
                                     <hr class="border-dashed my-3" />
                                     <div class="d-flex">
                                         <div class="d-flex w-50 align-items-center me-3">
-                                            <img src="duralux/images/brand/paypal.png" alt="sketch-logo" class="me-3" width="35" />
+                                            <img src="NEXEL/images/brand/paypal.png" alt="sketch-logo" class="me-3" width="35" />
                                             <div>
                                                 <a href="javascript:void(0);" class="text-truncate-1-line">Paypal Payment Gateway</a>
                                                 <div class="fs-11 text-muted">Payment</div>
@@ -3316,7 +3316,7 @@
                                 <div class="hstack justify-content-between border border-dashed rounded-3 p-3 mb-3">
                                     <div class="hstack gap-3">
                                         <div class="avatar-image">
-                                            <img src="duralux/images/avatar/1.png" alt="" class="img-fluid" />
+                                            <img src="NEXEL/images/avatar/1.png" alt="" class="img-fluid" />
                                         </div>
                                         <div>
                                             <a href="javascript:void(0);">Alexandra Della</a>
@@ -3328,7 +3328,7 @@
                                 <div class="hstack justify-content-between border border-dashed rounded-3 p-3 mb-3">
                                     <div class="hstack gap-3">
                                         <div class="avatar-image">
-                                            <img src="duralux/images/avatar/2.png" alt="" class="img-fluid" />
+                                            <img src="NEXEL/images/avatar/2.png" alt="" class="img-fluid" />
                                         </div>
                                         <div>
                                             <a href="javascript:void(0);">Archie Cantones</a>
@@ -3340,7 +3340,7 @@
                                 <div class="hstack justify-content-between border border-dashed rounded-3 p-3 mb-3">
                                     <div class="hstack gap-3">
                                         <div class="avatar-image">
-                                            <img src="duralux/images/avatar/3.png" alt="" class="img-fluid" />
+                                            <img src="NEXEL/images/avatar/3.png" alt="" class="img-fluid" />
                                         </div>
                                         <div>
                                             <a href="javascript:void(0);">Malanie Hanvey</a>
@@ -3352,7 +3352,7 @@
                                 <div class="hstack justify-content-between border border-dashed rounded-3 p-3 mb-2">
                                     <div class="hstack gap-3">
                                         <div class="avatar-image">
-                                            <img src="duralux/images/avatar/4.png" alt="" class="img-fluid" />
+                                            <img src="NEXEL/images/avatar/4.png" alt="" class="img-fluid" />
                                         </div>
                                         <div>
                                             <a href="javascript:void(0);">Kenneth Hune</a>
@@ -3553,7 +3553,7 @@
                     <a href="javascript:void(0);" class="btn btn-danger" data-style="reset-all-common-style">Reset</a>
                 </div>
                 <div class="flex-fill w-50">
-                    <a href="https://www.themewagon.com/themes/Duralux-admin" target="_blank" class="btn btn-primary">Download</a>
+                    <a href="https://www.themewagon.com/themes/NEXEL-admin" target="_blank" class="btn btn-primary">Download</a>
                 </div>
             </div>
         </div>
@@ -3565,18 +3565,18 @@
     <!--! Footer Script !-->
     <!--! ================================================================ !-->
     <!--! BEGIN: Vendors JS !-->
-    <script src="duralux/vendors/js/vendors.min.js"></script>
+    <script src="NEXEL/vendors/js/vendors.min.js"></script>
     <!-- vendors.min.js {always must need to be top} -->
-    <script src="duralux/vendors/js/daterangepicker.min.js"></script>
-    <script src="duralux/vendors/js/apexcharts.min.js"></script>
-    <script src="duralux/vendors/js/circle-progress.min.js"></script>
+    <script src="NEXEL/vendors/js/daterangepicker.min.js"></script>
+    <script src="NEXEL/vendors/js/apexcharts.min.js"></script>
+    <script src="NEXEL/vendors/js/circle-progress.min.js"></script>
     <!--! END: Vendors JS !-->
     <!--! BEGIN: Apps Init  !-->
-    <script src="duralux/js/common-init.min.js"></script>
-    <script src="duralux/js/dashboard-init.min.js"></script>
+    <script src="NEXEL/js/common-init.min.js"></script>
+    <script src="NEXEL/js/dashboard-init.min.js"></script>
     <!--! END: Apps Init !-->
     <!--! BEGIN: Theme Customizer  !-->
-    <script src="duralux/js/theme-customizer-init.min.js"></script>
+    <script src="NEXEL/js/theme-customizer-init.min.js"></script>
     <!--! END: Theme Customizer !-->
 </body>
 

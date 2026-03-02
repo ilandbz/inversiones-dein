@@ -10,18 +10,18 @@
     <meta name="author" content="flexilecode" />
     <title>{{ config('app.name', 'Laravel') }}</title>
     <link rel="shortcut icon" type="image/x-icon" href="/imagenes/logo_redondo.png" />
-    <link rel="stylesheet" type="text/css" href="/duralux/css/bootstrap.min.css" />
-    <link rel="stylesheet" type="text/css" href="/duralux/vendors/css/vendors.min.css" />
-    <!-- <link rel="stylesheet" type="text/css" href="duralux/vendors/css/daterangepicker.min.css" /> -->
-    <link rel="stylesheet" type="text/css" href="/duralux/css/theme.min.css" />
-    <link rel="stylesheet" type="text/css" href="/duralux/css/custom.css" />
+    <link rel="stylesheet" type="text/css" href="/NEXEL/css/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="/NEXEL/vendors/css/vendors.min.css" />
+    <!-- <link rel="stylesheet" type="text/css" href="NEXEL/vendors/css/daterangepicker.min.css" /> -->
+    <link rel="stylesheet" type="text/css" href="/NEXEL/css/theme.min.css" />
+    <link rel="stylesheet" type="text/css" href="/NEXEL/css/custom.css" />
     @vite('resources/js/app.js')
 </head>
 <body>
     <main id="top"></main>
-    <script src="/duralux/vendors/js/vendors.min.js"></script>
-    <script src="/duralux/js/common-init.min.js"></script>
-    <script src="/duralux/js/theme-customizer-init.min.js"></script>
+    <script src="/NEXEL/vendors/js/vendors.min.js"></script>
+    <script src="/NEXEL/js/common-init.min.js"></script>
+    <script src="/NEXEL/js/theme-customizer-init.min.js"></script>
 </body>
 
 </html>

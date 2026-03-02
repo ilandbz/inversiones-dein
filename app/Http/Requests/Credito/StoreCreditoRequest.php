@@ -30,7 +30,7 @@ class StoreCreditoRequest extends FormRequest
             'tipo' => 'required',
             'monto' => 'required|numeric|min:0',
             'origen_financiamiento_id' => 'required|exists:origen_financiamientos,id',
-            'frecuencia' => 'required|in:DIARIO,SEMANAL,QUINCENAL,MENSUAL',
+            'frecuencia' => 'required|in:DIARIA,SEMANAL,QUINCENAL,MENSUAL',
             'plazo' => 'required|integer|min:1',
             'tasainteres' => 'required|numeric|min:0',
             'costomora' => 'required|numeric|min:0',
