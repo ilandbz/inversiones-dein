@@ -43,7 +43,9 @@ const client = ref({
   memberSince: '',
   riskLevel: '',
   credits: [],
-  savings: []
+  savings: [],
+  photoUrl: '',
+  estado: ''
 })
 
 /* ── Pestaña activa ── */
@@ -128,7 +130,9 @@ const handleSearch = async () => {
         memberSince: cliente.value.fecha_reg ?? '',
         riskLevel: ['Bajo', 'Intermedio', 'Alto'][Math.floor(Math.random() * 3)],
         credits: cliente.value.creditos ?? [],
-        savings: cliente.value.ahorros ?? []
+        savings: cliente.value.ahorros ?? [],
+        photoUrl: '/storage/fotos/clientes/45532962.webp',
+        estado: cliente.value.estado ?? ''
       }
 
       // Cargar negocios del cliente
@@ -143,7 +147,17 @@ const handleSearch = async () => {
   }
 }
 
-/* ── Negocios CRUD ── */
+const estadoBadgeClass = computed(() => {
+  const e = (client.value.estado ?? '').toString().toLowerCase()
+
+  if (['activo', 'activa', '1', 'true'].includes(e)) return 'bg-success-subtle text-success border'
+  if (['inactivo', 'inactiva', '0', 'false'].includes(e)) return 'bg-secondary-subtle text-secondary border'
+  if (['bloqueado', 'bloqueada', 'suspendido', 'suspendida'].includes(e)) return 'bg-danger-subtle text-danger border'
+
+  return 'bg-light text-dark border'
+})
+
+
 const nuevoNegocio = async () => {
   limpiarFormNeg()
   formNeg.value.estadoCrud = 'nuevo'
@@ -295,6 +309,22 @@ const limpiarFormNeg = () => {
   box-shadow: 0 4px 15px rgba(0,0,0,.1);
   transform: translateY(-2px);
 }
+.avatar-photo{
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid #e5e7eb;
+  transition: transform .25s ease, box-shadow .25s;
+  cursor: pointer;
+}
+
+.avatar-photo:hover{
+  transform: scale(3);
+  box-shadow: 0 12px 30px rgba(0,0,0,.35);
+  z-index: 100;
+  position: relative;
+}
 </style>
 
 <template>
@@ -387,8 +417,17 @@ const limpiarFormNeg = () => {
                 <div class="card shadow-sm">
                   <div class="card-body">
                     <div class="d-flex align-items-start gap-3">
-                      <div class="avatar-initials">
-                        {{ client.initials }}
+                      <div>
+                        <img
+                          v-if="client.photoUrl"
+                          :src="client.photoUrl"
+                          alt="Foto del cliente"
+                          class="avatar-photo"
+                          @error="client.photoUrl = ''"
+                        />
+                        <div v-else class="avatar-initials">
+                          {{ client.initials }}
+                        </div>
                       </div>
 
                       <div class="flex-grow-1">
@@ -399,7 +438,9 @@ const limpiarFormNeg = () => {
                           </div>
 
                           <div class="d-flex gap-2 flex-wrap">
-                            <span class="badge bg-success-subtle text-success border">Activo</span>
+                            <span class="badge" :class="estadoBadgeClass">
+                              {{ client.estado || 'Sin estado' }}
+                            </span>
                             <span v-if="client.memberSince" class="badge bg-light text-dark border">
                               Cliente desde {{ client.memberSince }}
                             </span>

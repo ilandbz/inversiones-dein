@@ -39,17 +39,22 @@ class DesembolsoController extends Controller
                 $monto = $credito->monto;
                 $total = $credito->total;
                 $plazo = $credito->plazo;
-                $frecuencia = $credito->frecuencia;
+                $frecuencia = strtoupper(trim($credito->frecuencia));
 
                 $cuota_capital = round($monto / $plazo, 2);
                 $cuota_interes = round(($total - $monto) / $plazo, 2);
                 $cuota_total = round($total / $plazo, 2);
 
                 $fecha = Carbon::parse($request->fecha);
+                $fecha = Carbon::parse($request->fecha);
+                $frecuencia = strtoupper(trim($credito->frecuencia));
+
+                $saldo = $monto;
 
                 for ($i = 1; $i <= $plazo; $i++) {
+
                     switch ($frecuencia) {
-                        case 'DIARIO':
+                        case 'DIARIA':
                             $fecha->addDay();
                             break;
                         case 'SEMANAL':
@@ -63,13 +68,19 @@ class DesembolsoController extends Controller
                             break;
                     }
 
+                    $saldo = round($saldo - $cuota_capital, 2);
+
+                    if ($saldo < 0) {
+                        $saldo = 0;
+                    }
+
                     CronogramaPago::create([
-                        'credito_id'        => $credito->id,
-                        'nrocuota'      => $i,
+                        'credito_id' => $credito->id,
+                        'nrocuota'   => $i,
                         'fecha_prog' => $fecha->toDateString(),
-                        'nombredia' => $fecha->dayName,
-                        'cuota'           => $cuota_total,
-                        'saldo'             => $monto - ($cuota_capital * $i),
+                        'nombredia'  => ucfirst($fecha->locale('es')->dayName),
+                        'cuota'      => $cuota_total,
+                        'saldo'      => $saldo,
                     ]);
                 }
                 return response()->json([

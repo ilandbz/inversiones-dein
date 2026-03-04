@@ -186,7 +186,7 @@ onMounted(() => {
                             </thead>
                             <tbody>
                                 <tr v-if="creditos.total == 0">
-                                    <td class="text-danger text-center" colspan="10">No hay créditos aprobados pendientes de desembolso</td>
+                                    <td class="text-danger text-center" colspan="11">No hay créditos aprobados pendientes de desembolso</td>
                                 </tr>
                                 <tr v-else v-for="(credito, index) in creditos.data" :key="credito.id">
                                     <td>{{ index + creditos.from }}</td>
