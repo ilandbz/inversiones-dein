@@ -26,9 +26,6 @@ return new class extends Migration
             $table->decimal('interes_pagado', 12, 2)->default(0);
             $table->decimal('mora_pagada', 12, 2)->default(0);
 
-            $table->text('observacion')->nullable();
-
-            $table->timestamps();
             $table->index(['cronograma_id']);
             $table->index(['kardex_credito_id']);
             $table->index(['kardex_credito_id', 'cronograma_id']);

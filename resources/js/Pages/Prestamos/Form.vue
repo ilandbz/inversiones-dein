@@ -154,16 +154,26 @@ watch(
   { immediate: true }
 )
 
-const totalCalc = computed(() => {
+const interesCalc = computed(() => {
   const monto = toNumber(form.value.monto)
   const tasa = toNumber(form.value.tasainteres)
-  const total = monto + (monto * (tasa / 100))
+  const interes = monto * (tasa / 100)
+  return toMoney2(interes)
+})
+
+const totalCalc = computed(() => {
+  const monto = toNumber(form.value.monto)
+  const interes = toNumber(interesCalc.value)
+  const total = monto + interes
   return toMoney2(total)
 })
 
 watch(
   () => [form.value.monto, form.value.tasainteres],
-  () => { form.value.total = totalCalc.value },
+  () => { 
+    form.value.interes = interesCalc.value
+    form.value.total = totalCalc.value 
+  },
   { immediate: true }
 )
 
@@ -322,6 +332,7 @@ const guardar = async () => {
     frecuencia: form.value.frecuencia,
     plazo: form.value.plazo,
     tasainteres: form.value.tasainteres,
+    interes: form.value.interes,
     costomora: form.value.costomora,
     total: form.value.total,
   }
@@ -373,6 +384,7 @@ const limpiar = () => {
     plazo: plazoOptions.value?.[0]?.value ?? '',
     fuenterecursos: '',
     tasainteres: '0.00',
+    interes: '0.00',
     costomora: '0.00',
     total: '0.00',
     estadoCrud: 'nuevo',
@@ -492,6 +504,11 @@ onMounted(() => {
                   <div class="col-12 col-md-3">
                     <label class="form-label">Tasa interés (%)</label>
                     <input v-model="form.tasainteres" class="form-control" readonly />
+                  </div>
+
+                  <div class="col-12 col-md-3">
+                    <label class="form-label">Interés (S/)</label>
+                    <input v-model="form.interes" class="form-control" readonly />
                   </div>
 
                   <div class="col-12 col-md-3">

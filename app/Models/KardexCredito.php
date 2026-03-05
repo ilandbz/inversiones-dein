@@ -32,7 +32,7 @@ class KardexCredito extends Model
 
     public function credito(): BelongsTo
     {
-        return $this->belongsTo(Desembolso::class, 'credito_id', 'credito_id');
+        return $this->belongsTo(Credito::class, 'credito_id');
     }
 
     public function user(): BelongsTo

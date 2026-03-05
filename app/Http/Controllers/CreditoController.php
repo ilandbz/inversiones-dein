@@ -52,6 +52,7 @@ class CreditoController extends Controller
                 'frecuencia' => $request->frecuencia,
                 'plazo' => $request->plazo,
                 'tasainteres' => $request->tasainteres,
+                'interes' => $request->interes,
                 'costomora' => $request->costomora,
                 'total' => $request->total,
                 'fecha_reg' => now(),
@@ -133,6 +134,7 @@ class CreditoController extends Controller
         $credito->frecuencia                       = $request->frecuencia;
         $credito->plazo                            = $request->plazo;
         $credito->tasainteres                      = $request->tasainteres ?? 0.00;
+        $credito->interes                          = $request->interes ?? 0.00;
         $credito->costomora                        = $request->costomora;
         $credito->total                            = $request->total ?? 0.00;
         $credito->fecha_venc                       = $fechaVenc;

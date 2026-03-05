@@ -32,7 +32,13 @@ class DesembolsoController extends Controller
                     'totalentregado' => $request->totalentregado,
                 ]);
                 $credito = Credito::findOrFail($request->credito_id);
-                $credito->update(['estado' => 'DESEMBOLSADO']);
+                $credito->update([
+                    'estado' => 'DESEMBOLSADO',
+                    'fecha_inicio' => $request->fecha,
+                    'saldo_capital' => $credito->monto,
+                    'saldo_interes' => ($credito->total - $credito->monto),
+                    'saldo_total' => $credito->total,
+                ]);
                 Cliente::where('id', $credito->cliente_id)->update(['estado' => 'VIGENTE']);
 
                 // Generar Cronograma de Pagos

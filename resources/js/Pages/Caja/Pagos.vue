@@ -377,8 +377,9 @@ const changeTab = (tab) => {
                                                 <div class="small">Frecuencia: {{ c.frecuencia }}</div>
                                                 <div class="small">Plazo: {{ c.plazo }}</div>
                                                 <div class="small">Interes: {{ Number(c.tasainteres).toFixed(2) }}%</div>
-                                                <div class="small">Fecha Vencimiento: {{ Number(c.fecha_venc).toFixed(2) }}%</div>
-                                                <div class="small opacity-75">Fecha: {{ c.fecha_reg }}</div>
+                                                <div class="small">Fecha Vencimiento: {{ c.fecha_venc }}</div>
+                                                <div class="small opacity-75">Fecha Registro: {{ c.fecha_reg }}</div>
+                                                <div class="small opacity-75">Saldo: {{ c.fecha_reg }}</div>
                                             </div>
                                             <span class="badge bg-success rounded-pill">Activo</span>
                                         </div>

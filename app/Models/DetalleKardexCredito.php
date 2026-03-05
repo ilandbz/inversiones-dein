@@ -12,8 +12,9 @@ class DetalleKardexCredito extends Model
         'capital_pagado',
         'interes_pagado',
         'mora_pagada',
-        'observacion',
     ];
+
+    public $timestamps = false;
 
     public function kardex(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {

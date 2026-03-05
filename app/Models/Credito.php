@@ -16,15 +16,19 @@ class Credito extends Model
         'aval_id',
         'fecha_reg',
         'fecha_venc',
+        'fecha_inicio',
         'tipo',
         'monto',
         'origen_financiamiento_id',
         'frecuencia',
         'plazo',
-        'dondepagara',
         'tasainteres',
-        'costomora',
+        'interes',
         'total',
+        'saldo_capital',
+        'saldo_interes',
+        'saldo_total',
+        'costomora',
         'estado',
     ];
     public function cliente(): BelongsTo
@@ -45,7 +49,7 @@ class Credito extends Model
     }
     public function pagos(): HasMany
     {
-        return $this->hasMany(PagoCredito::class, 'credito_id');
+        return $this->hasMany(DetalleKardexCredito::class, 'credito_id');
     }
     public function balance()
     {

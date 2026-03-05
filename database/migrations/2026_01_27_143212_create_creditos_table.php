@@ -24,8 +24,13 @@ return new class extends Migration
             $table->string('frecuencia', 30);
             $table->integer('plazo')->length(15);
             $table->decimal('tasainteres', 5, 2)->default(0.00);
+            $table->decimal('interes', 5, 2)->default(0.00);
+            $table->decimal('saldo_capital', 5, 2)->default(0.00);
+            $table->decimal('saldo_interes', 5, 2)->default(0.00);
+            $table->decimal('saldo_total', 5, 2)->default(0.00);
             $table->decimal('total', 9, 2)->default(0.00);
             $table->decimal('costomora', 5, 2)->default(0.00);
+            $table->date('fecha_inicio');
             $table->date('fecha_venc');
             $table->timestamps();
         });

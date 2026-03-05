@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
 
             $table->unsignedBigInteger('credito_id');
-            $table->foreign('credito_id')->references('credito_id')->on('desembolsos')->onDelete('cascade')->onUpdate('cascade');
+            $table->foreign('credito_id')->references('id')->on('creditos')->onDelete('cascade')->onUpdate('cascade');
 
             $table->unsignedInteger('nro');
             $table->date('fecha');

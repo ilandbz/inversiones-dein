@@ -36,6 +36,7 @@ const formPrestamo = ref({
   fuenterecursos: '',
 
   tasainteres: '0.00',
+  interes: '0.00',
   costomora: '0.00',
   total: '0.00',
 
