@@ -412,56 +412,28 @@ class ClienteController extends Controller
     public function clientesPorEstado(Request $request)
     {
         $estado = $request->estado;
-        $buscar = $request->buscar;
-        $clientes = Cliente::query()
-            ->join('personas', 'clientes.persona_id', '=', 'personas.id')
-            ->where('clientes.estado', $estado)
-            ->where('personas.dni', 'like', '%' . $buscar . '%')
-            ->orWhere('personas.ape_pat', 'like', '%' . $buscar . '%')
-            ->orWhere('personas.ape_mat', 'like', '%' . $buscar . '%')
-            ->orWhere('personas.primernombre', 'like', '%' . $buscar . '%')
-            ->orWhere('personas.otrosnombres', 'like', '%' . $buscar . '%')
-            ->select([
-                'clientes.id',
-                'clientes.usuario_id',
-                'clientes.persona_id',
-                'clientes.estado',
-                'clientes.fecha_reg',
-                'clientes.hora_reg',
-                'clientes.referente_id',
-                'clientes.referente_parentesco',
+        $buscar = mb_strtoupper($request->buscar ?? '');
+        $paginacion = $request->paginacion ?? 10;
 
-                'personas.dni',
-                'personas.ape_pat',
-                'personas.ape_mat',
-                'personas.primernombre',
-                'personas.otrosnombres',
-                'personas.fecha_nac',
-                'personas.ubigeo_nac',
-                'personas.genero',
-                'personas.celular',
-                'personas.celular2',
-                'personas.email',
-                'personas.ruc',
-                'personas.estado_civil',
-                'personas.profesion',
-                'personas.grado_instr',
-                'personas.origen_labor',
-                'personas.ocupacion',
-                'personas.institucion_lab',
-                'personas.conyugue',
-                'personas.direccion',
+        $query = Cliente::with([
+            'persona:id,dni,ape_pat,ape_mat,primernombre,otrosnombres,celular,ruc,email,direccion',
+        ])
+        ->where('estado', $estado);
 
-                DB::raw("CONCAT(
-                    personas.ape_pat,' ',
-                    personas.ape_mat,' ',
-                    personas.primernombre,' ',
-                    IFNULL(personas.otrosnombres,'')
-                ) AS apenom")
-            ])
-            ->get();
+        if (!empty($buscar)) {
+            $query->where(function ($q) use ($buscar) {
+                $q->whereHas('persona', function ($q2) use ($buscar) {
+                    $q2->whereRaw('UPPER(dni) LIKE ?', ['%' . $buscar . '%'])
+                        ->orWhereRaw('UPPER(ape_pat) LIKE ?', ['%' . $buscar . '%'])
+                        ->orWhereRaw('UPPER(ape_mat) LIKE ?', ['%' . $buscar . '%'])
+                        ->orWhereRaw('UPPER(primernombre) LIKE ?', ['%' . $buscar . '%'])
+                        ->orWhereRaw('UPPER(otrosnombres) LIKE ?', ['%' . $buscar . '%'])
+                        ->orWhereRaw("UPPER(CONCAT(ape_pat, ' ', ape_mat, ' ', primernombre, ' ', IFNULL(otrosnombres, ''))) LIKE ?", ['%' . $buscar . '%']);
+                });
+            });
+        }
 
-        return $clientes;
+        return $query->paginate($paginacion);
     }
     public function listar(Request $request)
     {

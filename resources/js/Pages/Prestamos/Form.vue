@@ -148,6 +148,7 @@ onMounted(() => { listaAsesores(); listaOrigenesFinanciamientos(); listaPlazos()
                                             <div class="col-md-3">
                                                 <label class="form-label small fw-bold text-muted text-uppercase">Tipo</label>
                                                 <select v-model="form.tipo" class="form-select border-0 bg-light rounded-3 shadow-none">
+                                                    <option value="">Seleccione tipo...</option>
                                                     <option value="NUEVO">NUEVO</option>
                                                     <option value="RENOVACIÓN">RENOVACIÓN</option>
                                                 </select>
@@ -155,6 +156,7 @@ onMounted(() => { listaAsesores(); listaOrigenesFinanciamientos(); listaPlazos()
                                             <div class="col-md-3">
                                                 <label class="form-label small fw-bold text-muted text-uppercase">Origen</label>
                                                 <select v-model="form.origen_financiamiento_id" class="form-select border-0 bg-light rounded-3 shadow-none">
+                                                    <option value="">Seleccione origen...</option>
                                                     <option v-for="o in origenes" :key="o.id" :value="o.id">{{ o.nombre }}</option>
                                                 </select>
                                             </div>
