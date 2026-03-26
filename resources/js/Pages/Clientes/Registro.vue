@@ -742,17 +742,48 @@ const cancelar = () => router.push({ name: 'Principal' })
                                 <option>SOLTERO</option><option>CASADO</option><option>CONVIVIENTE</option><option>DIVORCIADO</option><option>VIUDO</option>
                             </select>
                         </div>
-                        <div class="col-md-3">
-                          <label class="form-label text-muted small fw-bold">UBIGEO NACIMIENTO</label>
-                          <input
-                            v-model.trim="form.ubigeo_nac"
-                            class="form-control rounded-pill bg-light border-0 px-3 shadow-none"
-                            maxlength="6"
-                            @input="syncFromUbigeo('nac', form.ubigeo_nac)"
-                            placeholder="060101"
-                          >
-                          <small v-if="ubigeoTextoNac" class="text-muted d-block mt-1">
-                            {{ ubigeoTextoNac }}
+                        <div class="col-md-6">
+                          <label class="form-label text-muted small fw-bold">LUGAR DE NACIMIENTO / UBIGEO</label>
+                          <div class="d-flex gap-2 mb-2">
+                            <div class="btn-group btn-group-sm rounded-pill overflow-hidden border">
+                              <button type="button" class="btn btn-light border-0 px-3" :class="{'bg-primary text-white': ubigeoModeNac==='manual'}" @click="ubigeoModeNac='manual'">Manual</button>
+                              <button type="button" class="btn btn-light border-0 px-3" :class="{'bg-primary text-white': ubigeoModeNac==='select'}" @click="ubigeoModeNac='select'">Selección</button>
+                            </div>
+                          </div>
+
+                          <div v-if="ubigeoModeNac==='manual'">
+                            <input
+                              v-model.trim="form.ubigeo_nac"
+                              class="form-control rounded-pill bg-light border-0 px-3 shadow-none"
+                              maxlength="6"
+                              @input="syncFromUbigeo('nac', form.ubigeo_nac)"
+                              placeholder="Código de 6 dígitos"
+                            >
+                          </div>
+                          
+                          <div v-else class="row g-2">
+                            <div class="col-md-4">
+                              <select v-model="nac.dep" class="form-select form-select-sm rounded-pill bg-light border-0 px-2 shadow-none small">
+                                <option value="">Departamento</option>
+                                <option v-for="d in (departamentos.data || departamentos)" :key="d.id" :value="d.id">{{ d.nombre }}</option>
+                              </select>
+                            </div>
+                            <div class="col-md-4">
+                              <select v-model="nac.prov" class="form-select form-select-sm rounded-pill bg-light border-0 px-2 shadow-none small" :disabled="!nac.dep || loadingNac">
+                                <option value="">Provincia</option>
+                                <option v-for="p in provinciasNac" :key="p.id" :value="p.id">{{ p.nombre }}</option>
+                              </select>
+                            </div>
+                            <div class="col-md-4">
+                              <select v-model="nac.dist" class="form-select form-select-sm rounded-pill bg-light border-0 px-2 shadow-none small" :disabled="!nac.prov || loadingNac">
+                                <option value="">Distrito</option>
+                                <option v-for="d in distritosNac" :key="d.ubigeo" :value="d.ubigeo">{{ d.nombre }}</option>
+                              </select>
+                            </div>
+                          </div>
+
+                          <small v-if="ubigeoTextoNac" class="text-primary fw-bold d-block mt-1 extra-small">
+                            <i class="fas fa-map-marker-alt me-1"></i> {{ ubigeoTextoNac }} ({{ form.ubigeo_nac }})
                           </small>
                         </div>
 
@@ -804,26 +835,48 @@ const cancelar = () => router.push({ name: 'Principal' })
                             <div class="invalid-feedback" v-if="hasError('direccion')">{{ firstError('direccion') }}</div>
                         </div>
 
-                        <div class="col-md-6">
-                          <label class="form-label text-muted small fw-bold">UBIGEO DOMICILIO</label>
-                          <div class="input-group bg-light rounded-pill px-3 shadow-none border-0">
+                        <div class="col-md-12 mt-2">
+                          <label class="form-label text-muted small fw-bold">UBIGEO DOMICILIO (RESIDENCIA)</label>
+                          <div class="d-flex gap-2 mb-2">
+                            <div class="btn-group btn-group-sm rounded-pill overflow-hidden border">
+                              <button type="button" class="btn btn-light border-0 px-3" :class="{'bg-primary text-white': ubigeoModeDom==='manual'}" @click="ubigeoModeDom='manual'">Manual</button>
+                              <button type="button" class="btn btn-light border-0 px-3" :class="{'bg-primary text-white': ubigeoModeDom==='select'}" @click="ubigeoModeDom='select'">Selección</button>
+                            </div>
+                          </div>
+
+                          <div v-if="ubigeoModeDom==='manual'">
                             <input
                               v-model.trim="form.ubigeo_dom"
-                              class="form-control bg-transparent border-0 shadow-none"
+                              class="form-control rounded-pill bg-light border-0 px-3 shadow-none"
                               maxlength="6"
                               @input="syncFromUbigeo('dom', form.ubigeo_dom)"
-                              placeholder="6 dígitos"
+                              placeholder="Código de 6 dígitos"
                             >
-                            <button
-                              type="button"
-                              class="btn btn-link text-primary text-decoration-none fw-bold small"
-                              @click="ubigeoModeDom='search'"
-                            >
-                              BUSCAR
-                            </button>
                           </div>
-                          <small v-if="ubigeoTextoDom" class="text-muted d-block mt-1">
-                            {{ ubigeoTextoDom }}
+                          
+                          <div v-else class="row g-2">
+                            <div class="col-md-4">
+                              <select v-model="dom.dep" class="form-select form-select-sm rounded-pill bg-light border-0 px-2 shadow-none small">
+                                <option value="">Departamento</option>
+                                <option v-for="d in (departamentos.data || departamentos)" :key="d.id" :value="d.id">{{ d.nombre }}</option>
+                              </select>
+                            </div>
+                            <div class="col-md-4">
+                              <select v-model="dom.prov" class="form-select form-select-sm rounded-pill bg-light border-0 px-2 shadow-none small" :disabled="!dom.dep || loadingDom">
+                                <option value="">Provincia</option>
+                                <option v-for="p in provinciasDom" :key="p.id" :value="p.id">{{ p.nombre }}</option>
+                              </select>
+                            </div>
+                            <div class="col-md-4">
+                              <select v-model="dom.dist" class="form-select form-select-sm rounded-pill bg-light border-0 px-2 shadow-none small" :disabled="!dom.prov || loadingDom">
+                                <option value="">Distrito</option>
+                                <option v-for="d in distritosDom" :key="d.ubigeo" :value="d.ubigeo">{{ d.nombre }}</option>
+                              </select>
+                            </div>
+                          </div>
+
+                          <small v-if="ubigeoTextoDom" class="text-primary fw-bold d-block mt-1 extra-small">
+                            <i class="fas fa-map-marker-alt me-1"></i> {{ ubigeoTextoDom }} ({{ form.ubigeo_dom }})
                           </small>
                         </div>
                         
@@ -994,6 +1047,7 @@ const cancelar = () => router.push({ name: 'Principal' })
 .icon-box { width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; }
 .photo-preview-box:hover { background: #f8f9fa; border-color: #0d6efd !important; }
 .sticky-top { transition: top 0.3s ease; }
+.extra-small { font-size: 0.75rem; }
 /* Estilos para que el modal de prestamo no rompa la estetica si es necesario */
 :deep(.modal-content) { border-radius: 1rem !important; border: none !important; box-shadow: 0 1rem 3rem rgba(0,0,0,0.175) !important; }
 </style>
