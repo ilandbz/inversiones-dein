@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests\Cliente;
 
 use Illuminate\Foundation\Http\FormRequest;
@@ -75,7 +77,7 @@ class StoreClienteRequest extends FormRequest
 
             'referente.otrosnombres' => ['nullable', 'string', 'max:70'],
             'referente.email'        => ['nullable', 'email', 'max:120'],
-            'referente.direccion'    => ['required', 'string', 'max:120'],
+            'referente.direccion'    => ['nullable', 'string', 'max:120'],
         ];
 
         // ✅ NEGOCIO: requerido solo si INDEPENDIENTE

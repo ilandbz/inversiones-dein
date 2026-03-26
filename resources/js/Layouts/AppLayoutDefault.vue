@@ -8,6 +8,7 @@ import useDatosSession from '@/Composables/session'
 import { useAutenticacion } from '@/Composables/autenticacion'
 
 const route = useRoute()
+const props = defineProps(['title'])
 const { usuario, menus, role } = useDatosSession()
 const { logoutUsuario } = useAutenticacion()
 

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use App\Http\Requests\Cliente\StoreClienteRequest;
@@ -77,7 +79,7 @@ class ClienteController extends Controller
                     'otrosnombres' => $ref['otrosnombres'] ?? null,
                     'celular'      => $ref['celular'],
                     'email'        => $ref['email'] ?? null,
-                    'direccion'    => $ref['direccion'],
+                    'direccion'    => $ref['direccion'] ?? null,
 
                     // defaults
                     'fecha_nac'    => '2000-01-01',
@@ -279,7 +281,7 @@ class ClienteController extends Controller
                         'otrosnombres' => $ref['otrosnombres'] ?? null,
                         'celular'      => $ref['celular'],
                         'email'        => $ref['email'] ?? null,
-                        'direccion'    => $ref['direccion'],
+                        'direccion'    => $ref['direccion'] ?? null,
 
                         // defaults
                         'fecha_nac'    => '2000-01-01',
@@ -464,7 +466,7 @@ class ClienteController extends Controller
     public function listar(Request $request)
     {
         $filters = $this->getUserFilters();
-        $buscar = mb_strtoupper($request->buscar);
+        $buscar = mb_strtoupper($request->buscar ?? '');
         $paginacion = $request->paginacion ?? 10;
         $query = Cliente::with([
             'usuario:id,name',
@@ -497,7 +499,7 @@ class ClienteController extends Controller
     public function listarClientesPosicion(Request $request)
     {
         $filters = $this->getUserFilters();
-        $buscar = mb_strtoupper($request->buscar);
+        $buscar = mb_strtoupper($request->buscar ?? '');
         $paginacion = $request->paginacion ?? 10;
         $query = Cliente::join('personas', 'clientes.persona_id', '=', 'personas.id')
             ->with([

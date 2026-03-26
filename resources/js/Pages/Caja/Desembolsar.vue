@@ -1,15 +1,16 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
+import AppLayoutDefault from '@/Layouts/AppLayoutDefault.vue'
 import useCredito from '@/Composables/Credito';
 import useDesembolso from '@/Composables/Desembolso';
 import useDatosSession from '@/Composables/session';
 import FormArchivos from '@/Pages/Evaluacion/FormArchivos.vue';
 import useHelper from '@/Helpers';
 
-const { obtenerCreditos, creditos, cambiarEstadoCredito, respuesta } = useCredito();
-const { agregarDesembolso, respuesta: respuestaDesem } = useDesembolso();
+const { obtenerCreditos, creditos, loading: loadingCreditos } = useCredito();
+const { agregarDesembolso, loading: loadingDesem } = useDesembolso();
 const { usuario } = useDatosSession();
-const { openModal, Toast, Swal, formatoFecha } = useHelper();
+const { Toast, Swal, formatoFecha, formatoDinero } = useHelper();
 
 const selectedId = ref(null);
 const selectedClienteNombre = ref('');
@@ -29,51 +30,57 @@ const listarCreditos = async (page = 1) => {
 const archivos = (credito) => {
     selectedId.value = credito.id;
     selectedClienteNombre.value = credito.cliente?.persona?.apenom || '';
-    openModal('#archivosModal');
+    const modal = new bootstrap.Modal(document.getElementById('archivosModal'))
+    modal.show()
 };
 
 const desembolsar = async (creditoObj) => {
     const { isConfirmed, value } = await Swal.fire({
-        title: 'Realizar Desembolso',
+        title: 'Confirmar Desembolso',
         html: `
-            <div class="text-start">
-                <p><b>Cliente:</b> ${creditoObj.cliente.persona.apenom}</p>
-                <p><b>Monto Crédito:</b> S/. ${Number(creditoObj.monto).toFixed(2)}</p>
+            <div class="text-start p-2">
+                <div class="alert alert-primary border-0 rounded-4 mb-4">
+                    <div class="small fw-bold opacity-75">CLIENTE</div>
+                    <div class="fs-5 fw-bold">${creditoObj.cliente?.persona?.apenom}</div>
+                </div>
                 
-                <div class="mb-2">
-                    <label class="form-label">Fecha de Desembolso</label>
-                    <input id="swal-fecha" type="date" class="form-control" value="${formatoFecha(null, "YYYY-MM-DD")}">
-                </div>
-
-                <div class="mb-2">
-                    <label class="form-label">Descontado (S/.)</label>
-                    <input id="swal-descontado" type="number" step="0.01" class="form-control" value="0.00">
-                </div>
-
-                <div class="mb-2">
-                    <label class="form-label">Total Entregado (S/.)</label>
-                    <input id="swal-totalentregado" type="number" step="0.01" class="form-control" value="${Number(creditoObj.monto).toFixed(2)}">
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label class="form-label small fw-bold text-muted">FECHA DE OPERACIÓN</label>
+                        <input id="swal-fecha" type="date" class="form-control form-control-lg border-0 bg-light rounded-3" value="${formatoFecha(null, "YYYY-MM-DD")}">
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label small fw-bold text-muted">MONTO CRÉDITO</label>
+                        <input type="text" class="form-control border-0 bg-light rounded-3 fw-bold" value="${formatoDinero(creditoObj.monto)}" readonly>
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label small fw-bold text-muted">DESCONTADO (S/)</label>
+                        <input id="swal-descontado" type="number" step="0.01" class="form-control border-0 bg-light rounded-3 fw-bold" value="0.00">
+                    </div>
+                    <div class="col-12 mt-3">
+                        <label class="form-label small fw-bold text-primary">NETO A ENTREGAR (S/)</label>
+                        <input id="swal-totalentregado" type="number" step="0.01" class="form-control form-control-lg border-primary bg-primary-subtle text-primary rounded-3 fw-bold fs-4" value="${Number(creditoObj.monto).toFixed(2)}">
+                    </div>
                 </div>
             </div>
         `,
-        focusConfirm: false,
+        customClass: {
+            confirmButton: 'btn btn-primary rounded-pill px-5 py-2 fw-bold shadow mt-3',
+            cancelButton: 'btn btn-light rounded-pill px-4 fw-bold mt-3'
+        },
+        buttonsStyling: false,
         showCancelButton: true,
-        confirmButtonText: 'Confirmar Desembolso',
-        cancelButtonText: 'Cancelar',
+        confirmButtonText: 'REALIZAR DESEMBOLSO',
+        cancelButtonText: 'CANCELAR',
         preConfirm: () => {
             const fecha = document.getElementById('swal-fecha').value;
             const descontado = document.getElementById('swal-descontado').value;
             const totalentregado = document.getElementById('swal-totalentregado').value;
-
-            if (!fecha || !totalentregado) {
-                Swal.showValidationMessage('La fecha y el total entregado son obligatorios');
-                return;
-            }
-
+            if (!fecha || !totalentregado) return Swal.showValidationMessage('Complete todos los campos obligatorios');
             return {
                 credito_id: creditoObj.id,
                 fecha: fecha,
-                hora: new Date().toLocaleTimeString('it-IT'), // HH:mm:ss
+                hora: new Date().toLocaleTimeString('it-IT'),
                 user_id: usuario.value.id,
                 descontado: descontado,
                 totalentregado: totalentregado,
@@ -83,34 +90,13 @@ const desembolsar = async (creditoObj) => {
     });
 
     if (isConfirmed) {
-        await agregarDesembolso(value);
-        if (respuestaDesem.value?.ok === 1) {
-            Toast.fire({ icon: 'success', title: 'Desembolso realizado correctamente' });
+        const res = await agregarDesembolso(value);
+        if (res?.ok === 1) {
+            Toast.fire({ icon: 'success', title: 'Desembolso procesado con éxito' });
             listarCreditos(creditos.value.current_page);
-        } else {
-            Toast.fire({ icon: 'error', title: 'Error al procesar el desembolso' });
         }
     }
 };
-
-// PAGINACIÓN
-const offset = 2;
-const isActived = () => creditos.value?.current_page;
-const pagesNumber = computed(() => {
-    const c = creditos.value;
-    if (!c?.to) return [];
-    let from = c.current_page - offset;
-    if (from < 1) from = 1;
-    let to = from + offset * 2;
-    if (to >= c.last_page) to = c.last_page;
-    const pages = [];
-    for (let p = from; p <= to; p++) pages.push(p);
-    return pages;
-});
-
-const buscar = () => listarCreditos(1);
-const cambiarPaginacion = () => listarCreditos(1);
-const cambiarPagina = (pagina) => listarCreditos(pagina);
 
 onMounted(() => {
     listarCreditos();
@@ -118,105 +104,82 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="page-content">
-        <div class="container-fluid">
-            <div class="card card-primary card-outline">
-                <div class="card-header">
-                    <h6 class="card-title">Desembolso de Créditos</h6>
-                </div>
-
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-2 mb-1">
-                            <div class="input-group mb-1">
-                                <span class="input-group-text">Mostrar</span>
-                                <select class="form-select" v-model="dato.paginacion" @change="cambiarPaginacion">
-                                    <option value="10">10</option>
-                                    <option value="20">20</option>
-                                    <option value="50">50</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="col-md-5">
-                            <div class="input-group mb-1">
-                                <span class="input-group-text">Buscar</span>
-                                <input class="form-control" placeholder="Cliente, código..." type="text"
-                                    v-model="dato.buscar" @change="buscar" />
-                            </div>
-                        </div>
-
-                        <div class="col-md-4 mb-1">
-                            <nav>
-                                <ul class="pagination">
-                                    <li v-if="creditos.current_page > 1" class="page-item">
-                                        <a href="#" class="page-link" @click.prevent="cambiarPagina(creditos.current_page - 1)">
-                                            <span><i class="fas fa-angle-left"></i></span>
-                                        </a>
-                                    </li>
-                                    <li v-for="page in pagesNumber" :key="page" class="page-item" :class="{ active: page == isActived() }">
-                                        <a href="#" class="page-link" @click.prevent="cambiarPagina(page)">{{ page }}</a>
-                                    </li>
-                                    <li v-if="creditos.current_page < creditos.last_page" class="page-item">
-                                        <a href="#" class="page-link" @click.prevent="cambiarPagina(creditos.current_page + 1)">
-                                            <span><i class="fas fa-angle-right"></i></span>
-                                        </a>
-                                    </li>
-                                </ul>
-                            </nav>
+    <AppLayoutDefault title="Caja - Desembolsos">
+        <div class="page-content py-4">
+            <div class="container-fluid">
+                <!-- Header -->
+                <div class="row mb-4 align-items-center">
+                    <div class="col">
+                        <h3 class="fw-bold text-dark mb-1">Desembolsos Pendientes</h3>
+                        <p class="text-muted small mb-0">Créditos aprobados listos para la entrega de efectivo</p>
+                    </div>
+                    <div class="col-auto">
+                        <div class="input-group bg-white rounded-pill px-3 py-1 shadow-sm border">
+                            <span class="input-group-text bg-transparent border-0 text-muted"><i class="fas fa-search"></i></span>
+                            <input v-model="dato.buscar" type="text" class="form-control bg-transparent border-0" placeholder="Buscar cliente..." @keyup.enter="listarCreditos(1)">
                         </div>
                     </div>
+                </div>
 
-                    <div class="table-responsive">
-                        <table class="table table-bordered table-hover table-xs table-striped">
-                            <thead>
-                                <tr>
-                                    <th>#</th>
-                                    <th>Cod</th>
-                                    <th>Cliente</th>
-                                    <th>Asesor</th>
-                                    <th>Monto</th>
-                                    <th>Frecuencia</th>
-                                    <th>Tasa</th>
-                                    <th>Tipo</th>
-                                    <th>Fecha Reg</th>
-                                    <th>Estado</th>
-                                    <th>Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr v-if="creditos.total == 0">
-                                    <td class="text-danger text-center" colspan="11">No hay créditos aprobados pendientes de desembolso</td>
-                                </tr>
-                                <tr v-else v-for="(credito, index) in creditos.data" :key="credito.id">
-                                    <td>{{ index + creditos.from }}</td>
-                                    <td>{{ credito.id }}</td>
-                                    <td>{{ credito.cliente.persona.apenom }}</td>
-                                    <td>{{ credito.asesor.user?.name }}</td>
-                                    <td>{{ 'S/. ' + Number(credito.monto ?? 0).toFixed(2) }}</td>
-                                    <td>{{ credito.frecuencia }}</td>
-                                    <td>{{ Number(credito.tasainteres * 100).toFixed(2) + '%' }}</td>
-                                    <td>{{ credito.tipo }}</td>
-                                    <td>{{ credito.fecha_reg }}</td>
-                                    <td><span class="badge bg-success">{{ credito.estado }}</span></td>
-                                    <td>
-                                        <div class="d-flex gap-1">
-                                            <button class="btn btn-success btn-sm" title="Desembolsar" @click.prevent="desembolsar(credito)">
-                                                <i class="fas fa-money-bill-wave"></i> Desembolsar
-                                            </button>
-                                            <button class="btn btn-info btn-sm" title="Archivos" @click.prevent="archivos(credito)">
-                                                <i class="fa-solid fa-file-pdf"></i>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+                <!-- Table Card -->
+                <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="bg-light text-muted small text-uppercase">
+                                    <tr>
+                                        <th class="ps-4">Código</th>
+                                        <th>Socio / Cliente</th>
+                                        <th>Monto Aprobado</th>
+                                        <th>Fecha Aprob.</th>
+                                        <th class="pe-4 text-end">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-if="!creditos.data?.length" class="text-center py-5">
+                                        <td colspan="5" class="py-5 text-muted">
+                                            <i class="fas fa-check-circle fs-1 mb-3 d-block opacity-25"></i>
+                                            No hay créditos pendientes de desembolso.
+                                        </td>
+                                    </tr>
+                                    <tr v-for="c in creditos.data" :key="c.id" class="transition-all">
+                                        <td class="ps-4 fw-bold">#{{ c.id }}</td>
+                                        <td>
+                                            <div class="fw-bold text-dark text-uppercase">{{ c.cliente?.persona?.apenom }}</div>
+                                            <div class="small text-muted">DNI: {{ c.cliente?.persona?.dni }}</div>
+                                        </td>
+                                        <td>
+                                            <div class="fs-5 fw-bold text-primary">{{ formatoDinero(c.monto) }}</div>
+                                            <div class="small text-muted">{{ c.plazo }} cuotas</div>
+                                        </td>
+                                        <td class="small">{{ c.fecha_reg }}</td>
+                                        <td class="pe-4 text-end">
+                                            <div class="btn-group shadow-sm rounded-pill overflow-hidden border">
+                                                <button class="btn btn-white btn-sm px-3" title="Ver Expediente" @click="archivos(c)">
+                                                    <i class="fas fa-folder-open text-info"></i>
+                                                </button>
+                                                <button class="btn btn-success btn-sm px-4 fw-bold" @click="desembolsar(c)">
+                                                    <i class="fas fa-hand-holding-usd me-1"></i> DESEMBOLSAR
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <FormArchivos :creditoId="selectedId" :clienteNombre="selectedClienteNombre" />
+        <FormArchivos :creditoId="selectedId" :clienteNombre="selectedClienteNombre" />
+    </AppLayoutDefault>
 </template>
+
+<style scoped>
+.btn-white { background: #fff; }
+.btn-white:hover { background: #f8f9fa; }
+.bg-primary-subtle { background-color: #e9f2ff !important; }
+.transition-all { transition: all 0.2s ease; }
+.table-hover tbody tr:hover { background-color: rgba(var(--bs-primary-rgb), 0.02); }
+</style>

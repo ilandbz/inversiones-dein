@@ -1,285 +1,156 @@
 <script setup>
-  import { ref, onMounted } from 'vue';
-  import { defineTitle } from '@/Helpers';
-  import useHelper from '@/Helpers';  
-  import useRol from '@/Composables/Rol.js';
-  import RoleForm from './Form.vue'
-  const { openModal, Toast, Swal } = useHelper();
-  const {
-        roles, errors, role, respuesta,
-        obtenerRoles, obtenerRole, eliminarRole
-    } = useRol();
-    const titleHeader = ref({
-      titulo: "Rol",
-      subTitulo: "Inicio",
-      icon: "",
-      vista: ""
-    });
-    const dato = ref({
-        page:'',
-        buscar:'',
-        paginacion: 10
-    });
-    const form = ref({
-        id:'',
-        nombre : '',
-        estadoCrud:'',
-        errors:[]
+import { ref, onMounted, computed } from 'vue';
+import AppLayoutDefault from '@/Layouts/AppLayoutDefault.vue'
+import useHelper from '@/Helpers';  
+import useRol from '@/Composables/Rol.js';
+import RoleForm from './Form.vue'
 
-    });
-    const limpiar = ()=> {
-        form.value.id='',
-        form.value.nombre='',
-        form.value.estadoCrud = '',          
-        form.value.errors = []
-        errors.value = []
-    }
-    const obtenerDatos = async(id) => {
-        await obtenerRole(id);
-        if(role.value)
-        {
-            form.value.id=role.value.id;
-            form.value.nombre=role.value.nombre;
-        }
-    }
-    const editar = (id) => {
-        limpiar();
-        obtenerDatos(id)
-        form.value.estadoCrud = 'editar'
-        document.getElementById("modalRoleLabel").innerHTML = 'Editar Rol';
-        openModal('#modalRole')
-    }
-    const nuevo = () => {
-        limpiar()
-        form.value.estadoCrud = 'nuevo'
-        openModal('#modalRole')
-        document.getElementById("modalRoleLabel").innerHTML = 'Nuevo Rol';
-    }
-    const listarRoles = async(page=1) => {
-        dato.value.page= page
-        await obtenerRoles(dato.value)
-    }
-    const eliminar = (id) => {
-        Swal.fire({
-            title: '¿Estás seguro de Eliminar?',
-            text: "Rol",
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Si, Eliminalo!'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                elimina(id)
-            }
-        })
-    }
-    const elimina = async(id) => {
-        await eliminarRole(id)
-        form.value.errors = []
-        if(errors.value)
-        {
-            form.value.errors = errors.value
-        }
-        if(respuesta.value.ok==1){
-            form.value.errors = []
-            Toast.fire({icon:'success', title:respuesta.value.mensaje})
-            listarRoles(roles.value.current_page)
-        }
-    }
-    // PAGINACION
-    const isActived = () => {
-        return roles.value.current_page
-    }
-    const offset = 2;
+const { openModal, Toast, Swal } = useHelper();
+const { roles, role, respuesta, errors, obtenerRoles, obtenerRole, eliminarRole } = useRol();
 
-    const buscar = () => {
-        listarRoles()
+const dato = ref({
+    page: 1,
+    buscar: '',
+    paginacion: 10
+});
+
+const form = ref({
+    id: '', nombre: '', estadoCrud: '', errors: []
+});
+
+const listarRoles = async (page = 1) => {
+    dato.value.page = page;
+    await obtenerRoles(dato.value);
+};
+
+const nuevo = () => {
+    form.value = { id: '', nombre: '', estadoCrud: 'nuevo', errors: [] };
+    openModal('#modalRole');
+};
+
+const editar = async (id) => {
+    await obtenerRole(id);
+    if (role.value) {
+        form.value = { id: role.value.id, nombre: role.value.nombre, estadoCrud: 'editar', errors: [] };
+        openModal('#modalRole');
     }
-    const cambiarPaginacion = () => {
-        listarRoles()
-    }
-    const cambiarPagina =(pagina) => {
-        listarRoles(pagina)
-    }
-    const pagesNumber = () => {
-        if(!roles.value.to){
-            return []
+};
+
+const eliminar = (id) => {
+    Swal.fire({
+        title: '¿Eliminar Rol?',
+        text: "Esta acción podría afectar los permisos de varios usuarios.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'SÍ, ELIMINAR',
+        cancelButtonText: 'CANCELAR',
+        customClass: { confirmButton: 'btn btn-danger rounded-pill px-4', cancelButton: 'btn btn-light rounded-pill px-4' },
+        buttonsStyling: false
+    }).then(async (result) => {
+        if (result.isConfirmed) {
+            await eliminarRole(id);
+            if (respuesta.value?.ok === 1) listarRoles(roles.value.current_page);
         }
-        let from = roles.value.current_page - offset
-        if(from < 1) from = 1
-        let to = from + (offset*2)
-        if( to >= roles.value.last_page) to = roles.value.last_page
-        let pagesArray = []
-        while(from <= to) {
-            pagesArray.push(from)
-            from ++
-        }
-        return pagesArray
-    }
-    // CARGA
-    onMounted(() => {
-        defineTitle(titleHeader.value.titulo)
-        listarRoles()
-    })
+    });
+};
+
+const offset = 2;
+const pagesNumber = computed(() => {
+    const r = roles.value;
+    if(!r?.to) return [];
+    let from = r.current_page - offset;
+    if(from < 1) from = 1;
+    let to = from + (offset*2);
+    if( to >= r.last_page) to = r.last_page;
+    const pages = [];
+    for (let p = from; p <= to; p++) pages.push(p);
+    return pages;
+});
+
+onMounted(() => { listarRoles(); });
 </script>
+
 <template>
-    <div class="app-content">
-      <div class="container-fluid">
-        <div class="card card-primary card-outline">
-            <div class="card-header">
-                <h6 class="card-title">
-                    Listado de Roles
-                </h6>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-1 mb-1">
-                        <button  type="button" class="btn btn-danger" @click.prevent="nuevo">
-                            <i class="fas fa-plus"></i> Nuevo
-                        </button>                        
+    <AppLayoutDefault title="Configuración de Roles">
+        <div class="page-content py-4">
+            <div class="container-fluid">
+                <!-- Header -->
+                <div class="row mb-4 align-items-center">
+                    <div class="col">
+                        <h3 class="fw-bold text-dark mb-1">Roles de Usuario</h3>
+                        <p class="text-muted small mb-0">Definición de perfiles y niveles de acceso al sistema</p>
                     </div>
-                    <div class="col-md-2 mb-1">
-                        <div class="input-group mb-1">
-                            <span class="input-group-text" id="basic-addon1">Mostrar</span>
-                            <select class="form-select"  v-model="dato.paginacion" @change="cambiarPaginacion">
-                                <option value="5">5</option>
-                                <option value="10">10</option>
-                                <option value="20">20</option>
-                                <option value="25">25</option>
-                                <option value="50">50</option>
-                                <option value="100">100</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col-md-5">
-                        <div class="input-group mb-1">
-                            <span class="input-group-text" id="basic-addon1">Buscar</span>
-                            <input class="form-control" placeholder="Ingrese nombre, código ciiu" type="text" v-model="dato.buscar"
-                                @change="buscar" />
-                        </div>
-                    </div>
-                    <div class="col-md-4 mb-1">
-                        <nav>
-                            <ul class="pagination">
-                                <li v-if="roles.current_page >= 2" class="page-item">
-                                    <a href="#" aria-label="Previous" class="page-link"
-                                        title="Primera Página"
-                                        @click.prevent="cambiarPagina(1)">
-                                        <span><i class="fas fa-backward"></i></span>
-                                    </a>
-                                </li>
-                                <li v-if="roles.current_page > 1" class="page-item">
-                                    <a href="#" aria-label="Previous" class="page-link"
-                                        title="Página Anterior"
-                                        @click.prevent="cambiarPagina(roles.current_page - 1)">
-                                        <span><i class="fas fa-angle-left"></i></span>
-                                    </a>
-                                </li>
-                                <li v-for="page in pagesNumber()" class="page-item"
-                                    :key="page"
-                                    :class="[ page == isActived() ? 'active' : '']"
-                                    :title="'Página '+ page">
-                                    <a href="#" class="page-link"
-                                        @click.prevent="cambiarPagina(page)">{{ page }}</a>
-                                </li>
-                                <li v-if="roles.current_page < roles.last_page" class="page-item">
-                                    <a href="#" aria-label="Next" class="page-link"
-                                        title="Página Siguiente"
-                                        @click.prevent="cambiarPagina(roles.current_page + 1)">
-                                        <span ><i class="fas fa-angle-right"></i></span>
-                                    </a>
-                                </li>
-                                    <li v-if="roles.current_page <= roles.last_page-1" class="page-item">
-                                    <a href="#" aria-label="Next" class="page-link"
-                                        @click.prevent="cambiarPagina(roles.last_page)"
-                                        title="Última Página">
-                                        <span ><i class="fas fa-step-forward"></i></span>
-                                    </a>
-                                </li>
-                            </ul>
-                        </nav>
+                    <div class="col-auto">
+                        <button class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm" @click="nuevo">
+                            <i class="fas fa-plus-circle me-1"></i> NUEVO ROL
+                        </button>
                     </div>
                 </div>
-                <div class="row">
-                    <div class="col-md-12 mb-1">
-                        <div class="table-responsive">         
-                            <table class="table table-bordered table-hover table-sm table-striped">
-                                <thead class="">
+
+                <!-- Main Card -->
+                <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                    <div class="card-header bg-white p-4 border-0 pb-0">
+                        <div class="row g-2 align-items-center">
+                            <div class="col-md-5">
+                                <div class="input-group bg-light rounded-pill px-3 py-1">
+                                    <span class="input-group-text bg-transparent border-0 text-muted"><i class="fas fa-search"></i></span>
+                                    <input v-model="dato.buscar" type="text" class="form-control bg-transparent border-0" placeholder="Buscar rol..." @keyup.enter="listarRoles(1)">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0 mt-3">
+                                <thead class="bg-light text-muted small text-uppercase">
                                     <tr>
-                                        <th colspan="7" class="text-center">roles</th>
-                                    </tr>
-                                    <tr>
-                                        <th>#</th>
-                                        <th>Nombre</th>
-                                        <th>Acciones</th>
+                                        <th class="ps-4" style="width: 80px;">#</th>
+                                        <th>Nombre del Rol</th>
+                                        <th class="pe-4 text-end">Acciones</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr v-if="roles.total == 0">
-                                        <td class="text-danger text-center" colspan="7">
-                                            -- Datos No Registrados - Tabla Vacía --
-                                        </td>
+                                    <tr v-if="!roles.data?.length" class="text-center py-5">
+                                        <td colspan="3" class="py-5 text-muted">No hay roles registrados.</td>
                                     </tr>
-                                    <tr v-else v-for="(role,index) in roles.data" :key="role.id">
-                                        <td>{{ index + roles.from }}</td>
-                                        <td>{{ role.nombre }}</td>
+                                    <tr v-for="(r, index) in roles.data" :key="r.id">
+                                        <td class="ps-4 small fw-bold">{{ index + roles.from }}</td>
                                         <td>
-                                            <button class="btn btn-warning btn-sm" title="Editar" @click.prevent="editar(role.id)">
-                                                <i class="fas fa-edit"></i>
-                                            </button>&nbsp;
-                                            <button class="btn btn-danger btn-sm" title="Enviar a Papelera" @click.prevent="eliminar(role.id, 'Temporal')">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
+                                            <div class="d-flex align-items-center">
+                                                <div class="icon-box bg-primary-subtle text-primary rounded-circle me-3">
+                                                    <i class="fas fa-user-shield"></i>
+                                                </div>
+                                                <span class="fw-bold text-dark text-uppercase">{{ r.nombre }}</span>
+                                            </div>
+                                        </td>
+                                        <td class="pe-4 text-end">
+                                            <div class="btn-group shadow-sm rounded-pill overflow-hidden border">
+                                                <button class="btn btn-white btn-sm px-3 border-end" title="Editar" @click="editar(r.id)"><i class="fas fa-edit text-warning"></i></button>
+                                                <button class="btn btn-white btn-sm px-3" title="Eliminar" @click="eliminar(r.id)"><i class="fas fa-trash-alt text-danger"></i></button>
+                                            </div>
                                         </td>
                                     </tr>
                                 </tbody>
                             </table>
                         </div>
                     </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-5 mb-1">
-                        Mostrando <b>{{roles.from}}</b> a <b>{{ roles.to }}</b> de <b>{{ roles.total}}</b> Registros
-                    </div>
-                    <div class="col-md-7 mb-1 text-right">
-                        <nav>
-                            <ul class="pagination">
-                                <li v-if="roles.current_page >= 2" class="page-item">
-                                    <a href="#" aria-label="Previous" class="page-link"
-                                        title="Primera Página"
-                                        @click.prevent="cambiarPagina(1)">
-                                        <span><i class="fas fa-backward"></i></span>
-                                    </a>
-                                </li>
-                                <li v-if="roles.current_page > 1" class="page-item">
-                                    <a href="#" aria-label="Previous" class="page-link"
-                                        title="Página Anterior"
-                                        @click.prevent="cambiarPagina(roles.current_page - 1)">
 
-                                        <span><i class="fas fa-angle-left"></i></span>
-                                    </a>
+                    <!-- Pagination -->
+                    <div class="card-footer bg-white p-4 border-top-0 d-flex justify-content-between align-items-center">
+                        <div class="small text-muted">
+                            Paginación: {{ roles.current_page }} de {{ roles.last_page }}
+                        </div>
+                        <nav v-if="roles.last_page > 1">
+                            <ul class="pagination pagination-sm mb-0 gap-1 child-rounded-pill">
+                                <li class="page-item" :class="{ disabled: roles.current_page === 1 }">
+                                    <button class="page-link border-0 shadow-none px-3" @click="listarRoles(roles.current_page - 1)"><i class="fas fa-chevron-left"></i></button>
                                 </li>
-                                <li v-for="page in pagesNumber()" class="page-item"
-                                    :key="page"
-                                    :class="[ page == isActived() ? 'active' : '']"
-                                    :title="'Página '+ page">
-                                    <a href="#" class="page-link"
-                                        @click.prevent="cambiarPagina(page)">{{ page }}</a>
+                                <li v-for="p in pagesNumber" :key="p" class="page-item" :class="{ active: p === roles.current_page }">
+                                    <button class="page-link border-0 shadow-none px-3" @click="listarRoles(p)">{{ p }}</button>
                                 </li>
-                                <li v-if="roles.current_page < roles.last_page" class="page-item">
-                                    <a href="#" aria-label="Next" class="page-link"
-                                        title="Página Siguiente"
-                                        @click.prevent="cambiarPagina(roles.current_page + 1)">
-                                        <span ><i class="fas fa-angle-right"></i></span>
-                                    </a>
-                                </li>
-                                    <li v-if="roles.current_page <= roles.last_page-1" class="page-item">
-                                    <a href="#" aria-label="Next" class="page-link"
-                                        @click.prevent="cambiarPagina(roles.last_page)"
-                                        title="Última Página">
-                                        <span ><i class="fas fa-step-forward"></i></span>
-                                    </a>
+                                <li class="page-item" :class="{ disabled: roles.current_page === roles.last_page }">
+                                    <button class="page-link border-0 shadow-none px-3" @click="listarRoles(roles.current_page + 1)"><i class="fas fa-chevron-right"></i></button>
                                 </li>
                             </ul>
                         </nav>
@@ -287,7 +158,16 @@
                 </div>
             </div>
         </div>
-      </div>
-    </div>
-    <RoleForm :form="form" @onListar="listarRoles" :currentPage="roles.current_page"></RoleForm>
+
+        <RoleForm :form="form" @onListar="listarRoles" :currentPage="roles.current_page" />
+    </AppLayoutDefault>
 </template>
+
+<style scoped>
+.btn-white { background: #fff; }
+.btn-white:hover { background: #f8f9fa; }
+.bg-primary-subtle { background-color: #e9f2ff !important; }
+.icon-box { width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; }
+.child-rounded-pill .page-link { border-radius: 50px !important; }
+.table-hover tbody tr:hover { background-color: rgba(var(--bs-primary-rgb), 0.02); }
+</style>

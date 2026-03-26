@@ -5,14 +5,15 @@ import { getConfigHeader } from '@/Helpers'
 export default function useAhorro() {
     const ahorros = ref([])
     const ahorro = ref({})
+    const movimientos = ref([])
     const errors = ref('')
-    const respuesta = ref([])
     const loading = ref(false)
 
-    const listarAhorrosPorCliente = async (clienteId) => {
+    const listarAhorros = async (params = {}) => {
         loading.value = true
         try {
-            const respond = await axios.get(`/ahorro/por-cliente?cliente_id=${clienteId}`, getConfigHeader())
+            const query = new URLSearchParams(params).toString()
+            const respond = await axios.get(`/ahorro/listar?${query}`, getConfigHeader())
             ahorros.value = respond.data
         } catch (error) {
             console.error('Error al listar ahorros:', error)
@@ -30,50 +31,74 @@ export default function useAhorro() {
         }
     }
 
-    const guardarAhorro = async (data) => {
+    const listarMovimientos = async (ahorroId) => {
+        loading.value = true
+        try {
+            const respond = await axios.get(`/ahorro/movimientos?ahorro_id=${ahorroId}`, getConfigHeader())
+            movimientos.value = respond.data
+        } catch (error) {
+            console.error('Error al listar movimientos de ahorro:', error)
+        } finally {
+            loading.value = false
+        }
+    }
+
+    const abrirCuenta = async (data) => {
         errors.value = ''
         loading.value = true
         try {
             const respond = await axios.post('/ahorro/guardar', data, getConfigHeader())
-            respuesta.value = respond.data
             return respond.data
         } catch (error) {
             if (error?.response?.status === 422) {
                 errors.value = error.response.data.errors
-            } else {
-                console.error('Error al guardar ahorro:', error)
             }
+            throw error
         } finally {
             loading.value = false
         }
     }
 
-    const actualizarAhorro = async (data) => {
+    const depositar = async (data) => {
         errors.value = ''
         loading.value = true
         try {
-            const respond = await axios.post('/ahorro/actualizar', data, getConfigHeader())
-            respuesta.value = respond.data
+            const respond = await axios.post('/ahorro/depositar', data, getConfigHeader())
             return respond.data
         } catch (error) {
             if (error?.response?.status === 422) {
                 errors.value = error.response.data.errors
-            } else {
-                console.error('Error al actualizar ahorro:', error)
             }
+            throw error
         } finally {
             loading.value = false
         }
     }
 
-    const eliminarAhorro = async (id) => {
+    const retirar = async (data) => {
+        errors.value = ''
         loading.value = true
         try {
-            const respond = await axios.post('/ahorro/eliminar', { id }, getConfigHeader())
-            respuesta.value = respond.data
+            const respond = await axios.post('/ahorro/retirar', data, getConfigHeader())
             return respond.data
         } catch (error) {
-            console.error('Error al eliminar ahorro:', error)
+            if (error?.response?.status === 422) {
+                errors.value = error.response.data.errors
+            }
+            throw error
+        } finally {
+            loading.value = false
+        }
+    }
+
+    const cerrarCuenta = async (ahorroId, data = {}) => {
+        loading.value = true
+        try {
+            const respond = await axios.post('/ahorro/cerrar', { ahorro_id: ahorroId, ...data }, getConfigHeader())
+            return respond.data
+        } catch (error) {
+            console.error('Error al cerrar cuenta:', error)
+            throw error
         } finally {
             loading.value = false
         }
@@ -82,13 +107,15 @@ export default function useAhorro() {
     return {
         ahorros,
         ahorro,
+        movimientos,
         errors,
-        respuesta,
         loading,
-        listarAhorrosPorCliente,
+        listarAhorros,
         mostrarAhorro,
-        guardarAhorro,
-        actualizarAhorro,
-        eliminarAhorro
+        listarMovimientos,
+        abrirCuenta,
+        depositar,
+        retirar,
+        cerrarCuenta
     }
 }

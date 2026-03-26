@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
+import AppLayoutDefault from '@/Layouts/AppLayoutDefault.vue'
 import useHelper from '@/Helpers'
 import useCliente from '@/Composables/Cliente.js'
 import useActividadNegocio from '@/Composables/ActividadNegocio.js'
@@ -62,6 +63,9 @@ const abrirPrestamo = (cliente) => {
   document.getElementById("prestamomodalLabel").innerHTML = 'Solicitar Prestamo';
   openModal('#prestamomodal')
 }
+
+const ubigeoTextoNac = ref('')
+const ubigeoTextoDom = ref('')
 
 // ----------------- UBIGEO UI (NAC / DOM) -----------------
 const ubigeoModeNac = ref('select') // 'select' | 'search'
@@ -155,9 +159,16 @@ watch(() => dom.value.prov, async (prov) => {
   }
 })
 
-// Auto-set si escriben ubigeo manual: usa tu obtenerPorUbigeo
 const syncFromUbigeo = async (which, ubigeo) => {
-  if (!ubigeo || String(ubigeo).length !== 6) return
+  if (!ubigeo || String(ubigeo).length !== 6) {
+    if (which === 'nac') {
+      ubigeoTextoNac.value = ''
+    } else {
+      ubigeoTextoDom.value = ''
+    }
+    return
+  }
+
   try {
     await obtenerUbigeo(ubigeo)
     const r = registro.value
@@ -167,23 +178,43 @@ const syncFromUbigeo = async (which, ubigeo) => {
     const provId = r?.provincia?.id
     const disUb = r?.ubigeo
 
+    const texto = `${r?.provincia?.departamento?.nombre || ''} / ${r?.provincia?.nombre || ''} / ${r?.nombre || ''}`
+
     if (which === 'nac') {
       ubigeoModeNac.value = 'select'
-      nac.value.dep = depId
-      // provincias se cargarán por watch(dep). Esperamos microtick y seteamos
-      setTimeout(() => {
-        nac.value.prov = provId
-        setTimeout(() => (nac.value.dist = disUb), 0)
-      }, 0)
+      nac.value.dep = depId || ''
+      form.value.ubigeo_nac = disUb || ''
+
+      await obtenerProvinciasPorDepartamento(depId)
+      provinciasNac.value = provincias.value || []
+      nac.value.prov = provId || ''
+
+      await obtenerDistritosPorProvincia(provId)
+      distritosNac.value = distritos.value || []
+      nac.value.dist = disUb || ''
+
+      ubigeoTextoNac.value = texto
+      buscarNac.value = texto
     } else {
       ubigeoModeDom.value = 'select'
-      dom.value.dep = depId
-      setTimeout(() => {
-        dom.value.prov = provId
-        setTimeout(() => (dom.value.dist = disUb), 0)
-      }, 0)
+      dom.value.dep = depId || ''
+      form.value.ubigeo_dom = disUb || ''
+
+      await obtenerProvinciasPorDepartamento(depId)
+      provinciasDom.value = provincias.value || []
+      dom.value.prov = provId || ''
+
+      await obtenerDistritosPorProvincia(provId)
+      distritosDom.value = distritos.value || []
+      dom.value.dist = disUb || ''
+
+      ubigeoTextoDom.value = texto
+      buscarDom.value = texto
     }
-  } catch (e) {}
+  } catch (e) {
+    if (which === 'nac') ubigeoTextoNac.value = ''
+    else ubigeoTextoDom.value = ''
+  }
 }
 
 // búsqueda (autocomplete)
@@ -211,14 +242,17 @@ watch(buscarDom, (q) => {
 })
 
 const selectFromSearch = (which, item) => {
-  // item: {ubigeo, distrito, provincia, departamento}
+  const texto = `${item.departamento} / ${item.provincia} / ${item.distrito}`
+
   if (which === 'nac') {
     form.value.ubigeo_nac = item.ubigeo
-    buscarNac.value = `${item.departamento} / ${item.provincia} / ${item.distrito}`
+    buscarNac.value = texto
+    ubigeoTextoNac.value = texto
     resultadosNac.value = []
   } else {
     form.value.ubigeo_dom = item.ubigeo
-    buscarDom.value = `${item.departamento} / ${item.provincia} / ${item.distrito}`
+    buscarDom.value = texto
+    ubigeoTextoDom.value = texto
     resultadosDom.value = []
   }
 }
@@ -426,8 +460,14 @@ const normalizeErrors = (payload) => {
 
 const setErrorsFromComposable = () => { form.value.errors = normalizeErrors(errors.value) }
 const clearErrors = () => { form.value.errors = {} }
-const hasError = (name) => toArr(form.value.errors?.[name]).length > 0
-const firstError = (name) => toArr(form.value.errors?.[name])[0] || ''
+const hasError = (name) => {
+  const errs = form.value.errors?.[name]
+  return Array.isArray(errs) ? errs.length > 0 : !!errs
+}
+const firstError = (name) => {
+  const errs = toArr(form.value.errors?.[name])
+  return errs[0] || ''
+}
 const clearFieldError = (name) => { if (form.value.errors?.[name]) delete form.value.errors[name] }
 
 const scrollToFirstInvalid = async () => {
@@ -521,9 +561,10 @@ const fullName = computed(() => {
 const openPdf = async (cliente_id) => {
   if (!cliente_id) return
   await obtenerClienteRecientePdf(cliente_id)
+  await nextTick()
   const t = document.getElementById('impresionresumenLabel')
   if (t) t.innerHTML = 'Resumen Cliente'
-  openModal('#impresionresumen')
+  setTimeout(() => { openModal('#impresionresumen') }, 150)
 }
 
 /* ----------------- GUARDAR ----------------- */
@@ -557,16 +598,14 @@ const guardar = async () => {
       const cliente = respuesta.value?.cliente
       const html = `
         <div class="text-start">
-          <div class="mb-2"><b>Cliente:</b> ${fullName.value || '-'}</div>
-          <div class="mb-2"><b>Codigo:</b> ${cliente.id || '-'}</div>
-          <div class="mb-2"><b>DNI:</b> ${form.value.dni || '-'}</div>
-          <div class="mb-2"><b>Celular:</b> ${form.value.celular || '-'}</div>
-          <div class="mb-2"><b>Origen:</b> ${form.value.origen_labor || '-'}</div>
+          <div class="mb-2 small"><b>Cliente:</b> ${fullName.value || '-'}</div>
+          <div class="mb-2 small"><b>DNI:</b> ${form.value.dni || '-'}</div>
+          <div class="mb-2 small"><b>Tipo:</b> ${form.value.origen_labor || '-'}</div>
         </div>
       `
 
       const result = await Swal.fire({
-        title: respuesta.value?.mensaje || 'Registro exitoso',
+        title: '¡Registro Exitoso!',
         icon: 'success',
         html,
         showDenyButton: true,
@@ -574,20 +613,18 @@ const guardar = async () => {
         confirmButtonText: 'Nuevo registro',
         denyButtonText: 'Ver PDF',
         cancelButtonText: 'Cerrar',
+        customClass: {
+            confirmButton: 'btn btn-primary rounded-pill px-4 ms-2',
+            denyButton: 'btn btn-outline-dark rounded-pill px-4 ms-2',
+            cancelButton: 'btn btn-light rounded-pill px-4 ms-2'
+        },
+        buttonsStyling: false,
         reverseButtons: true
       })
 
-      // Actualiza "cliente reciente" (para tener id seguro)
       await obtenerClienteReciente()
-
-      if (result.isDenied) {
-        console.log("se selecciono pdf")
-        await openPdf(cliente.id)
-      }
-
-      //if (result.isConfirmed) {
-        resetForm()
-      //}
+      if (result.isDenied) await openPdf(cliente.id)
+      resetForm()
     }
   } catch (e) {
     Toast?.error ? Toast.error('Ocurrió un error al guardar.') : console.error(e)
@@ -614,924 +651,349 @@ const resetForm = () => {
   clearErrors()
   removePhoto()
   detalleActividadNegocios.value = []
+
+ubigeoTextoNac.value = ''
+ubigeoTextoDom.value = ''
+buscarNac.value = ''
+buscarDom.value = ''
+nac.value = { dep: '', prov: '', dist: '' }
+dom.value = { dep: '', prov: '', dist: '' }
+provinciasNac.value = []
+distritosNac.value = []
+provinciasDom.value = []
+distritosDom.value = []
+
 }
 
 const cancelar = () => router.push({ name: 'Principal' })
 </script>
 
-
 <template>
-  <div class="page-content">
-    <section class="row">
-
-
-      <!-- IZQUIERDA -->
-      <div class="col-12 col-lg-8">
-        <div class="card shadow-sm">
-          <div class="card-header d-flex align-items-center justify-content-between">
-            <div>
-              <h3 class="mb-0">Cliente Nuevo</h3>
-              <div class="text-muted small">Complete los datos principales y del referente.</div>
+  <AppLayoutDefault title="Registro de Clientes">
+    <div class="page-content py-4">
+      <div class="container-fluid">
+        <!-- Header Section -->
+        <div class="row mb-4 align-items-center">
+            <div class="col">
+                <h3 class="fw-bold text-dark mb-1">Nuevo Socio Receptivo</h3>
+                <p class="text-muted small mb-0">Complete el expediente digital del nuevo cliente para evaluación crediticia</p>
             </div>
-            <span class="badge bg-light text-dark border">Registro</span>
+            <div class="col-auto">
+                <div class="d-flex gap-2">
+                    <button class="btn btn-light rounded-pill px-4 shadow-sm fw-bold small text-uppercase" @click="cancelar">
+                        <i class="fas fa-times me-2 opacity-50"></i> Cancelar
+                    </button>
+                    <button class="btn btn-primary rounded-pill px-4 shadow-sm fw-bold small text-uppercase" @click="guardar" :disabled="isSaving">
+                        <span v-if="isSaving" class="spinner-border spinner-border-sm me-2"></span>
+                        <i v-else class="fas fa-save me-2 opacity-50"></i> Guardar Expediente
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+          <!-- LEFT FORM COLUMN -->
+          <div class="col-lg-8">
+            <!-- 1. Información Personal -->
+            <div class="card border-0 shadow-sm rounded-4 mb-4">
+                <div class="card-header bg-white border-0 py-3 px-4 d-flex align-items-center">
+                    <div class="icon-box bg-primary text-white rounded-3 me-3"><i class="fas fa-user"></i></div>
+                    <h5 class="fw-bold text-dark mb-0">Información de Identidad</h5>
+                </div>
+                <div class="card-body px-4 pb-4 pt-0">
+                    <div class="row g-3 mt-1">
+                        <div class="col-md-3">
+                            <label class="form-label text-muted small fw-bold">DNI / DOCUMENTO</label>
+                            <input v-model="form.dni" type="text" class="form-control rounded-pill bg-light border-0 px-3 shadow-none" maxlength="8" @keypress="soloNumeros" @change="validarDni(form.dni)" :class="{'is-invalid': hasError('dni')}" placeholder="12345678">
+                            <div class="invalid-feedback" v-if="hasError('dni')">{{ firstError('dni') }}</div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label text-muted small fw-bold">PRIMER NOMBRE</label>
+                            <input v-model.trim="form.primernombre" class="form-control rounded-pill bg-light border-0 px-3 shadow-none" :class="{'is-invalid': hasError('primernombre')}" placeholder="Ej: Juan">
+                        </div>
+                        <div class="col-md-5">
+                            <label class="form-label text-muted small fw-bold">OTROS NOMBRES</label>
+                            <input v-model.trim="form.otrosnombres" class="form-control rounded-pill bg-light border-0 px-3 shadow-none" placeholder="Ej: Carlos Alberto">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small fw-bold">APELLIDO PATERNO</label>
+                            <input v-model.trim="form.ape_pat" class="form-control rounded-pill bg-light border-0 px-3 shadow-none" :class="{'is-invalid': hasError('ape_pat')}" placeholder="Ej: Pérez">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small fw-bold">APELLIDO MATERNO</label>
+                            <input v-model.trim="form.ape_mat" class="form-control rounded-pill bg-light border-0 px-3 shadow-none" :class="{'is-invalid': hasError('ape_mat')}" placeholder="Ej: Gómez">
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <label class="form-label text-muted small fw-bold">FECHA NACIMIENTO</label>
+                            <input v-model="form.fecha_nac" type="date" class="form-control rounded-pill bg-light border-0 px-3 shadow-none" :class="{'is-invalid': hasError('fecha_nac')}">
+                            <div class="invalid-feedback" v-if="hasError('fecha_nac')">{{ firstError('fecha_nac') }}</div>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label text-muted small fw-bold">GÉNERO</label>
+                            <select v-model="form.genero" class="form-select rounded-pill bg-light border-0 px-3 shadow-none">
+                                <option value="M">Masculino</option>
+                                <option value="F">Femenino</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label text-muted small fw-bold">ESTADO CIVIL</label>
+                            <select v-model="form.estado_civil" class="form-select rounded-pill bg-light border-0 px-3 shadow-none">
+                                <option>SOLTERO</option><option>CASADO</option><option>CONVIVIENTE</option><option>DIVORCIADO</option><option>VIUDO</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                          <label class="form-label text-muted small fw-bold">UBIGEO NACIMIENTO</label>
+                          <input
+                            v-model.trim="form.ubigeo_nac"
+                            class="form-control rounded-pill bg-light border-0 px-3 shadow-none"
+                            maxlength="6"
+                            @input="syncFromUbigeo('nac', form.ubigeo_nac)"
+                            placeholder="060101"
+                          >
+                          <small v-if="ubigeoTextoNac" class="text-muted d-block mt-1">
+                            {{ ubigeoTextoNac }}
+                          </small>
+                        </div>
+
+                        <!-- Grado de Instrucción y Profesión -->
+                        <div class="col-md-4">
+                            <label class="form-label text-muted small fw-bold">GRADO DE INSTRUCCIÓN</label>
+                            <select v-model="form.grado_instr" class="form-select rounded-pill bg-light border-0 px-3 shadow-none" :class="{'is-invalid': hasError('grado_instr')}">
+                                <option value="">-- Seleccionar --</option>
+                                <option v-for="g in gradosInstruccion" :key="g" :value="g">{{ g }}</option>
+                            </select>
+                            <div class="invalid-feedback" v-if="hasError('grado_instr')">{{ firstError('grado_instr') }}</div>
+                        </div>
+                        <div class="col-md-8">
+                            <label class="form-label text-muted small fw-bold">PROFESIÓN</label>
+                            <select v-model="form.profesion" class="form-select rounded-pill bg-light border-0 px-3 shadow-none" :disabled="!esSuperior" :class="{'is-invalid': hasError('profesion')}">
+                                <option value="">-- No Aplica / Otros --</option>
+                                <option v-for="p in profesionesPeru" :key="p" :value="p">{{ p }}</option>
+                            </select>
+                            <div class="invalid-feedback" v-if="hasError('profesion')">{{ firstError('profesion') }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. Contacto y Ubicación -->
+            <div class="card border-0 shadow-sm rounded-4 mb-4">
+                <div class="card-header bg-white border-0 py-3 px-4 d-flex align-items-center">
+                    <div class="icon-box bg-success text-white rounded-3 me-3"><i class="fas fa-map-marker-alt"></i></div>
+                    <h5 class="fw-bold text-dark mb-0">Contacto y Residencia</h5>
+                </div>
+                <div class="card-body px-4 pb-4 pt-0">
+                    <div class="row g-3 mt-1">
+                        <div class="col-md-4">
+                            <label class="form-label text-muted small fw-bold">CELULAR PRINCIPAL</label>
+                            <input v-model="form.celular" class="form-control rounded-pill bg-light border-0 px-3 shadow-none" maxlength="9" @keypress="soloNumeros" placeholder="999 999 999">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label text-muted small fw-bold">CELULAR SECUNDARIO</label>
+                            <input v-model="form.celular2" class="form-control rounded-pill bg-light border-0 px-3 shadow-none" maxlength="9" @keypress="soloNumeros" placeholder="Opcional">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label text-muted small fw-bold">CORREO ELECTRÓNICO</label>
+                            <input v-model.trim="form.email" type="email" class="form-control rounded-pill bg-light border-0 px-3 shadow-none" placeholder="socio@ejemplo.com">
+                        </div>
+                        
+                        <div class="col-md-12">
+                            <label class="form-label text-muted small fw-bold">DIRECCIÓN DOMICILIARIA ACTUAL</label>
+                            <textarea v-model.trim="form.direccion" class="form-control rounded-4 bg-light border-0 px-3 shadow-none" rows="2" placeholder="Av / Jr / Calle / Psje / Mz / Lt..." :class="{'is-invalid': hasError('direccion')}"></textarea>
+                            <div class="invalid-feedback" v-if="hasError('direccion')">{{ firstError('direccion') }}</div>
+                        </div>
+
+                        <div class="col-md-6">
+                          <label class="form-label text-muted small fw-bold">UBIGEO DOMICILIO</label>
+                          <div class="input-group bg-light rounded-pill px-3 shadow-none border-0">
+                            <input
+                              v-model.trim="form.ubigeo_dom"
+                              class="form-control bg-transparent border-0 shadow-none"
+                              maxlength="6"
+                              @input="syncFromUbigeo('dom', form.ubigeo_dom)"
+                              placeholder="6 dígitos"
+                            >
+                            <button
+                              type="button"
+                              class="btn btn-link text-primary text-decoration-none fw-bold small"
+                              @click="ubigeoModeDom='search'"
+                            >
+                              BUSCAR
+                            </button>
+                          </div>
+                          <small v-if="ubigeoTextoDom" class="text-muted d-block mt-1">
+                            {{ ubigeoTextoDom }}
+                          </small>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small fw-bold">GEOLOCALIZACIÓN (COORDENADAS)</label>
+                            <div class="input-group bg-light rounded-pill px-1 shadow-none border-0">
+                                <input v-model.trim="form.latitud_longitud" class="form-control bg-transparent border-0 shadow-none px-3" placeholder="Lat, Lng">
+                                <button class="btn btn-dark rounded-pill px-3 small fw-bold" @click="obtenerUbicacion" :disabled="geoLoading">
+                                    <i class="fas fa-crosshairs me-2"></i> GPS
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. Perfil Económico / Negocio -->
+            <div class="card border-0 shadow-sm rounded-4 mb-4">
+                <div class="card-header bg-white border-0 py-3 px-4 d-flex align-items-center">
+                    <div class="icon-box bg-warning text-dark rounded-3 me-3"><i class="fas fa-briefcase"></i></div>
+                    <h5 class="fw-bold text-dark mb-0">Situación Laboral / Económica</h5>
+                    <div class="ms-auto">
+                        <select v-model="form.origen_labor" class="form-select form-select-sm rounded-pill px-3 bg-light border-0 shadow-none fw-bold">
+                            <option>INDEPENDIENTE</option><option>DEPENDIENTE</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="card-body px-4 pb-4 pt-0">
+                    <div v-if="esIndependiente" class="row g-3 mt-1">
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small fw-bold">RAZÓN SOCIAL / NOMBRE COMERCIAL</label>
+                            <input v-model.trim="form.negocio.razonsocial" class="form-control rounded-pill bg-light border-0 px-3 shadow-none" placeholder="Nombre del negocio">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small fw-bold">RUC NEGOCIO (SI TIENE)</label>
+                            <input v-model="form.negocio.ruc" class="form-control rounded-pill bg-light border-0 px-3 shadow-none" maxlength="11" placeholder="20XXXXXXXXX">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small fw-bold">GIRO / ACTIVIDAD</label>
+                            <select v-model="form.negocio.tipo_actividad_id" class="form-select rounded-pill bg-light border-0 px-3 shadow-none" @change="onChangeTipoActividad">
+                                <option value="">-- Seleccionar --</option>
+                                <option v-for="a in actividadNegocios" :key="a.id" :value="a.id">{{ a.nombre }}</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small fw-bold">DETALLE ESPECÍFICO</label>
+                            <select v-model="form.negocio.detalle_actividad_id" class="form-select rounded-pill bg-light border-0 px-3 shadow-none" :disabled="!form.negocio.tipo_actividad_id">
+                                <option value="">-- Seleccionar --</option>
+                                <option v-for="d in detalleActividadNegocios" :key="d.id" :value="d.id">{{ d.nombre }}</option>
+                            </select>
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label text-muted small fw-bold">DIRECCIÓN DEL NEGOCIO</label>
+                            <input v-model.trim="form.negocio.direccion" class="form-control rounded-pill bg-light border-0 px-3 shadow-none" :class="{'is-invalid': hasError('negocio.direccion')}" placeholder="Calle / Mz / Lt del local comercial">
+                            <div class="invalid-feedback" v-if="hasError('negocio.direccion')">{{ firstError('negocio.direccion') }}</div>
+                        </div>
+                    </div>
+                    <div v-else class="row g-3 mt-1">
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small fw-bold">CENTRO DE TRABAJO</label>
+                            <input v-model.trim="form.institucion_lab" class="form-control rounded-pill bg-light border-0 px-3 shadow-none" placeholder="Nombre de empresa">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small fw-bold">OCUPACIÓN / CARGO</label>
+                            <input v-model.trim="form.ocupacion" class="form-control rounded-pill bg-light border-0 px-3 shadow-none" placeholder="Ej: Administrador">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. Referente -->
+            <div class="card border-0 shadow-sm rounded-4 mb-4">
+                <div class="card-header bg-white border-0 py-3 px-4 d-flex align-items-center">
+                    <div class="icon-box bg-dark text-white rounded-3 me-3"><i class="fas fa-users"></i></div>
+                    <h5 class="fw-bold text-dark mb-0">Referente de Confianza</h5>
+                </div>
+                <div class="card-body px-4 pb-4 pt-0">
+                    <div class="row g-3 mt-1">
+                        <div class="col-md-3">
+                            <label class="form-label text-muted small fw-bold">DNI REFERENTE</label>
+                            <input v-model="form.referente.dni" class="form-control rounded-pill bg-light border-0 px-3 shadow-none" maxlength="8" :class="{'is-invalid': hasError('referente.dni')}">
+                            <div class="invalid-feedback" v-if="hasError('referente.dni')">{{ firstError('referente.dni') }}</div>
+                        </div>
+                        <div class="col-md-9">
+                            <label class="form-label text-muted small fw-bold">NOMBRE COMPLETO</label>
+                            <div class="input-group">
+                                <input v-model.trim="form.referente.primernombre" class="form-control rounded-start-pill bg-light border-0 px-3 shadow-none" placeholder="Nombres" :class="{'is-invalid': hasError('referente.primernombre')}">
+                                <input v-model.trim="form.referente.ape_pat" class="form-control bg-light border-0 px-3 shadow-none" placeholder="Ape. Paterno" :class="{'is-invalid': hasError('referente.ape_pat')}">
+                                <input v-model.trim="form.referente.ape_mat" class="form-control rounded-end-pill bg-light border-0 px-3 shadow-none" placeholder="Ape. Materno" :class="{'is-invalid': hasError('referente.ape_mat')}">
+                            </div>
+                            <!-- Error display for names (multiple possible) -->
+                            <div v-if="hasError('referente.primernombre') || hasError('referente.ape_pat') || hasError('referente.ape_mat')" class="text-danger extra-small mt-1 px-3">
+                                {{ firstError('referente.primernombre') || firstError('referente.ape_pat') || firstError('referente.ape_mat') }}
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label text-muted small fw-bold">VÍNCULO / PARENTESCO</label>
+                            <select v-model="form.referente.parentesco" class="form-select rounded-pill bg-light border-0 px-3 shadow-none">
+                                <option v-for="p in parentescos" :key="p" :value="p">{{ p }}</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label text-muted small fw-bold">CELULAR REFERENTE</label>
+                            <input v-model="form.referente.celular" class="form-control rounded-pill bg-light border-0 px-3 shadow-none" maxlength="9" :class="{'is-invalid': hasError('referente.celular')}">
+                            <div class="invalid-feedback" v-if="hasError('referente.celular')">{{ firstError('referente.celular') }}</div>
+                        </div>
+                        <div class="col-md-8">
+                            <label class="form-label text-muted small fw-bold">DIRECCIÓN (REFERENCIA)</label>
+                            <input v-model.trim="form.referente.direccion" class="form-control rounded-pill bg-light border-0 px-3 shadow-none" placeholder="Opcional">
+                        </div>
+                    </div>
+                </div>
+            </div>
           </div>
 
-          <div class="card-body">
-            <!-- Sección: Datos del Cliente -->
-            <div class="section-title mb-2">
-              <i class="bi bi-person-lines-fill me-2"></i> Datos del Cliente
-            </div>
-
-            <div class="row g-3">
-              <div class="col-12 col-md-3">
-                <label class="form-label">Primer nombre</label>
-                <input
-                  v-model.trim="form.primernombre"
-                  class="form-control"
-                  :class="{ 'is-invalid': hasError('primernombre') }"
-                  placeholder="Ej: Juan"
-                  @input="clearFieldError('primernombre')"
-                />
-                <div class="invalid-feedback" v-if="hasError('primernombre')">
-                  {{ firstError('primernombre') }}
-                </div>
-              </div>
-
-              <div class="col-12 col-md-3">
-                <label class="form-label">Otros Nombres</label>
-                <input
-                  v-model.trim="form.otrosnombres"
-                  class="form-control"
-                  :class="{ 'is-invalid': hasError('otrosnombres') }"
-                  placeholder="Ej: Carlos Alberto"
-                  @input="clearFieldError('otrosnombres')"
-                />
-                <div class="invalid-feedback" v-if="hasError('otrosnombres')">
-                  {{ firstError('otrosnombres') }}
-                </div>
-              </div>
-
-              <div class="col-12 col-md-3">
-                <label class="form-label">Apellido paterno</label>
-                <input
-                  v-model.trim="form.ape_pat"
-                  class="form-control"
-                  :class="{ 'is-invalid': hasError('ape_pat') }"
-                  placeholder="Ej: Pérez"
-                  @input="clearFieldError('ape_pat')"
-                />
-                <div class="invalid-feedback" v-if="hasError('ape_pat')">
-                  {{ firstError('ape_pat') }}
-                </div>
-              </div>
-
-              <div class="col-12 col-md-3">
-                <label class="form-label">Apellido materno</label>
-                <input
-                  v-model.trim="form.ape_mat"
-                  class="form-control"
-                  :class="{ 'is-invalid': hasError('ape_mat') }"
-                  placeholder="Ej: Gómez"
-                  @input="clearFieldError('ape_mat')"
-                />
-                <div class="invalid-feedback" v-if="hasError('ape_mat')">
-                  {{ firstError('ape_mat') }}
-                </div>
-              </div>
-
-              <div class="col-12 col-md-3">
-                <label class="form-label">DNI</label>
-                <input
-                  v-model="form.dni"
-                  class="form-control"
-                  :class="{ 'is-invalid': hasError('dni') }"
-                  maxlength="8"
-                  @keypress="soloNumeros"
-                  @change="validarDni(form.dni)"
-                  placeholder="Ej: 12345678"
-                  @input="clearFieldError('dni')"
-                />
-                <div class="invalid-feedback" v-if="hasError('dni')">
-                  {{ firstError('dni') }}
-                </div>
-              </div>
-
-              <div class="col-12 col-md-6">
-                <div class="d-flex align-items-center justify-content-between">
-                  <label class="form-label mb-0">Ubigeo Nacimiento</label>
-                  <div class="btn-group btn-group-sm">
-                    <button type="button"
-                      class="btn"
-                      :class="ubigeoModeNac==='select' ? 'btn-primary' : 'btn-outline-primary'"
-                      @click="ubigeoModeNac='select'">
-                      Seleccionar
-                    </button>
-                    <button type="button"
-                      class="btn"
-                      :class="ubigeoModeNac==='search' ? 'btn-primary' : 'btn-outline-primary'"
-                      @click="ubigeoModeNac='search'">
-                      Buscar
-                    </button>
-                  </div>
-                </div>
-
-                <!-- MODO SELECT -->
-                <div v-if="ubigeoModeNac==='select'" class="row g-2 mt-1">
-                  <div class="col-12 col-md-4">
-                    <select v-model="nac.dep" class="form-select">
-                      <option value="">Departamento</option>
-                      <option v-for="d in departamentos.data || departamentos" :key="d.id" :value="d.id">
-                        {{ d.nombre }}
-                      </option>
-                    </select>
-                  </div>
-
-                  <div class="col-12 col-md-4">
-                    <select v-model="nac.prov" class="form-select" :disabled="!nac.dep">
-                      <option value="">Provincia</option>
-                      <option v-for="p in provinciasNac" :key="p.id" :value="p.id">
-                        {{ p.nombre }}
-                      </option>
-                    </select>
-                  </div>
-
-                  <div class="col-12 col-md-4">
-                    <select v-model="nac.dist" class="form-select" :disabled="!nac.prov">
-                      <option value="">Distrito</option>
-                      <option v-for="di in distritosNac" :key="di.ubigeo" :value="di.ubigeo">
-                        {{ di.nombre }} — {{ di.ubigeo }}
-                      </option>
-                    </select>
-                  </div>
-                </div>
-
-                <!-- MODO SEARCH -->
-                <div v-else class="mt-2 position-relative">
-                  <input
-                    v-model="buscarNac"
-                    class="form-control"
-                    placeholder="Escribe: distrito / provincia / departamento (min 3 letras)"
-                  />
-
-                  <div v-if="resultadosNac.length" class="list-group position-absolute w-100 shadow" style="z-index: 20;">
-                    <button
-                      v-for="it in resultadosNac"
-                      :key="it.ubigeo"
-                      type="button"
-                      class="list-group-item list-group-item-action"
-                      @click="selectFromSearch('nac', it)">
-                      <div class="fw-semibold">{{ it.distrito }} — {{ it.ubigeo }}</div>
-                      <div class="small text-muted">{{ it.departamento }} / {{ it.provincia }}</div>
-                    </button>
-                  </div>
-                </div>
-
-                <!-- Ubigeo final -->
-                <input
-                  v-model.trim="form.ubigeo_nac"
-                  class="form-control mt-2"
-                  :class="{ 'is-invalid': hasError('ubigeo_nac') }"
-                  maxlength="6"
-                  placeholder="Ubigeo (6 dígitos) - auto"
-                  @input="syncFromUbigeo('nac', form.ubigeo_nac)"
-                />
-                <div class="invalid-feedback" v-if="hasError('ubigeo_nac')">
-                  {{ firstError('ubigeo_nac') }}
-                </div>
-              </div>
-
-              <div class="col-12 col-md-3">
-                <label class="form-label">Fecha de nacimiento</label>
-                <input
-                  v-model="form.fecha_nac"
-                  type="date"
-                  class="form-control"
-                  :class="{ 'is-invalid': hasError('fecha_nac') }"
-                  @input="clearFieldError('fecha_nac')"
-                />
-                <div class="invalid-feedback" v-if="hasError('fecha_nac')">
-                  {{ firstError('fecha_nac') }}
-                </div>
-              </div>
-
-              <div class="col-12 col-md-3">
-                <label class="form-label">Género</label>
-                <select v-model="form.genero" class="form-select">
-                  <option value="M">Masculino</option>
-                  <option value="F">Femenino</option>
-                </select>
-              </div>
-
-              <div class="col-12 col-md-3">
-                <label class="form-label">Estado civil</label>
-                <select v-model="form.estado_civil" class="form-select">
-                  <option>SOLTERO</option>
-                  <option>CASADO</option>
-                  <option>CONVIVIENTE</option>
-                  <option>DIVORCIADO</option>
-                  <option>VIUDO</option>
-                </select>
-              </div>
-
-              <div class="col-12 col-md-3">
-                <label class="form-label">Grado de instrucción</label>
-                <select
-                  v-model="form.grado_instr"
-                  class="form-select"
-                  :class="{ 'is-invalid': hasError('grado_instr') }"
-                  @change="clearFieldError('grado_instr')"
-                >
-                  <option value="">-- Seleccione --</option>
-                  <option v-for="g in gradosInstruccion" :key="g" :value="g">
-                    {{ g }}
-                  </option>
-                </select>
-                <div class="invalid-feedback" v-if="hasError('grado_instr')">
-                  {{ firstError('grado_instr') }}
-                </div>
-              </div>
-
-              <div class="col-12 col-md-3" v-if="esSuperior">
-                <label class="form-label">Profesión</label>
-                <select
-                  v-model="form.profesion"
-                  class="form-select"
-                  :class="{ 'is-invalid': hasError('profesion') }"
-                  @change="clearFieldError('profesion')"
-                >
-                  <option value="">-- Seleccione profesión --</option>
-                  <option v-for="p in profesionesPeru" :key="p" :value="p">
-                    {{ p }}
-                  </option>
-                </select>
-
-                <div class="invalid-feedback" v-if="hasError('profesion')">
-                  {{ firstError('profesion') }}
-                </div>
-              </div>
-
-              <div class="col-12 col-md-3">
-                <label class="form-label">Origen laboral</label>
-                <select
-                  v-model="form.origen_labor"
-                  class="form-select"
-                  :class="{ 'is-invalid': hasError('origen_labor') }"
-                  @change="clearFieldError('origen_labor')"
-                >
-                  <option>INDEPENDIENTE</option>
-                  <option>DEPENDIENTE</option>
-                </select>
-                <div class="invalid-feedback" v-if="hasError('origen_labor')">
-                  {{ firstError('origen_labor') }}
-                </div>
-              </div>
-
-              <div class="col-12 col-md-3">
-                <label class="form-label">Celular</label>
-                <input
-                  v-model="form.celular"
-                  class="form-control"
-                  :class="{ 'is-invalid': hasError('celular') }"
-                  maxlength="9"
-                  @keypress="soloNumeros"
-                  placeholder="Ej: 999999999"
-                  @input="clearFieldError('celular')"
-                />
-                <div class="invalid-feedback" v-if="hasError('celular')">
-                  {{ firstError('celular') }}
-                </div>
-              </div>
-
-              <div class="col-12 col-md-3">
-                <label class="form-label">Celular 2</label>
-                <input
-                  v-model="form.celular2"
-                  class="form-control"
-                  :class="{ 'is-invalid': hasError('celular2') }"
-                  maxlength="9"
-                  @keypress="soloNumeros"
-                  placeholder="Ej: 999999999"
-                  @input="clearFieldError('celular2')"
-                />
-                <div class="invalid-feedback" v-if="hasError('celular2')">
-                  {{ firstError('celular2') }}
-                </div>
-              </div>
-
-              <div class="col-12 col-md-3">
-                <label class="form-label">Email (opcional)</label>
-                <input
-                  v-model.trim="form.email"
-                  type="email"
-                  class="form-control"
-                  :class="{ 'is-invalid': hasError('email') }"
-                  placeholder="correo@dominio.com"
-                  @input="clearFieldError('email')"
-                />
-                <div class="invalid-feedback" v-if="hasError('email')">
-                  {{ firstError('email') }}
-                </div>
-              </div>
-
-              <div class="col-12 col-md-3">
-                <label class="form-label">RUC (opcional)</label>
-                <input
-                  v-model="form.ruc"
-                  class="form-control"
-                  :class="{ 'is-invalid': hasError('ruc') }"
-                  maxlength="11"
-                  placeholder="Ej: 10456789123"
-                  @keypress="soloNumeros"
-                  @input="clearFieldError('ruc')"
-                />
-                <div class="invalid-feedback" v-if="hasError('ruc')">
-                  {{ firstError('ruc') }}
-                </div>
-              </div>
-
-              <div class="col-12 col-md-6">
-                <div class="d-flex align-items-center justify-content-between">
-                  <label class="form-label mb-0">Ubigeo Domicilio</label>
-                  <div class="btn-group btn-group-sm">
-                    <button type="button"
-                      class="btn"
-                      :class="ubigeoModeDom==='select' ? 'btn-primary' : 'btn-outline-primary'"
-                      @click="ubigeoModeDom='select'">
-                      Seleccionar
-                    </button>
-                    <button type="button"
-                      class="btn"
-                      :class="ubigeoModeDom==='search' ? 'btn-primary' : 'btn-outline-primary'"
-                      @click="ubigeoModeDom='search'">
-                      Buscar
-                    </button>
-                  </div>
-                </div>
-
-                <!-- MODO SELECT -->
-                <div v-if="ubigeoModeDom==='select'" class="row g-2 mt-1">
-                  <div class="col-12 col-md-4">
-                    <select v-model="dom.dep" class="form-select">
-                      <option value="">Departamento</option>
-                      <option v-for="d in departamentos.data || departamentos" :key="d.id" :value="d.id">
-                        {{ d.nombre }}
-                      </option>
-                    </select>
-                  </div>
-
-                  <div class="col-12 col-md-4">
-                    <select v-model="dom.prov" class="form-select" :disabled="!dom.dep">
-                      <option value="">Provincia</option>
-                      <option v-for="p in provinciasDom" :key="p.id" :value="p.id">
-                        {{ p.nombre }}
-                      </option>
-                    </select>
-                  </div>
-
-                  <div class="col-12 col-md-4">
-                    <select v-model="dom.dist" class="form-select" :disabled="!dom.prov">
-                      <option value="">Distrito</option>
-                      <option v-for="di in distritosDom" :key="di.ubigeo" :value="di.ubigeo">
-                        {{ di.nombre }} — {{ di.ubigeo }}
-                      </option>
-                    </select>
-                  </div>
-                </div>
-
-                <!-- MODO SEARCH -->
-                <div v-else class="mt-2 position-relative">
-                  <input
-                    v-model="buscarDom"
-                    class="form-control"
-                    placeholder="Escribe: distrito / provincia / departamento (min 3 letras)"
-                  />
-
-                  <div v-if="resultadosDom.length" class="list-group position-absolute w-100 shadow" style="z-index: 20;">
-                    <button
-                      v-for="it in resultadosDom"
-                      :key="it.ubigeo"
-                      type="button"
-                      class="list-group-item list-group-item-action"
-                      @click="selectFromSearch('dom', it)">
-                      <div class="fw-semibold">{{ it.distrito }} — {{ it.ubigeo }}</div>
-                      <div class="small text-muted">{{ it.departamento }} / {{ it.provincia }}</div>
-                    </button>
-                  </div>
-                </div>
-
-                <!-- Ubigeo final -->
-                <input
-                  v-model.trim="form.ubigeo_dom"
-                  class="form-control mt-2"
-                  :class="{ 'is-invalid': hasError('ubigeo_dom') }"
-                  maxlength="6"
-                  placeholder="Ubigeo (6 dígitos) - auto"
-                  @input="syncFromUbigeo('dom', form.ubigeo_dom)"
-                />
-                <div class="invalid-feedback" v-if="hasError('ubigeo_dom')">
-                  {{ firstError('ubigeo_dom') }}
-                </div>
-              </div>
-
-
-              <div class="col-12 col-md-6">
-                <label class="form-label">Dirección</label>
-                <textarea
-                  v-model.trim="form.direccion"
-                  class="form-control"
-                  rows="2"
-                  :class="{ 'is-invalid': hasError('direccion') }"
-                  placeholder="Av / Jr / Mz / Lt..."
-                  @input="clearFieldError('direccion')"
-                ></textarea>
-                <div class="invalid-feedback" v-if="hasError('direccion')">
-                  {{ firstError('direccion') }}
-                </div>
-              </div>
-
-              <div class="col-12 col-md-6">
-                <label class="form-label">Ubicación (Latitud, Longitud)</label>
-
-                <div class="input-group">
-                  <input
-                    v-model.trim="form.latitud_longitud"
-                    class="form-control"
-                    :class="{ 'is-invalid': hasError('latitud_longitud') }"
-                    placeholder="Ej: -9.930123,-76.242991"
-                    @input="clearFieldError('latitud_longitud')"
-                  />
-                  <button
-                    class="btn btn-outline-primary"
-                    type="button"
-                    @click="obtenerUbicacion"
-                    :disabled="geoLoading"
-                  >
-                    <span v-if="geoLoading" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
-                    Obtener mi ubicación
-                  </button>
-                </div>
-
-                <div class="invalid-feedback" v-if="hasError('latitud_longitud')">
-                  {{ firstError('latitud_longitud') }}
-                </div>
-
-                <div class="form-text" v-if="!hasError('latitud_longitud')">
-                  Guarda en formato: <b>lat,lng</b>. Ej: -9.930123,-76.242991
-                </div>
-
-                <div class="text-danger small mt-1" v-if="geoMsg">
-                  {{ geoMsg }}
-                </div>
-              </div>
-
-              <!-- NEGOCIO -->
-              <div v-if="esIndependiente" class="mt-3">
-                <div class="border rounded-3 p-3 section-box">
-                  <div class="section-title mb-2">
-                    <i class="bi bi-shop me-2"></i> Datos del Negocio
-                  </div>
-
-                  <div class="row g-3 mb-1">
-                    <div class="col-12 col-md-3">
-                      <label class="form-label">Tipo actividad (opcional)</label>
-                      <select
-                        v-model="form.negocio.tipo_actividad_id"
-                        class="form-select"
-                        :class="{ 'is-invalid': hasError('negocio.tipo_actividad_id') }"
-                        @change="onChangeTipoActividad"
-                      >
-                        <option value="">-- Seleccione --</option>
-                        <option v-for="value in actividadNegocios" :key="value.id" :value="value.id">
-                          {{ value.nombre }}
-                        </option>
-                      </select>
-
-                      <div class="invalid-feedback" v-if="hasError('negocio.tipo_actividad_id')">
-                        {{ firstError('negocio.tipo_actividad_id') }}
-                      </div>
+          <!-- RIGHT SIDEBAR (SUMMARY & PHOTO) -->
+          <div class="col-lg-4">
+            <div class="sticky-top" style="top: 2rem; z-index: 10;">
+                <!-- Photo Upload -->
+                <div class="card border-0 shadow-sm rounded-4 mb-4 overflow-hidden">
+                    <div class="card-header bg-dark text-white border-0 py-3 px-4 fw-bold small text-center">FOTOGRAFÍA DEL SOCIO</div>
+                    <div class="card-body p-4 text-center">
+                        <div class="photo-preview-box mx-auto mb-3 shadow-sm border border-2 border-dashed rounded-4 position-relative" style="width: 200px; height: 200px; cursor: pointer" @click="$refs.photoInput.click()">
+                            <img v-if="photoPreview" :src="photoPreview" class="w-100 h-100 object-fit-cover rounded-4">
+                            <div v-else class="h-100 d-flex flex-column align-items-center justify-content-center text-muted">
+                                <i class="fas fa-camera fa-3x mb-2 opacity-25"></i>
+                                <span class="small fw-bold">SUBIR FOTO</span>
+                            </div>
+                        </div>
+                        <input type="file" ref="photoInput" class="d-none" @change="handlePhotoChange" accept="image/*">
+                        <div v-if="photoPreview" class="d-flex justify-content-center gap-2">
+                            <button class="btn btn-danger btn-sm rounded-pill px-3" @click="removePhoto"><i class="fas fa-trash me-1"></i> Quitar</button>
+                            <button class="btn btn-outline-dark btn-sm rounded-pill px-3" @click="$refs.photoInput.click()">Cambiar</button>
+                        </div>
+                        <p class="small text-muted mt-2 mb-0">Formato JPG/PNG. Máx 4MB.</p>
                     </div>
-
-                    <div class="col-12 col-md-6">
-                      <label class="form-label">Detalle Actividad</label>
-                      <select
-                        v-model="form.negocio.detalle_actividad_id"
-                        class="form-select"
-                        :class="{ 'is-invalid': hasError('negocio.detalle_actividad_id') }"
-                        @change="clearFieldError('negocio.detalle_actividad_id')"
-                      >
-                        <option value="">-- Seleccione --</option>
-                        <option v-for="value in detalleActividadNegocios" :key="value.id" :value="value.id">
-                          {{ value.nombre }}
-                        </option>
-                      </select>
-
-                      <div class="invalid-feedback" v-if="hasError('negocio.detalle_actividad_id')">
-                        {{ firstError('negocio.detalle_actividad_id') }}
-                      </div>
-                    </div>
-
-                    <div class="col-12 col-md-3">
-                      <label class="form-label">Celular / Teléfono</label>
-                      <input
-                        v-model="form.negocio.celular"
-                        class="form-control"
-                        maxlength="9"
-                        @keypress="soloNumeros"
-                        :class="{ 'is-invalid': hasError('negocio.celular') }"
-                        @input="clearFieldError('negocio.celular')"
-                        placeholder="Ej: 999999999"
-                      />
-                      <div class="invalid-feedback" v-if="hasError('negocio.celular')">
-                        {{ firstError('negocio.celular') }}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="row g-3">
-                    <div class="col-12 col-md-6">
-                      <label class="form-label">Razón social</label>
-                      <input
-                        v-model.trim="form.negocio.razonsocial"
-                        class="form-control"
-                        :class="{ 'is-invalid': hasError('negocio.razonsocial') }"
-                        @input="clearFieldError('negocio.razonsocial')"
-                        placeholder="Ej: Bodega San Martín"
-                      />
-                      <div class="invalid-feedback" v-if="hasError('negocio.razonsocial')">
-                        {{ firstError('negocio.razonsocial') }}
-                      </div>
-                    </div>
-
-                    <div class="col-12 col-md-3">
-                      <label class="form-label">RUC (opcional)</label>
-                      <input
-                        v-model="form.negocio.ruc"
-                        class="form-control"
-                        maxlength="11"
-                        @keypress="soloNumeros"
-                        :class="{ 'is-invalid': hasError('negocio.ruc') }"
-                        @input="clearFieldError('negocio.ruc')"
-                        placeholder="Ej: 10456789123"
-                      />
-                      <div class="invalid-feedback" v-if="hasError('negocio.ruc')">
-                        {{ firstError('negocio.ruc') }}
-                      </div>
-                    </div>
-
-                    <div class="col-12 col-md-3">
-                      <label class="form-label">Inicio actividad (opcional)</label>
-                      <input
-                        v-model="form.negocio.inicioactividad"
-                        type="date"
-                        class="form-control"
-                        :class="{ 'is-invalid': hasError('negocio.inicioactividad') }"
-                        @input="clearFieldError('negocio.inicioactividad')"
-                      />
-                      <div class="invalid-feedback" v-if="hasError('negocio.inicioactividad')">
-                        {{ firstError('negocio.inicioactividad') }}
-                      </div>
-                    </div>
-
-                    <div class="col-12">
-                      <label class="form-label">Dirección del negocio (opcional)</label>
-                      <textarea
-                        v-model.trim="form.negocio.direccion"
-                        class="form-control"
-                        rows="2"
-                        :class="{ 'is-invalid': hasError('negocio.direccion') }"
-                        @input="clearFieldError('negocio.direccion')"
-                        placeholder="Av / Jr / Mz / Lt..."
-                      ></textarea>
-                      <div class="invalid-feedback" v-if="hasError('negocio.direccion')">
-                        {{ firstError('negocio.direccion') }}
-                      </div>
-                    </div>
-                  </div>
                 </div>
-              </div>
 
-              <!-- DEPENDIENTE -->
-              <div v-else class="mt-3">
-                <div class="border rounded-3 p-3 section-box">
-                  <div class="section-title mb-2">
-                    <i class="bi bi-briefcase me-2"></i> Datos Laborales (Dependiente)
-                  </div>
-
-                  <div class="row g-3">
-                    <div class="col-12 col-md-6">
-                      <label class="form-label">Ocupación</label>
-                      <input
-                        v-model.trim="form.ocupacion"
-                        class="form-control"
-                        :class="{ 'is-invalid': hasError('ocupacion') }"
-                        placeholder="Ej: Vendedor"
-                        @input="clearFieldError('ocupacion')"
-                      />
-                      <div class="invalid-feedback" v-if="hasError('ocupacion')">
-                        {{ firstError('ocupacion') }}
-                      </div>
-                    </div>
-
-                    <div class="col-12 col-md-6">
-                      <label class="form-label">Institución laboral</label>
-                      <input
-                        v-model.trim="form.institucion_lab"
-                        class="form-control"
-                        :class="{ 'is-invalid': hasError('institucion_lab') }"
-                        placeholder="Ej: NINGUNO / Empresa"
-                        @input="clearFieldError('institucion_lab')"
-                      />
-                      <div class="invalid-feedback" v-if="hasError('institucion_lab')">
-                        {{ firstError('institucion_lab') }}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- REFERENTE -->
-              <div class="mt-3">
-                <div class="border rounded-3 p-3 section-box">
-                  <div class="section-title mb-2">
-                    <i class="bi bi-people me-2"></i> Datos del Referente
-                  </div>
-
-                  <div class="row g-3">
-                    <div class="col-12 col-md-3">
-                      <label class="form-label">Primer nombre</label>
-                      <input
-                        v-model.trim="form.referente.primernombre"
-                        class="form-control"
-                        :class="{ 'is-invalid': hasError('referente.primernombre') }"
-                        placeholder="Ej: Juan"
-                        @input="clearFieldError('referente.primernombre')"
-                      />
-                      <div class="invalid-feedback" v-if="hasError('referente.primernombre')">
-                        {{ firstError('referente.primernombre') }}
-                      </div>
-                    </div>
-
-                    <div class="col-12 col-md-3">
-                      <label class="form-label">Segundo nombre</label>
-                      <input
-                        v-model.trim="form.referente.otrosnombres"
-                        class="form-control"
-                        :class="{ 'is-invalid': hasError('referente.otrosnombres') }"
-                        placeholder="Ej: Carlos Alberto"
-                        @input="clearFieldError('referente.otrosnombres')"
-                      />
-                      <div class="invalid-feedback" v-if="hasError('referente.otrosnombres')">
-                        {{ firstError('referente.otrosnombres') }}
-                      </div>
-                    </div>
-
-                    <div class="col-12 col-md-3">
-                      <label class="form-label">Apellido paterno</label>
-                      <input
-                        v-model.trim="form.referente.ape_pat"
-                        class="form-control"
-                        :class="{ 'is-invalid': hasError('referente.ape_pat') }"
-                        placeholder="Ej: Pérez"
-                        @input="clearFieldError('referente.ape_pat')"
-                      />
-                      <div class="invalid-feedback" v-if="hasError('referente.ape_pat')">
-                        {{ firstError('referente.ape_pat') }}
-                      </div>
-                    </div>
-
-                    <div class="col-12 col-md-3">
-                      <label class="form-label">Apellido materno</label>
-                      <input
-                        v-model.trim="form.referente.ape_mat"
-                        class="form-control"
-                        :class="{ 'is-invalid': hasError('referente.ape_mat') }"
-                        placeholder="Ej: Gómez"
-                        @input="clearFieldError('referente.ape_mat')"
-                      />
-                      <div class="invalid-feedback" v-if="hasError('referente.ape_mat')">
-                        {{ firstError('referente.ape_mat') }}
-                      </div>
-                    </div>
-
-                    <div class="col-12 col-md-3">
-                      <label class="form-label">DNI</label>
-                      <input
-                        v-model="form.referente.dni"
-                        class="form-control"
-                        :class="{ 'is-invalid': hasError('referente.dni') }"
-                        maxlength="8"
-                        @keypress="soloNumeros"
-                        placeholder="Ej: 12345678"
-                        @input="clearFieldError('referente.dni')"
-                      />
-                      <div class="invalid-feedback" v-if="hasError('referente.dni')">
-                        {{ firstError('referente.dni') }}
-                      </div>
-                    </div>
-
-                    <div class="col-12 col-md-3">
-                      <label class="form-label">Celular</label>
-                      <input
-                        v-model="form.referente.celular"
-                        class="form-control"
-                        :class="{ 'is-invalid': hasError('referente.celular') }"
-                        maxlength="9"
-                        @keypress="soloNumeros"
-                        placeholder="Ej: 999999999"
-                        @input="clearFieldError('referente.celular')"
-                      />
-                      <div class="invalid-feedback" v-if="hasError('referente.celular')">
-                        {{ firstError('referente.celular') }}
-                      </div>
-                    </div>
-
-                    <div class="col-12 col-md-3">
-                      <label class="form-label">Parentesco / Relación</label>
-                      <select
-                        v-model="form.referente.parentesco"
-                        class="form-select"
-                        :class="{ 'is-invalid': hasError('referente.parentesco') }"
-                        @change="clearFieldError('referente.parentesco')"
-                      >
-                        <option value="">-- Seleccione --</option>
-                        <option v-for="p in parentescos" :key="p" :value="p">
-                          {{ p }}
-                        </option>
-                      </select>
-
-                      <div class="invalid-feedback" v-if="hasError('referente.parentesco')">
-                        {{ firstError('referente.parentesco') }}
-                      </div>
-                    </div>
-
-                    <div class="col-12 col-md-3">
-                      <label class="form-label">Email (opcional)</label>
-                      <input
-                        v-model.trim="form.referente.email"
-                        type="email"
-                        class="form-control"
-                        :class="{ 'is-invalid': hasError('referente.email') }"
-                        placeholder="correo@dominio.com"
-                        @input="clearFieldError('referente.email')"
-                      />
-                      <div class="invalid-feedback" v-if="hasError('referente.email')">
-                        {{ firstError('referente.email') }}
-                      </div>
-                    </div>
-
-                    <div class="col-12">
-                      <label class="form-label">Dirección (opcional)</label>
-                      <textarea
-                        v-model.trim="form.referente.direccion"
-                        class="form-control"
-                        rows="2"
-                        :class="{ 'is-invalid': hasError('referente.direccion') }"
-                        placeholder="Av / Jr / Mz / Lt..."
-                        @input="clearFieldError('referente.direccion')"
-                      ></textarea>
-                      <div class="invalid-feedback" v-if="hasError('referente.direccion')">
-                        {{ firstError('referente.direccion') }}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-
-            </div>
-
-            <!-- BOTONES -->
-            <div class="d-flex gap-2 mt-4">
-              <button type="button" @click="guardar()" class="btn btn-primary" :disabled="isSaving">
-                <span v-if="isSaving" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                <i v-else class="bi bi-save me-1"></i>
-                {{ isSaving ? 'Guardando...' : 'Guardar' }}
-              </button>
-
-              <button type="button" class="btn btn-light" @click="cancelar" :disabled="isSaving">
-                Cancelar
-              </button>
-
-              <button type="button" class="btn btn-outline-secondary ms-auto" @click="resetForm" :disabled="isSaving">
-                <i class="bi bi-arrow-counterclockwise me-1"></i> Limpiar
-              </button>
+                <!-- Recent Summary -->
+                <Resumen />
             </div>
           </div>
         </div>
       </div>
+    </div>
 
-      <!-- DERECHA: FOTO -->
-      <div class="col-12 col-lg-4">
-        <div class="card shadow-sm sticky-lg-top" style="top: 1rem;">
-          <div class="card-header d-flex align-items-center justify-content-between">
-            <h4 class="card-title mb-0">Foto del cliente</h4>
-            <span class="badge bg-light text-secondary">Vista previa</span>
-          </div>
-
-          <div class="card-body">
-            <div class="d-flex flex-column align-items-center gap-3">
-
-              <div class="avatar-box rounded-circle d-flex align-items-center justify-content-center border">
-                <img v-if="photoPreview" :src="photoPreview" alt="Foto" class="avatar-img" />
-                <div v-else class="text-muted text-center px-3">
-                  <i class="bi bi-person-circle" style="font-size: 3rem;"></i>
-                  <div class="small mt-1">Sin foto</div>
-                </div>
-              </div>
-
-              <div class="w-100">
-                <label class="form-label">Subir imagen</label>
-                <input type="file" accept="image/*" class="form-control" @change="handlePhotoChange" />
-                <div class="form-text">JPG/PNG. Recomendado: 400x400.</div>
-              </div>
-
-              <div class="d-flex gap-2 w-100">
-                <button
-                  type="button"
-                  class="btn btn-light w-100"
-                  @click="removePhoto"
-                  :disabled="!photoFile && !photoPreview"
-                >
-                  <i class="bi bi-trash me-1"></i> Quitar
-                </button>
-              </div>
-
-              <!-- Cliente reciente -->
-              <div class="w-100" v-if="cliente?.id">
-                <div class="border rounded p-3 bg-light">
-                  <div class="d-flex justify-content-between align-items-center mb-2">
-                    <h6 class="mb-0">Cliente reciente</h6>
-                    <span class="badge bg-success-subtle text-success">OK</span>
-                  </div>
-
-                  <div class="small">
-                    <div class="mb-1">
-                      <b>Codigo : </b> {{ cliente.id }}<br>
-                      <b>Nombre:</b>
-                      {{ cliente.persona?.ape_pat }} {{ cliente.persona?.ape_mat }}
-                      {{ cliente.persona?.primernombre }} {{ cliente.persona?.otrosnombres }}
+    <!-- MODALS -->
+    <Prestamo :form="formPrestamo" @onListar="getClienteReciente" />
+    <teleport to="body">
+        <div class="modal fade" id="impresionresumen" tabindex="-1" data-bs-focus="false">
+            <div class="modal-dialog modal-xl modal-dialog-centered">
+                <div class="modal-content border-0 rounded-4 shadow-lg overflow-hidden">
+                    <div class="modal-header bg-dark text-white border-0">
+                        <h5 class="fw-bold mb-0" id="impresionresumenLabel">Expediente Digital</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                     </div>
-                    <div><b>DNI:</b> {{ cliente.persona?.dni }}</div>
-                  </div>
-
-                  <div class="pt-3">
-                    <div class="row">
-                      <div class="col-6">
-                        <button
-                          type="button"
-                          class="btn btn-outline-danger w-100"
-                          @click="openPdf(cliente.id)"
-                        >
-                          <i class="bi bi-filetype-pdf me-1"></i> Ver resumen PDF
-                        </button>
-                      </div>
-                      <div class="col-6">
-                        <button
-                        type="button"
-                        class="btn btn-outline-warning w-100"
-                        @click="abrirPrestamo(cliente)"
-                        >
-                        Solicitar Prestamo
-                        </button>
-                      </div>
+                    <div class="modal-body p-0">
+                        <iframe v-if="pdfUrl" :src="pdfUrl" class="w-100" style="height: 80vh;" border="0"></iframe>
                     </div>
-                  </div>
                 </div>
-              </div>
-
             </div>
-          </div>
         </div>
-      </div>
-
-    </section>
-  </div>
-  <Resumen :url="pdfUrl" />
-  <Prestamo :form="formPrestamo" @cargar="getClienteReciente()" />
+    </teleport>
+  </AppLayoutDefault>
 </template>
 
 <style scoped>
-.section-title{
-  font-weight: 700;
-  font-size: .95rem;
-  color: rgba(0,0,0,.7);
-  padding: .35rem .5rem;
-  border-left: 4px solid rgba(13,110,253,.35);
-  background: rgba(13,110,253,.05);
-  border-radius: .35rem;
-}
-.section-box{
-  background: rgba(0,0,0,.015);
-}
-.avatar-box{
-  width: 160px;
-  height: 160px;
-  overflow: hidden;
-  background: rgba(0,0,0,.02);
-}
-.avatar-img{
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
+.icon-box { width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; }
+.photo-preview-box:hover { background: #f8f9fa; border-color: #0d6efd !important; }
+.sticky-top { transition: top 0.3s ease; }
+/* Estilos para que el modal de prestamo no rompa la estetica si es necesario */
+:deep(.modal-content) { border-radius: 1rem !important; border: none !important; box-shadow: 0 1rem 3rem rgba(0,0,0,0.175) !important; }
 </style>

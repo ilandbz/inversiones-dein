@@ -1,0 +1,64 @@
+Listed directory inversiones-dein
+Listed directory Models
+Listed directory Controllers
+Listed directory Pages
+
+Basado en el análisis de la estructura de tu proyecto (modelos, controladores y vistas en Vue), el sistema actual ya cuenta con una base muy robusta para una institución microfinanciera, cooperativa o empresa de préstamos. 
+
+A continuación, te detallo la **funcionalidad que ya posee tu proyecto** y luego te ofrezco **sugerencias de mejora y expansión** considerando las mejores prácticas para un sistema completo de créditos y ahorros.
+
+### 1. Descripción de la Funcionalidad del Proyecto Actual
+
+El sistema está construido con Laravel en el backend y Vue.js (Inertia) en el frontend, y actualmente cubre los siguientes módulos principales:
+
+*   **Gestión de Clientes y Asesores:**
+    *   Manejo de `Persona` y `Cliente` para registrar los datos demográficos y de contacto.
+    *   Asignación y control de `Personal` y `Asesor` (quienes colocan y gestionan los créditos).
+*   **Evaluación Crediticia y Negocios:**
+    *   Registro detallado del `Negocio` y la `ActividadNegocio` del cliente.
+    *   Módulo de `EvaluacionPrestamo`, el cual se apoya en balances financieros: `Balance`, `BalanceDeuda` (deudas vigentes con terceros), `BalanceInventario` (mercadería del negocio) y `BalanceMueble` (activos). También cuenta con registro de `Propiedad`es. Esto permite medir la capacidad de pago real del cliente.
+*   **Módulo Core de Préstamos (Créditos):**
+    *   Gestión de la solicitud (`Credito`) y los términos (`Plazo`, `OrigenFinanciamiento`).
+    *   Proceso de `Desembolso` (entrega del dinero).
+    *   Generación del `CronogramaPago` (las cuotas que el cliente debe pagar).
+    *   Seguimiento financiero a través de un `KardexCredito` y su `DetalleKardexCredito` (registro de cada amortización, interés pagado y saldo capital).
+    *   Cálculo y gestión de penalidades por atraso (`CostoMora`).
+*   **Módulo de Ahorros:**
+    *   Implementación de cuentas de `Ahorro`, lo cual es vital si el crédito requiere un "fondo de garantía" o si la entidad capta depósitos del público/socios.
+*   **Caja y Autorizaciones:**
+    *   Vistas dedicadas a `Caja` para el control de flujo de efectivo.
+    *   Sistema de seguridad con `Permisos`, `Roles` y `Autorizaciones` (para aprobar desembolsos o excepciones).
+
+---
+
+### 2. Sugerencias para un Sistema de Préstamos y Ahorros de Alto Nivel
+
+Para llevar este sistema al siguiente nivel y hacerlo altamente competitivo, seguro y escalable, te sugiero implementar o verificar las siguientes funcionalidades:
+
+#### A. Mejoras en el Módulo de Créditos
+*   **Simulador de Créditos:** Añadir una herramienta pública o interna (antes de crear el `Credito` formal) que permita calcular cuotas usando diferentes sistemas de amortización (Cuota Fija/Francés, Cuota Decreciente/Alemán) para mostrarle opciones al cliente.
+*   **Refinanciación y Reprogramación:** Procesos automatizados para clientes con problemas de pago. Debe permitir "matar" el crédito antiguo y generar uno nuevo consolidando el capital pendiente más los intereses/moras no pagados.
+*   **Control Férreo de Garantías (Colaterales):** Más allá de las `Propiedades`, un módulo específico para tasar y retener garantías físicas (vehículos, joyas) o *Avales/Garantes* (otra `Persona` que firma como responsable solidario).
+
+#### B. Mejoras en el Módulo de Ahorros
+*   **Tipificación de Ahorros:** Separar lógicamente en la base de datos:
+    *   *Ahorro Libre / a la Vista:* El cliente puede depositar e ir a retirar a caja cuando quiera.
+    *   *Ahorro a Plazo Fijo:* Dinero bloqueado por *N* meses a una tasa de interés preferencial.
+    *   *Fondo de Garantía:* Ahorro obligatorio (usualmente un porcentaje del crédito) que se retiene hasta que el cliente termine de pagar su préstamo.
+*   **Cálculo de Intereses Pasivos (Cron Jobs):** Un proceso automático que corra diariamente a medianoche para sumar céntimos de interés a las cuentas de ahorro de los clientes, y un abono mensual automático.
+
+#### C. Gestión de Riesgo, Mora y Cobranza
+*   **Proyección de Cartera en Riesgo (PAR 30 / PAR > 0):** Reportes automáticos en el `Dashboard` que muestren qué porcentaje del dinero prestado está atrasado por más de 1, 8, 30 o 90 días.
+*   **CRM de Cobranzas:** Un módulo donde los asesores de cobranza puedan rellenar bitácoras de gestión ("Llamé al cliente", "Visité su negocio", "Prometió pagar el viernes").
+*   **Provisiones por Incobrabilidad:** Cálculos contables automáticos basándose en los días de mora de cada cliente, apartando dinero de las utilidades por riesgo de pérdida.
+
+#### D. Operatividad y Caja
+*   **Arqueo de Caja Computarizado:** Cada que el cajero abre y cierra su turno, debe declarar cuántos billetes y monedas de cada denominación tiene. El sistema debe contrastarlo con el `KardexCredito` y los cobros de `Ahorro` reales.
+*   **Transferencias y CI (Comprobantes de Ingreso/Egreso):** Permitir mover dinero entre bóveda principal y las cajas de las sucursales.
+
+#### E. Notificaciones y Experiencia
+*   **Notificaciones Automáticas (WhatsApp/SMS/Email):**
+    *   Recordatorio de pago 2 días antes del vencimiento.
+    *   Alerta automática al día 1 de mora.
+    *   Mensaje de agradecimiento cuando se procesa un pago exitoso.
+*   **Portal del Cliente (Opcional a futuro):** Una vista separada donde el `Cliente` pueda ingresar con su DNI para ver cuánto debe, cuándo le toca pagar su próxima cuota y de cuánto es su fondo de ahorro.

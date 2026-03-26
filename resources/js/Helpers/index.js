@@ -120,7 +120,7 @@ export default function useHelper() {
         if (ahora_dia > dia)
             dias = ahora_dia - dia;
         if (ahora_dia < dia) {
-            ultimoDiaMes = new Date(ahora_ano, ahora_mes - 1, 0);
+            let ultimoDiaMes = new Date(ahora_ano, ahora_mes - 1, 0);
             dias = ultimoDiaMes.getDate() - (dia - ahora_dia);
         }
 
@@ -185,6 +185,18 @@ export default function useHelper() {
         }
     };
 
+    const formatoDinero = (monto) => {
+        return new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(monto || 0);
+    }
+
+    const getStatusBadge = (status) => {
+        const s = (status || '').toUpperCase();
+        if (['PAGADO', 'COMPLETO', 'APROBADO', 'ACTIVO', 'ABIERTA', 'VIGENTE'].includes(s)) return 'bg-success';
+        if (['PENDIENTE', 'REVISIÓN', 'PROCESO', 'SOLICITADO'].includes(s)) return 'bg-warning text-dark';
+        if (['RECHAZADO', 'CANCELADO', 'INACTIVO', 'MORA', 'CERRADA', 'CASTIGADO'].includes(s)) return 'bg-danger';
+        return 'bg-secondary';
+    }
+
     const obtenerFingerprint = async () => {
         // Cargar la librería
         const fp = await FingerprintJS.load()
@@ -196,7 +208,7 @@ export default function useHelper() {
 
     return {
         Swal, Toast, openModal, hideModal, soloNumeros, calcularEdad, formatoFecha, formatearHora, meses, slugify, calcularNroCuotas,
-        obtenerFingerprint
+        formatoDinero, getStatusBadge, obtenerFingerprint
     }
 
 }

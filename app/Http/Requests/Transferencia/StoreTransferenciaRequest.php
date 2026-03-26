@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests\Transferencia;
 
 use Illuminate\Foundation\Http\FormRequest;

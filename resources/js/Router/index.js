@@ -22,6 +22,23 @@ import AutorizacionesInicio from '@/Pages/Autorizaciones/Inicio.vue'
 import Desembolsar from '@/Pages/Caja/Desembolsar.vue'
 import ClienteHistoria from '@/Pages/Clientes/Historia.vue'
 import CajaPagos from '@/Pages/Caja/Pagos.vue'
+import CajaApertura from '@/Pages/Caja/AperturaDeCaja.vue'
+import CajaCierre from '@/Pages/Caja/CierreDeCaja.vue'
+import CajaMovimientos from '@/Pages/Caja/MovimientosCaja.vue'
+import AhorrosApertura from '@/Pages/Ahorros/AperturaDeCuenta.vue'
+import AhorrosMovimientos from '@/Pages/Ahorros/DepositosRetiros.vue'
+import AhorrosEstado from '@/Pages/Ahorros/EstadoDeCuenta.vue'
+import BloqueoDePagos from '@/Pages/Riesgos/BloqueoDePagos.vue'
+import MoraYCastigos from '@/Pages/Riesgos/MoraYCastigos.vue'
+import AsesoresHistorico from '@/Pages/Asesores/Historico.vue'
+import PrestamosSimulacion from '@/Pages/Prestamos/Simulacion.vue'
+import GerenciaReportes from '@/Pages/Gerencia/Reportes.vue'
+import AsesoresMetas from '@/Pages/Asesores/Metas.vue'
+import CajaOtrosIngresos from '@/Pages/Caja/OtrosIngresos.vue'
+import AsesoresCartilla from '@/Pages/Asesores/Cartilla.vue'
+import PrestamosCronograma from '@/Pages/Prestamos/Cronograma.vue'
+import PagosReporteIngresos from '@/Pages/Pagos/ReporteIngresos.vue'
+import PagosEstadisticas from '@/Pages/Pagos/EstadisticasIngresos.vue'
 
 
 const routes = [
@@ -29,49 +46,49 @@ const routes = [
     path: '/',
     name: 'Principal',
     component: Principal,
-    meta: { layout: LayoutDefault, requiresAuth: true, title: 'Dashboard' }
+    meta: { requiresAuth: true, title: 'Dashboard' }
   },
 
   {
     path: '/clientes/registro-de-clientes',
     name: 'RegistroClientes',
     component: RegistroClientes,
-    meta: { layout: LayoutDefault, requiresAuth: true, title: 'Registro de Clientes' }
+    meta: { requiresAuth: true, title: 'Registro de Clientes' }
   },
 
   {
     path: '/actividad-negocio',
     name: 'ActividadDeNegocio',
     component: ActividadDeNegocio,
-    meta: { layout: LayoutDefault, requiresAuth: true, title: 'Actividad de Negocio' }
+    meta: { requiresAuth: true, title: 'Actividad de Negocio' }
   },
 
   {
     path: '/prestamos/evaluacion',
     name: 'Evaluacion',
     component: Evaluacion,
-    meta: { layout: LayoutDefault, requiresAuth: true, title: 'Evaluación' }
+    meta: { requiresAuth: true, title: 'Evaluación' }
   },
 
   {
     path: '/prestamos/desembolso',
     name: 'Desembolso',
     component: Desembolso,
-    meta: { layout: LayoutDefault, requiresAuth: true, title: 'Desembolso' }
+    meta: { requiresAuth: true, title: 'Desembolso' }
   },
 
   {
     path: '/perfil',
     name: 'Perfil',
     component: Perfil,
-    meta: { layout: LayoutDefault, requiresAuth: true, title: 'Perfil' }
+    meta: { requiresAuth: true, title: 'Perfil' }
   },
 
   {
     path: '/cambiar-clave',
     name: 'CambiarClave',
     component: CambiarClave,
-    meta: { layout: LayoutDefault, requiresAuth: true, title: 'Cambiar clave' }
+    meta: { requiresAuth: true, title: 'Cambiar Clave' }
   },
 
   {
@@ -81,49 +98,56 @@ const routes = [
     meta: { layout: LayoutLogin, title: 'Login' }
   },
 
-  { path: '/clientes/listado-de-clientes', name: 'ClientesListado', component: ClientesListado, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Listado del Cliente' } },
-  { path: '/clientes/historial-del-cliente', name: 'ClientesHistorial', component: ClienteHistoria, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Historial del Cliente' } },
+  { path: '/clientes/listado-de-clientes', name: 'ClientesListado', component: ClientesListado, meta: { requiresAuth: true, title: 'Listado del Cliente' } },
+  { path: '/clientes/historial-del-cliente', name: 'ClientesHistorial', component: ClienteHistoria, meta: { requiresAuth: true, title: 'Historial del Cliente' } },
 
 
   // --- ASESORES ---
-  { path: '/asesores/metas', name: 'AsesoresMetas', component: Placeholder, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Metas' } },
-  { path: '/asesores/cartilla-de-cobranza', name: 'AsesoresCartilla', component: Placeholder, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Cartilla de Cobranza' } },
-  { path: '/asesores/historico-del-asesor', name: 'AsesoresHistorico', component: Placeholder, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Histórico del Asesor' } },
+  { path: '/asesores/metas', name: 'AsesoresMetas', component: AsesoresMetas, meta: { requiresAuth: true, title: 'Metas' } },
+  { path: '/asesores/cartilla-de-cobranza', name: 'AsesoresCartilla', component: AsesoresCartilla, meta: { requiresAuth: true, title: 'Cartilla de Cobranza' } },
+  { path: '/asesores/historico-del-asesor', name: 'AsesoresHistorico', component: AsesoresHistorico, meta: { requiresAuth: true, title: 'Histórico del Asesor' } },
 
   // --- PAGOS ---
-  { path: '/pagos/reportes', name: 'PagosReportes', component: Placeholder, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Reportes' } },
-  { path: '/pagos/estadisticas-de-ingresos', name: 'PagosEstadisticas', component: Placeholder, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Estadísticas de Ingresos' } },
+  { path: '/pagos/reportes', name: 'PagosReportes', component: PagosReporteIngresos, meta: { requiresAuth: true, title: 'Reportes' } },
+  { path: '/pagos/estadisticas-de-ingresos', name: 'PagosEstadisticas', component: PagosEstadisticas, meta: { requiresAuth: true, title: 'Estadísticas de Ingresos' } },
 
-  { path: '/usuarios', name: 'Usuarios', component: Usuario, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Usuarios' } },
-  { path: '/roles', name: 'Roles', component: Rol, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Roles' } },
-  { path: '/permisos', name: 'Permisos', component: PermisosInicio, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Permisos' } },
+  { path: '/usuarios', name: 'Usuarios', component: Usuario, meta: { requiresAuth: true, title: 'Usuarios' } },
+  { path: '/roles', name: 'Roles', component: Rol, meta: { requiresAuth: true, title: 'Roles' } },
+  { path: '/permisos', name: 'Permisos', component: PermisosInicio, meta: { requiresAuth: true, title: 'Permisos' } },
   { path: '/configuracion', name: 'Configuracion', component: RegistroClientes, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Configuración' } },
-  { path: '/propiedades', name: 'Propiedades', component: RegistroPropiedades, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Propiedades' } },
+  { path: '/propiedades', name: 'Propiedades', component: RegistroPropiedades, meta: { requiresAuth: true, title: 'Propiedades' } },
 
   // --- PRESTAMOS ---
-  { path: '/prestamos/registrar', name: 'PrestamosRegistrar', component: PrestamosRegistrar, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Registrar Préstamo' } },
-  { path: '/prestamos/simulacion', name: 'PrestamosSimulacion', component: Placeholder, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Simulación' } },
-  { path: '/prestamos/cronograma-de-pagos', name: 'PrestamosCronograma', component: Placeholder, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Cronograma de Pagos' } },
-  { path: '/prestamos/historial-de-prestamos', name: 'PrestamosHistorial', component: PrestamosInicio, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Historial de Préstamos' } },
+  {
+    path: '/prestamos/registrar',
+    name: 'SolicitarPrestamo',
+    component: PrestamosRegistrar,
+    meta: { requiresAuth: true, title: 'Préstamos' }
+  },
+  { path: '/prestamos/simulacion', name: 'PrestamosSimulacion', component: PrestamosSimulacion, meta: { requiresAuth: true, title: 'Simulación' } },
+  { path: '/prestamos/cronograma-de-pagos', name: 'PrestamosCronograma', component: PrestamosCronograma, meta: { requiresAuth: true, title: 'Cronograma de Pagos' } },
+  { path: '/prestamos/historial-de-prestamos', name: 'PrestamosHistorial', component: PrestamosInicio, meta: { requiresAuth: true, title: 'Historial de Préstamos' } },
 
   // --- AHORROS ---
-  { path: '/ahorros/apertura-de-cuenta', name: 'AhorrosApertura', component: Placeholder, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Apertura de Cuenta' } },
-  { path: '/ahorros/depositos-retiros', name: 'AhorrosMovimientos', component: Placeholder, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Depósitos / Retiros' } },
-  { path: '/ahorros/estado-de-cuenta', name: 'AhorrosEstado', component: Placeholder, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Estado de Cuenta' } },
+  { path: '/ahorros/apertura-de-cuenta', name: 'AhorrosApertura', component: AhorrosApertura, meta: { requiresAuth: true, title: 'Apertura de Cuenta' } },
+  { path: '/ahorros/depositos-retiros', name: 'AhorrosMovimientos', component: AhorrosMovimientos, meta: { requiresAuth: true, title: 'Depósitos / Retiros' } },
+  { path: '/ahorros/estado-de-cuenta', name: 'AhorrosEstado', component: AhorrosEstado, meta: { requiresAuth: true, title: 'Estado de Cuenta' } },
 
   // --- CAJA ---
-  { path: '/caja/cobros', name: 'CajaCobros', component: Placeholder, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Cobros' } },
-  { path: '/caja/pagos', name: 'CajaPagos', component: CajaPagos, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Pagos' } },
-  { path: '/caja/cierre-de-caja', name: 'CajaCierre', component: Placeholder, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Cierre de Caja' } },
-  { path: '/caja/desembolsar', name: 'CajaDesembolsar', component: Desembolsar, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Desembolsar' } },
+  { path: '/caja/apertura-de-caja', name: 'CajaApertura', component: CajaApertura, meta: { requiresAuth: true, title: 'Apertura de Caja' } },
+  { path: '/caja/cobros', name: 'CajaCobros', component: CajaOtrosIngresos, meta: { requiresAuth: true, title: 'Cobros' } },
+  { path: '/caja/pagos', name: 'CajaPagos', component: CajaPagos, meta: { requiresAuth: true, title: 'Pagos' } },
+  { path: '/caja/cierre-de-caja', name: 'CajaCierre', component: CajaCierre, meta: { requiresAuth: true, title: 'Cierre de Caja' } },
+  { path: '/caja/movimientos', name: 'CajaMovimientos', component: CajaMovimientos, meta: { requiresAuth: true, title: 'Movimientos de Caja' } },
+  { path: '/caja/desembolsar', name: 'CajaDesembolsar', component: Desembolsar, meta: { requiresAuth: true, title: 'Desembolsar' } },
 
   // --- RIESGOS ---
-  { path: '/riesgos/mora-y-castigos', name: 'RiesgosMora', component: Placeholder, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Mora y Castigos' } },
-  { path: '/riesgos/bloqueo-de-pagos', name: 'RiesgosBloqueo', component: Placeholder, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Bloqueo de Pagos' } },
+  { path: '/riesgos/mora-y-castigos', name: 'RiesgosMora', component: MoraYCastigos, meta: { requiresAuth: true, title: 'Mora y Castigos' } },
+  { path: '/riesgos/bloqueo-de-pagos', name: 'RiesgosBloqueo', component: BloqueoDePagos, meta: { requiresAuth: true, title: 'Bloqueo de Pagos' } },
 
   // --- GERENCIA ---
-  { path: '/gerencia/reportes-gerenciales', name: 'GerenciaReportes', component: Placeholder, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Reportes Gerenciales' } },
-  { path: '/gerencia/autorizaciones', name: 'GerenciaAutorizaciones', component: AutorizacionesInicio, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Autorizaciones' } },
+  { path: '/gerencia/reportes-gerenciales', name: 'GerenciaReportes', component: GerenciaReportes, meta: { requiresAuth: true, title: 'Reportes Gerenciales' } },
+  { path: '/gerencia/autorizaciones', name: 'GerenciaAutorizaciones', component: AutorizacionesInicio, meta: { requiresAuth: true, title: 'Autorizaciones' } },
 
 ]
 const router = createRouter({
