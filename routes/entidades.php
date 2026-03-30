@@ -119,6 +119,7 @@ Route::group(['prefix' => 'origen_financiamiento', 'middleware' => 'auth'], func
 Route::group(['prefix' => 'plazo', 'middleware' => 'auth'], function () {
     Route::get('mostrar', [PlazoController::class, 'show']);
     Route::post('guardar', [PlazoController::class, 'store']);
+    Route::post('actualizar', [PlazoController::class, 'update']);
     Route::post('eliminar', [PlazoController::class, 'destroy']);
     Route::get('todos', [PlazoController::class, 'todos']);
     Route::get('listar', [PlazoController::class, 'listar']);

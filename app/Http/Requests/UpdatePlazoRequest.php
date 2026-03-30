@@ -6,7 +6,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class StorePlazoRequest extends FormRequest
+class UpdatePlazoRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -24,6 +24,7 @@ class StorePlazoRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'id'          => 'required|exists:plazos,id',
             'frecuencia'  => 'required|string|max:50',
             'plazo'       => 'required|integer|min:1',
             'tasainteres' => 'required|numeric|min:0',

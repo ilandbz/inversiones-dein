@@ -13,14 +13,9 @@ class PlazoController extends Controller
 {
     public function store(StorePlazoRequest $request)
     {
-        $request->validated();
+        $data = $request->validated();
 
-        $registro = Plazo::create([
-            'frecuencia'   => $request->frecuencia,
-            'plazo'        => $request->plazo,
-            'tasainteres'  => $request->tasainteres,
-            'costomora'    => $request->costomora,
-        ]);
+        $registro = Plazo::create($data);
 
         return response()->json([
             'ok' => 1,
@@ -36,15 +31,10 @@ class PlazoController extends Controller
 
     public function update(UpdatePlazoRequest $request)
     {
-        $request->validated();
+        $data = $request->validated();
 
-        $registro = Plazo::where('id', $request->id)->first();
-
-        $registro->frecuencia   = $request->frecuencia;
-        $registro->plazo        = $request->plazo;
-        $registro->tasainteres  = $request->tasainteres;
-        $registro->costomora    = $request->costomora;
-        $registro->save();
+        $registro = Plazo::findOrFail($request->id);
+        $registro->update($data);
 
         return response()->json([
             'ok' => 1,
@@ -70,9 +60,9 @@ class PlazoController extends Controller
 
     public function listar(Request $request)
     {
-        $buscar = mb_strtoupper($request->buscar);
-        $paginacion = $request->paginacion;
+        $buscar = mb_strtoupper((string) $request->buscar);
+        $paginacion = $request->paginacion ?? 10;
         return Plazo::whereRaw('UPPER(frecuencia) LIKE ?', ['%' . $buscar . '%'])
-            ->paginate($paginacion);
+            ->paginate((int) $paginacion);
     }
 }

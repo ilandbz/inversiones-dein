@@ -30,6 +30,7 @@ import AhorrosMovimientos from '@/Pages/Ahorros/DepositosRetiros.vue'
 import AhorrosEstado from '@/Pages/Ahorros/EstadoDeCuenta.vue'
 import BloqueoDePagos from '@/Pages/Riesgos/BloqueoDePagos.vue'
 import MoraYCastigos from '@/Pages/Riesgos/MoraYCastigos.vue'
+import Plazos from '@/Pages/Configuracion/Plazos/Inicio.vue'
 import AsesoresHistorico from '@/Pages/Asesores/Historico.vue'
 import PrestamosSimulacion from '@/Pages/Prestamos/Simulacion.vue'
 import GerenciaReportes from '@/Pages/Gerencia/Reportes.vue'
@@ -115,6 +116,7 @@ const routes = [
   { path: '/roles', name: 'Roles', component: Rol, meta: { requiresAuth: true, title: 'Roles' } },
   { path: '/permisos', name: 'Permisos', component: PermisosInicio, meta: { requiresAuth: true, title: 'Permisos' } },
   { path: '/configuracion', name: 'Configuracion', component: RegistroClientes, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Configuración' } },
+  { path: '/configuracion/plazos', name: 'Plazos', component: Plazos, meta: { requiresAuth: true, title: 'Plazos' } },
   { path: '/propiedades', name: 'Propiedades', component: RegistroPropiedades, meta: { requiresAuth: true, title: 'Propiedades' } },
 
   // --- PRESTAMOS ---
