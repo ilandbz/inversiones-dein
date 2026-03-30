@@ -38,6 +38,8 @@ class StoreCreditoRequest extends FormRequest
             'costomora' => 'required|numeric|min:0',
             'total' => 'required|numeric|min:0',
             'interes' => 'required|numeric|min:0',
+            'fecha_reg' => 'nullable|date',
+            'fecha_inicio' => 'nullable|date',
         ];
     }
 

@@ -37,6 +37,9 @@ class UpdateCreditoRequest extends FormRequest
             'tasainteres' => 'required|numeric|min:0',
             'costomora' => 'required|numeric|min:0',
             'total' => 'required|numeric|min:0',
+            'agencia_id' => 'nullable|exists:agencias,id',
+            'fecha_reg' => 'nullable|date',
+            'fecha_inicio' => 'nullable|date',
         ];
     }
 

@@ -47,6 +47,7 @@ class CreditoService
                 'costomora'               => $datos['costomora'] ?? 0.00,
                 'total'                   => $datos['total'] ?? 0.00,
                 'fecha_reg'               => now()->toDateString(),
+                'fecha_inicio'            => now()->toDateString(),
                 'fecha_venc'              => $fechaVenc,
                 'estado'                  => Credito::ESTADO_PENDIENTE,
                 'mencion'                 => $datos['mencion'] ?? null,
@@ -89,6 +90,8 @@ class CreditoService
             'interes'                  => $datos['interes'] ?? 0.00,
             'costomora'                => $datos['costomora'] ?? 0.00,
             'total'                    => $datos['total'] ?? 0.00,
+            'fecha_reg'                => $datos['fecha_reg'] ?? $credito->fecha_reg,
+            'fecha_inicio'             => $datos['fecha_inicio'] ?? $credito->fecha_inicio,
             'fecha_venc'               => $fechaVenc,
             'mencion'                  => $datos['mencion'] ?? $credito->mencion,
         ]);
