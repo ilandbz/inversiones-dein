@@ -7,13 +7,14 @@ import usePlazo from '@/Composables/Plazo.js'
 import useCredito from '@/Composables/Credito.js' 
 import useOrigenFinanciamiento from '@/Composables/OrigenFinanciamiento.js'
 
+
 const { asesores, listaAsesores } = useAsesor()
 const { origenes, listaOrigenesFinanciamientos } = useOrigenFinanciamiento()
 const { plazos, listaPlazos } = usePlazo()
 const { agregarCredito, actualizarCredito, respuesta } = useCredito()
 
 const props = defineProps({ form: Object })
-const emit = defineEmits(['onListar'])
+const emit = defineEmits(['onListar', 'cargar'])
 const { form } = toRefs(props)
 const { Toast, soloNumeros, Swal, hideModal, formatoDinero } = useHelper()
 
