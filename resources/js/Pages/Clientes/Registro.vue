@@ -710,18 +710,22 @@ const cancelar = () => router.push({ name: 'Principal' })
                         <div class="col-md-4">
                             <label class="form-label text-muted small fw-bold">PRIMER NOMBRE</label>
                             <input v-model.trim="form.primernombre" class="form-control rounded-pill bg-light border-0 px-3 shadow-none" :class="{'is-invalid': hasError('primernombre')}" placeholder="Ej: Juan">
+                            <div class="invalid-feedback" v-if="hasError('primernombre')">{{ firstError('primernombre') }}</div>
                         </div>
                         <div class="col-md-5">
                             <label class="form-label text-muted small fw-bold">OTROS NOMBRES</label>
                             <input v-model.trim="form.otrosnombres" class="form-control rounded-pill bg-light border-0 px-3 shadow-none" placeholder="Ej: Carlos Alberto">
+                            <div class="invalid-feedback" v-if="hasError('otrosnombres')">{{ firstError('otrosnombres') }}</div>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label text-muted small fw-bold">APELLIDO PATERNO</label>
                             <input v-model.trim="form.ape_pat" class="form-control rounded-pill bg-light border-0 px-3 shadow-none" :class="{'is-invalid': hasError('ape_pat')}" placeholder="Ej: Pérez">
+                            <div class="invalid-feedback" v-if="hasError('ape_pat')">{{ firstError('ape_pat') }}</div>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label text-muted small fw-bold">APELLIDO MATERNO</label>
                             <input v-model.trim="form.ape_mat" class="form-control rounded-pill bg-light border-0 px-3 shadow-none" :class="{'is-invalid': hasError('ape_mat')}" placeholder="Ej: Gómez">
+                            <div class="invalid-feedback" v-if="hasError('ape_mat')">{{ firstError('ape_mat') }}</div>
                         </div>
                         
                         <div class="col-md-3">
@@ -879,7 +883,7 @@ const cancelar = () => router.push({ name: 'Principal' })
                             <i class="fas fa-map-marker-alt me-1"></i> {{ ubigeoTextoDom }} ({{ form.ubigeo_dom }})
                           </small>
                         </div>
-                        
+                        <div class="invalid-feedback" v-if="hasError('ubigeo_dom')">{{ firstError('ubigeo_dom') }}</div>
                         <div class="col-md-6">
                             <label class="form-label text-muted small fw-bold">GEOLOCALIZACIÓN (COORDENADAS)</label>
                             <div class="input-group bg-light rounded-pill px-1 shadow-none border-0">
@@ -920,6 +924,7 @@ const cancelar = () => router.push({ name: 'Principal' })
                                 <option value="">-- Seleccionar --</option>
                                 <option v-for="a in actividadNegocios" :key="a.id" :value="a.id">{{ a.nombre }}</option>
                             </select>
+                            <div class="invalid-feedback" v-if="hasError('negocio.tipo_actividad_id')">{{ firstError('negocio.tipo_actividad_id') }}</div>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label text-muted small fw-bold">DETALLE ESPECÍFICO</label>
@@ -927,6 +932,7 @@ const cancelar = () => router.push({ name: 'Principal' })
                                 <option value="">-- Seleccionar --</option>
                                 <option v-for="d in detalleActividadNegocios" :key="d.id" :value="d.id">{{ d.nombre }}</option>
                             </select>
+                            <div class="invalid-feedback" v-if="hasError('negocio.detalle_actividad_id')">{{ firstError('negocio.detalle_actividad_id') }}</div>
                         </div>
                         <div class="col-md-12">
                             <label class="form-label text-muted small fw-bold">DIRECCIÓN DEL NEGOCIO</label>
@@ -999,19 +1005,41 @@ const cancelar = () => router.push({ name: 'Principal' })
                 <div class="card border-0 shadow-sm rounded-4 mb-4 overflow-hidden">
                     <div class="card-header bg-dark text-white border-0 py-3 px-4 fw-bold small text-center">FOTOGRAFÍA DEL SOCIO</div>
                     <div class="card-body p-4 text-center">
-                        <div class="photo-preview-box mx-auto mb-3 shadow-sm border border-2 border-dashed rounded-4 position-relative" style="width: 200px; height: 200px; cursor: pointer" @click="$refs.photoInput.click()">
-                            <img v-if="photoPreview" :src="photoPreview" class="w-100 h-100 object-fit-cover rounded-4">
-                            <div v-else class="h-100 d-flex flex-column align-items-center justify-content-center text-muted">
-                                <i class="fas fa-camera fa-3x mb-2 opacity-25"></i>
-                                <span class="small fw-bold">SUBIR FOTO</span>
-                            </div>
+                      <input
+                        type="file"
+                        ref="photoInput"
+                        class="d-none"
+                        @change="handlePhotoChange"
+                        accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+                      />
+
+                      <div
+                        class="photo-preview-box mx-auto mb-3 shadow-sm border border-2 border-dashed rounded-4 position-relative"
+                        :class="{ 'border-danger': hasError('foto') }"
+                        style="width: 200px; height: 200px; cursor: pointer"
+                        @click="$refs.photoInput.click()"
+                      >
+                        <img v-if="photoPreview" :src="photoPreview" class="w-100 h-100 object-fit-cover rounded-4" />
+                        <div v-else class="h-100 d-flex flex-column align-items-center justify-content-center text-muted">
+                          <i class="fas fa-camera fa-3x mb-2 opacity-25"></i>
+                          <span class="small fw-bold">SUBIR FOTO</span>
                         </div>
-                        <input type="file" ref="photoInput" class="d-none" @change="handlePhotoChange" accept="image/*">
-                        <div v-if="photoPreview" class="d-flex justify-content-center gap-2">
-                            <button class="btn btn-danger btn-sm rounded-pill px-3" @click="removePhoto"><i class="fas fa-trash me-1"></i> Quitar</button>
-                            <button class="btn btn-outline-dark btn-sm rounded-pill px-3" @click="$refs.photoInput.click()">Cambiar</button>
-                        </div>
-                        <p class="small text-muted mt-2 mb-0">Formato JPG/PNG. Máx 4MB.</p>
+                      </div>
+
+                      <div v-if="photoPreview" class="d-flex justify-content-center gap-2">
+                        <button type="button" class="btn btn-danger btn-sm rounded-pill px-3" @click="removePhoto">
+                          <i class="fas fa-trash me-1"></i> Quitar
+                        </button>
+                        <button type="button" class="btn btn-outline-dark btn-sm rounded-pill px-3" @click="$refs.photoInput.click()">
+                          Cambiar
+                        </button>
+                      </div>
+
+                      <p class="small text-muted mt-2 mb-0">Formato JPG/PNG/WEBP. Máx 4MB.</p>
+
+                      <div v-if="hasError('foto')" class="text-danger small mt-2">
+                        {{ firstError('foto') }}
+                      </div>
                     </div>
                 </div>
 

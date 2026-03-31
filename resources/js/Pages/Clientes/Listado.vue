@@ -55,6 +55,7 @@ const obtenerDatos = async (id) => {
   if (!c) return
   const p = c.persona ?? {}
   const n = c.negocio ?? {}
+  const r = c.referente ?? {}
 
   form.value.id = c.id ?? ''
   form.value.estado = c.estado ?? 'ACTIVO'
@@ -70,10 +71,22 @@ const obtenerDatos = async (id) => {
   form.value.fecha_nac = p.fecha_nac ?? ''
   form.value.genero = p.genero ?? 'M'
   form.value.estado_civil = p.estado_civil ?? 'SOLTERO'
+  form.value.ubigeo_nac = p.ubigeo_nac ?? ''
+  form.value.ubigeo_dom = p.ubigeo_dom ?? ''
   form.value.profesion = p.profesion ?? ''
+  form.value.grado_instr = p.grado_instr ?? ''
+  form.value.origen_labor = p.origen_labor ?? 'INDEPENDIENTE'
+  form.value.ocupacion = p.ocupacion ?? ''
+  form.value.institucion_lab = p.institucion_lab ?? ''
   form.value.direccion = p.direccion ?? ''
-  form.value.negocio = { ...NEGOCIO_DEFAULT(), ...(n ?? {}) }
-  form.value.referente = c.referente ?? REFERENTE_DEFAULT()
+  form.value.latitud_longitud = p.latitud_longitud ?? ''
+  
+  form.value.negocio = { ...NEGOCIO_DEFAULT(), ...n }
+  form.value.referente = { 
+    ...REFERENTE_DEFAULT(), 
+    ...r, 
+    parentesco: c.referente_parentesco ?? '' 
+  }
 }
 
 const editar = async (id) => {

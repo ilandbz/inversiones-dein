@@ -228,8 +228,14 @@ class ClienteController extends Controller
         DB::beginTransaction();
         try {
 
-            // 1) Foto (igual que store)
+            // 1) Foto (reemplazo inteligente)
             if ($request->hasFile('foto')) {
+                // Eliminar foto anterior si existe (por el DNI actual o el que viene en request)
+                $oldDni = $cliente->persona->dni;
+                if ($oldDni && Storage::disk('fotos')->exists('clientes/' . $oldDni . '.webp')) {
+                    Storage::disk('fotos')->delete('clientes/' . $oldDni . '.webp');
+                }
+
                 $file = $request->file('foto');
                 $manager = new ImageManager(new Driver());
                 $image = $manager->read($file)->scaleDown(width: 800, height: 1000);

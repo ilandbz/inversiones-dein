@@ -22,11 +22,14 @@ const { obtenerDepartamentos, departamentos, obtenerProvinciasPorDepartamento, p
 const { agregarCliente, actualizarCliente, respuesta, existeClientePorDni, existeCliente } = useCliente()
 
 const modalEl = ref(null)
+const photoInput = ref(null)
 const emit = defineEmits(['onListar'])
 
 // Ubigeo State
 const ubigeoModeNac = ref('select') 
 const ubigeoModeDom = ref('select')
+const ubigeoTextoNac = ref('')
+const ubigeoTextoDom = ref('')
 const nac = ref({ dep: '', prov: '', dist: '' })
 const dom = ref({ dep: '', prov: '', dist: '' })
 const provinciasNac = ref([])
@@ -39,6 +42,48 @@ const resultadosNac = ref([])
 const resultadosDom = ref([])
 const loadingNac = ref(false)
 const loadingDom = ref(false)
+
+// Photo State
+const photoFile = ref(null)
+const photoPreview = ref(null)
+let previewUrl = null
+
+const handlePhotoChange = (e) => {
+  const file = e.target.files?.[0]
+  if (!file) return
+  if (!file.type.startsWith('image/')) {
+    Toast.fire({ icon: 'warning', title: 'Archivo inválido', text: 'Selecciona una imagen válida.' })
+    e.target.value = ''
+    return
+  }
+  const maxMB = 4
+  if (file.size > maxMB * 1024 * 1024) {
+    Toast.fire({ icon: 'warning', title: 'Imagen muy grande', text: `La imagen no debe superar ${maxMB}MB.` })
+    e.target.value = ''
+    return
+  }
+  photoFile.value = file
+  if (previewUrl) URL.revokeObjectURL(previewUrl)
+  previewUrl = URL.createObjectURL(file)
+  photoPreview.value = previewUrl
+}
+
+const removePhoto = () => {
+  photoFile.value = null
+  if (previewUrl) URL.revokeObjectURL(previewUrl)
+  previewUrl = null
+  photoPreview.value = null
+}
+
+watch(() => form.value.dni, (newDni) => {
+  if (form.value.estadoCrud === 'editar' && newDni && !photoFile.value) {
+    photoPreview.value = `/storage/fotos/clientes/${newDni}.webp?t=${Date.now()}`
+  }
+}, { immediate: true })
+
+onBeforeUnmount(() => {
+  if (previewUrl) URL.revokeObjectURL(previewUrl)
+})
 
 // Sync selects with form
 watch(() => nac.value.dist, (ub) => { if(ub) form.value.ubigeo_nac = ub })
@@ -65,47 +110,81 @@ watch(() => dom.value.prov, async (prov) => {
 })
 
 const syncFromUbigeo = async (which, ubigeo, isInit = false) => {
-  if (!ubigeo || String(ubigeo).length !== 6) return
+  if (!ubigeo || String(ubigeo).length !== 6) {
+    if (which === 'nac') { ubigeoTextoNac.value = ''; provinciasNac.value = []; distritosNac.value = [] }
+    else { ubigeoTextoDom.value = ''; provinciasDom.value = []; distritosDom.value = [] }
+    return
+  }
   try {
-    await obtenerUbigeo(ubigeo)
-    const r = registro.value
+    const r = await obtenerUbigeo(ubigeo)
     if (!r) return
     const depId = r?.provincia?.departamento_id
     const provId = r?.provincia?.id
     const disUb = r?.ubigeo
+    const texto = `${r?.provincia?.departamento?.nombre || ''} / ${r?.provincia?.nombre || ''} / ${r?.nombre || ''}`
 
     if (which === 'nac') {
-      if(!isInit) ubigeoModeNac.value = 'select'
+      ubigeoTextoNac.value = texto
+      if (!isInit) ubigeoModeNac.value = 'select'
       nac.value.dep = depId
-      setTimeout(async () => {
-         await obtenerProvinciasPorDepartamento(depId)
-         provinciasNac.value = provincias.value
-         nac.value.prov = provId
-         setTimeout(async () => {
-             await obtenerDistritosPorProvincia(provId)
-             distritosNac.value = distritos.value
-             nac.value.dist = disUb
-         }, 100)
-      }, 100)
+      const pData = await obtenerProvinciasPorDepartamento(depId)
+      provinciasNac.value = pData
+      nac.value.prov = provId
+      const dData = await obtenerDistritosPorProvincia(provId)
+      distritosNac.value = dData
+      nac.value.dist = disUb
     } else {
-      if(!isInit) ubigeoModeDom.value = 'select'
+      ubigeoTextoDom.value = texto
+      if (!isInit) ubigeoModeDom.value = 'select'
       dom.value.dep = depId
-      setTimeout(async () => {
-         await obtenerProvinciasPorDepartamento(depId)
-         provinciasDom.value = provincias.value
-         dom.value.prov = provId
-         setTimeout(async () => {
-             await obtenerDistritosPorProvincia(provId)
-             distritosDom.value = distritos.value
-             dom.value.dist = disUb
-         }, 100)
-      }, 100)
+      const pData = await obtenerProvinciasPorDepartamento(depId)
+      provinciasDom.value = pData
+      dom.value.prov = provId
+      const dData = await obtenerDistritosPorProvincia(provId)
+      distritosDom.value = dData
+      dom.value.dist = disUb
     }
   } catch (e) {}
 }
 
-watch(() => form.value.ubigeo_nac, (val) => syncFromUbigeo('nac', val, true), { immediate: true })
-watch(() => form.value.ubigeo_dom, (val) => syncFromUbigeo('dom', val, true), { immediate: true })
+const resetPhotoState = () => {
+  photoFile.value = null
+
+  if (previewUrl) {
+    URL.revokeObjectURL(previewUrl)
+    previewUrl = null
+  }
+
+  photoPreview.value = null
+
+  if (photoInput.value) {
+    photoInput.value.value = ''
+  }
+}
+
+const cerrarModal = () => {
+  document.activeElement?.blur()
+  form.value.errors = {}
+  resetPhotoState()
+  hideModal('#modalcliente')
+}
+
+const isUpdatingNac = ref(false)
+const isUpdatingDom = ref(false)
+
+watch(() => form.value.ubigeo_nac, async (val) => {
+    if (isUpdatingNac.value) return
+    isUpdatingNac.value = true
+    await syncFromUbigeo('nac', val, true)
+    isUpdatingNac.value = false
+}, { immediate: true })
+
+watch(() => form.value.ubigeo_dom, async (val) => {
+    if (isUpdatingDom.value) return
+    isUpdatingDom.value = true
+    await syncFromUbigeo('dom', val, true)
+    isUpdatingDom.value = false
+}, { immediate: true })
 
 // Search Logic
 let tNac = null; let tDom = null;
@@ -128,6 +207,10 @@ const selectFromSearch = (which, item) => {
 
 // Business Logic
 const esIndependiente = computed(() => form.value.origen_labor === 'INDEPENDIENTE')
+const esSuperior = computed(() => {
+  const g = String(form.value.grado_instr || '').toUpperCase()
+  return g.includes('SUPERIOR') || g.includes('POSTGRADO')
+})
 const onChangeActividad = async () => {
   const id = form.value.negocio?.actividad_negocio_id
   if (!id) { if(form.value.negocio) form.value.negocio.detalle_actividad_id = ''; return }
@@ -157,6 +240,10 @@ const submitForm = async () => {
   for (const [k, v] of Object.entries(plain)) { if (!['negocio', 'referente', 'errors'].includes(k)) appendIfFilled(k, v) }
   if (esIndependiente.value) { for (const [k, v] of Object.entries(plain.negocio || {})) { appendIfFilled(`negocio[${k}]`, v) } }
   for (const [k, v] of Object.entries(plain.referente || {})) { appendIfFilled(`referente[${k}]`, v) }
+  
+  if (photoFile.value) {
+      fd.append('foto', photoFile.value)
+  }
 
   if (plain.estadoCrud === 'nuevo') await agregarCliente(fd)
   else await actualizarCliente(fd)
@@ -166,7 +253,20 @@ const submitForm = async () => {
     Toast.fire({ icon: 'success', title: respuesta.value.mensaje }); emit('onListar')
   }
 }
+watch(
+  () => [form.value.id, form.value.dni, form.value.estadoCrud],
+  ([id, dni, estado]) => {
+    resetPhotoState()
 
+    if (estado === 'editar' && dni) {
+      photoPreview.value = `/storage/fotos/clientes/${dni}.webp?t=${Date.now()}`
+    }
+  },
+  { immediate: true }
+)
+onBeforeUnmount(() => {
+  if (previewUrl) URL.revokeObjectURL(previewUrl)
+})
 onMounted(async () => {
     await listaActividadNegocios(); await obtenerDepartamentos()
 })
@@ -174,7 +274,7 @@ onMounted(async () => {
 
 <template>
     <teleport to="body">
-        <div ref="modalEl" class="modal fade" id="modalcliente" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+        <div ref="modalEl" class="modal fade" id="modalcliente">
             <div class="modal-dialog modal-xl modal-dialog-centered">
                 <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
                     <div class="modal-header bg-primary text-white p-4 border-0">
@@ -184,7 +284,7 @@ onMounted(async () => {
                             </div>
                             <h5 class="modal-title fw-bold mb-0">{{ modalTitle }}</h5>
                         </div>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                        <button type="button" class="btn-close btn-close-white" @click="cerrarModal"></button>
                     </div>
                     
                     <div class="modal-body bg-light p-4">
@@ -192,6 +292,42 @@ onMounted(async () => {
                             <div class="row g-4">
                                 <!-- Columna 1: Datos Personales y Ubicación -->
                                 <div class="col-lg-7">
+                                    <!-- Foto del Socio -->
+                                    <div class="card border-0 shadow-sm rounded-4 mb-4">
+                                        <div class="card-body p-4 text-center">
+                                            <h6 class="fw-bold text-primary text-uppercase small text-start mb-4">
+                                                <i class="fas fa-camera me-2"></i>Fotografía del Socio
+                                            </h6>
+                                            <input
+                                                type="file"
+                                                ref="photoInput"
+                                                class="d-none"
+                                                @change="handlePhotoChange"
+                                                accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+                                            />
+                                            <div
+                                                class="photo-preview-box mx-auto mb-3 shadow-sm border border-2 border-dashed rounded-4 position-relative overflow-hidden"
+                                                :class="{ 'border-danger': hasError('foto') }"
+                                                style="width: 180px; height: 180px; cursor: pointer"
+                                                @click="photoInput.click()"
+                                            >
+                                                <img v-if="photoPreview" :src="photoPreview" class="w-100 h-100 object-fit-cover" />
+                                                <div v-else class="h-100 d-flex flex-column align-items-center justify-content-center text-muted">
+                                                    <i class="fas fa-user-circle fa-4x mb-2 opacity-25"></i>
+                                                    <span class="small fw-bold">SUBIR FOTO</span>
+                                                </div>
+                                            </div>
+                                            <div v-if="photoPreview" class="d-flex justify-content-center gap-2">
+                                                <button type="button" class="btn btn-danger btn-sm rounded-pill px-3" @click="removePhoto">
+                                                    <i class="fas fa-trash me-1"></i> Quitar
+                                                </button>
+                                                <button type="button" class="btn btn-outline-dark btn-sm rounded-pill px-3" @click="photoInput.click()">
+                                                    Cambiar
+                                                </button>
+                                            </div>
+                                            <p class="small text-muted mt-2 mb-0">Recomendado JPG/WEBP. Máx 4MB.</p>
+                                        </div>
+                                    </div>
                                     <div class="card border-0 shadow-sm rounded-4 mb-4">
                                         <div class="card-body p-4">
                                             <h6 class="fw-bold text-primary text-uppercase small mb-4">
@@ -250,6 +386,44 @@ onMounted(async () => {
                                             </h6>
                                             <div class="row g-3">
                                                 <div class="col-12">
+                                                    <label class="form-label small fw-bold text-muted d-block">Ubigeo Nacimiento</label>
+                                                    <div class="input-group input-group-sm mb-2">
+                                                        <button type="button" class="btn" :class="ubigeoModeNac==='select'?'btn-primary':'btn-outline-primary'" @click="ubigeoModeNac='select'">Manual</button>
+                                                        <button type="button" class="btn" :class="ubigeoModeNac==='search'?'btn-primary':'btn-outline-primary'" @click="ubigeoModeNac='search'">Buscador</button>
+                                                    </div>
+                                                    <div v-if="ubigeoModeNac==='select'" class="row g-2">
+                                                        <div class="col-md-4">
+                                                            <select v-model="nac.dep" class="form-select form-select-sm border-0 bg-light">
+                                                                <option value="">Dep...</option>
+                                                                <option v-for="d in departamentos.data || departamentos" :key="d.id" :value="d.id">{{ d.nombre }}</option>
+                                                            </select>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <select v-model="nac.prov" class="form-select form-select-sm border-0 bg-light">
+                                                                <option value="">Prov...</option>
+                                                                <option v-for="p in provinciasNac" :key="p.id" :value="p.id">{{ p.nombre }}</option>
+                                                            </select>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <select v-model="nac.dist" class="form-select form-select-sm border-0 bg-light">
+                                                                <option value="">Dist...</option>
+                                                                <option v-for="d in distritosNac" :key="d.ubigeo" :value="d.ubigeo">{{ d.nombre }}</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div v-else class="position-relative">
+                                                        <input v-model="buscarNac" class="form-control form-control-sm border-0 bg-light" placeholder="Escriba distrito / provincia..." />
+                                                        <ul v-if="resultadosNac.length" class="list-group position-absolute w-100 shadow-lg top-100 mt-1" style="z-index:1060;">
+                                                            <li v-for="r in resultadosNac" :key="r.ubigeo" class="list-group-item list-group-item-action small py-2" @click="selectFromSearch('nac', r)">
+                                                                {{ r.distrito }} - {{ r.provincia }} ({{ r.departamento }})
+                                                            </li>
+                                                        </ul>
+                                                    </div>
+                                                    <small v-if="ubigeoTextoNac" class="text-primary fw-bold d-block mt-1 extra-small">
+                                                        <i class="fas fa-map-marker-alt me-1"></i> {{ ubigeoTextoNac }} ({{ form.ubigeo_nac }})
+                                                    </small>
+                                                </div>
+                                                <div class="col-12">
                                                     <label class="form-label small fw-bold text-muted d-block">Ubigeo Domicilio</label>
                                                     <div class="input-group input-group-sm mb-2">
                                                         <button type="button" class="btn" :class="ubigeoModeDom==='select'?'btn-primary':'btn-outline-primary'" @click="ubigeoModeDom='select'">Manual</button>
@@ -283,6 +457,9 @@ onMounted(async () => {
                                                             </li>
                                                         </ul>
                                                     </div>
+                                                    <small v-if="ubigeoTextoDom" class="text-primary fw-bold d-block mt-1 extra-small">
+                                                        <i class="fas fa-map-marker-alt me-1"></i> {{ ubigeoTextoDom }} ({{ form.ubigeo_dom }})
+                                                    </small>
                                                 </div>
                                                 <div class="col-12">
                                                     <label class="form-label small fw-bold text-muted">Dirección Detallada</label>
@@ -309,10 +486,14 @@ onMounted(async () => {
                                                     </select>
                                                 </div>
                                                 <div class="col-md-6">
-                                                    <label class="form-label small fw-bold text-muted">Instrucción</label>
                                                     <select v-model="form.grado_instr" class="form-select form-select-sm border-0 bg-light">
                                                         <option v-for="g in gradosInstruccion" :key="g" :value="g">{{ g }}</option>
                                                     </select>
+                                                </div>
+                                                
+                                                <div v-if="esSuperior" class="col-12 mt-0">
+                                                    <label class="form-label small fw-bold text-muted">Profesión</label>
+                                                    <input v-model="form.profesion" class="form-control form-control-sm border-0 bg-light" placeholder="Ej: CONTABILIDAD" />
                                                 </div>
                                                 
                                                 <div v-if="esIndependiente && form.negocio" class="col-12">
@@ -363,9 +544,21 @@ onMounted(async () => {
                                                     <label class="form-label small fw-bold text-muted">DNI Referente</label>
                                                     <input v-model="form.referente.dni" class="form-control form-control-sm border-0 bg-light" maxlength="8" />
                                                 </div>
-                                                <div class="col-md-12">
-                                                    <label class="form-label small fw-bold text-muted">Apellidos y Nombres</label>
-                                                    <input v-model="form.referente.apenom_full" class="form-control form-control-sm border-0 bg-light" placeholder="Ape. Paterno, Materno y Nombres" />
+                                                <div class="col-md-6">
+                                                    <label class="form-label small fw-bold text-muted">Ape. Paterno</label>
+                                                    <input v-model.trim="form.referente.ape_pat" class="form-control form-control-sm border-0 bg-light" placeholder="Paterno" />
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label small fw-bold text-muted">Ape. Materno</label>
+                                                    <input v-model.trim="form.referente.ape_mat" class="form-control form-control-sm border-0 bg-light" placeholder="Materno" />
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label small fw-bold text-muted">Primer Nombre</label>
+                                                    <input v-model.trim="form.referente.primernombre" class="form-control form-control-sm border-0 bg-light" placeholder="Nombre" />
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label small fw-bold text-muted">Otros Nombres</label>
+                                                    <input v-model.trim="form.referente.otrosnombres" class="form-control form-control-sm border-0 bg-light" placeholder="Otros" />
                                                 </div>
                                                 <div class="col-md-6">
                                                     <label class="form-label small fw-bold text-muted">Celular</label>
@@ -402,4 +595,6 @@ onMounted(async () => {
 .cursor-pointer { cursor: pointer; }
 .modal-body { max-height: 75vh; overflow-y: auto; scrollbar-width: thin; }
 .form-control:focus, .form-select:focus { background-color: #fff !important; box-shadow: 0 0 0 0.25rem rgba(var(--bs-primary-rgb), 0.1); border-color: var(--bs-primary); }
+.photo-preview-box:hover { background: #f8f9fa; border-color: #0d6efd !important; }
+.extra-small { font-size: 0.75rem; }
 </style>

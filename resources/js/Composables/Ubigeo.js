@@ -24,8 +24,10 @@ export default function useUbigeo() {
         try {
             let respond = await axios.get('/ubigeo/obtener?ubigeo=' + ubigeo, getConfigHeader())
             registro.value = respond.data
+            return respond.data
         } catch (error) {
-            errors.value = error.response.data
+            errors.value = error.response?.data
+            return null
         }
     }
     const buscarDistritos = async ({ buscar = '', paginacion = 10, page = 1 } = {}) => {
@@ -39,11 +41,13 @@ export default function useUbigeo() {
     const obtenerProvinciasPorDepartamento = async (departamento_id) => {
         const respond = await axios.get('/ubigeo/provincias?departamento_id=' + departamento_id, getConfigHeader())
         provincias.value = respond.data // array
+        return respond.data 
     }
 
     const obtenerDistritosPorProvincia = async (provincia_id) => {
         const respond = await axios.get('/ubigeo/distritos?provincia_id=' + provincia_id, getConfigHeader())
         distritos.value = respond.data // array
+        return respond.data
     }
     const agregarUbicacion = async (data) => {
         errors.value = ''
