@@ -50,6 +50,9 @@ class DesembolsoService
                 'saldo_total'   => $credito->total,
             ]);
 
+
+
+
             $this->auditoriaService->registrar('DESEMBOLSO', 'DESEMBOLSAR', Credito::class, (int) $credito->id, null, $credito->toArray(), "Desembolso realizado por S/ {$credito->monto}");
 
             // Actualizar estado del cliente
@@ -58,7 +61,8 @@ class DesembolsoService
             // Generar cronograma
             $this->cronogramaService->generar($credito, Carbon::parse($datos['fecha']));
 
-            return $desembolso->fresh(['credito']);
+            //return $desembolso;
+            return $desembolso->load('credito');
         });
     }
 }

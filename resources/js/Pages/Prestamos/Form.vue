@@ -14,7 +14,7 @@ const { plazos, listaPlazos } = usePlazo()
 const { agregarCredito, actualizarCredito, respuesta } = useCredito()
 
 const props = defineProps({ form: Object })
-const emit = defineEmits(['onListar', 'cargar'])
+const emit = defineEmits(['onListar'])
 const { form } = toRefs(props)
 const { Toast, soloNumeros, Swal, hideModal, formatoDinero } = useHelper()
 
@@ -25,10 +25,6 @@ const aval = ref({
   form: { dni: '', ape_pat: '', ape_mat: '', primernombre: '', otrosnombres: '', celular: '', email: '', genero:'M', fecha_nac:'2000-01-01', direccion: '' },
   errors: {}
 })
-
-const clearAvalErrors = () => { aval.value.errors = {} }
-const hasAvalError = (k) => Array.isArray(aval.value.errors?.[k]) && aval.value.errors[k].length > 0
-const firstAvalError = (k) => (aval.value.errors?.[k]?.[0] || '')
 
 /* --- HELPERS --- */
 const hasError = (name) => form.value.errors?.[name]
@@ -98,6 +94,13 @@ const registrarAval = async () => {
   } catch (e) { console.error(e) }
 }
 
+
+const cerrarModal = () => {
+    document.activeElement?.blur()
+    hideModal('#prestamomodal');
+    emit('onListar');
+}
+
 const submitForm = async () => {
   const isEdit = form.value.estadoCrud === 'editar'
   try {
@@ -106,7 +109,7 @@ const submitForm = async () => {
     
     if (respuesta.value?.ok == 1) {
       Swal.fire('Éxito', respuesta.value.mensaje, 'success')
-      hideModal('#prestamomodal'); emit('onListar')
+      cerrarModal();
     }
   } catch (e) { Toast.fire({ icon: 'error', title: 'Error al procesar solicitud' }) }
 }
@@ -116,18 +119,20 @@ onMounted(() => { listaAsesores(); listaOrigenesFinanciamientos(); listaPlazos()
 
 <template>
     <teleport to="body">
-        <div class="modal fade" id="prestamomodal" tabindex="-1" data-bs-backdrop="static">
+        <div class="modal fade" id="prestamomodal">
             <div class="modal-dialog modal-xl modal-dialog-centered">
                 <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
                     <div class="modal-header bg-primary text-white p-4 border-0">
                         <div class="d-flex align-items-center">
-                            <div class="bg-white-20 rounded-circle p-2 me-3"><i class="fas fa-hand-holding-usd fs-4"></i></div>
+                            <div class="bg-white-20 rounded-circle p-2 me-3">
+                                <i class="fas fa-hand-holding-usd fs-4"></i>
+                            </div>
                             <div>
                                 <h5 class="modal-title fw-bold mb-0">Configuración de Crédito</h5>
                                 <div class="small opacity-75">Cliente: {{ form.cliente_apenom }}</div>
                             </div>
                         </div>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                        <button type="button" class="btn-close btn-close-white" @click="cerrarModal"></button>
                     </div>
 
                     <div class="modal-body bg-light p-4">

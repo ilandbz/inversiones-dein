@@ -8,6 +8,8 @@ const { form } = toRefs(props)
 
 const { hideModal } = useHelper()
 
+const emit = defineEmits(['onListar'])
+
 // ---------- helpers ----------
 const toNumber = (v) => {
   if (v === null || v === undefined || v === '') return 0

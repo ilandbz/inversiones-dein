@@ -65,12 +65,12 @@ const editar = async(id) => {
     limpiar();
     await obtenerDatos(id);
     form.value.estadoCrud = 'editar';
-    openModal('#modalprestamo');
+    openModal('#prestamomodal');
 }
 
 const evaluacion = async(id) => {
     selectedId.value = id;
-    openModal('#modalevaluacion');
+    openModal('#evaluacionmodal');
 }
 
 const archivos = (creditoObj) => {
@@ -233,8 +233,8 @@ onMounted(() => {
         </div>
 
         <!-- Modales -->
-        <Prestamo :form="form" :listarCreditos="listarCreditos" />
-        <Evaluacion :idCredito="selectedId" @onListar="listarCreditos" />
+        <Prestamo :form="form" @onListar="listarCreditos" />
+        <!-- <Evaluacion :idCredito="selectedId" @onListar="listarCreditos" /> -->
         <FormArchivos :creditoId="selectedId" :clienteNombre="selectedClienteNombre" />
     </AppLayoutDefault>
 </template>

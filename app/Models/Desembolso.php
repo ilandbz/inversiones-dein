@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Desembolso extends Model
@@ -18,9 +19,12 @@ class Desembolso extends Model
         'totalentregado',
     ];
 
-    public function credito()
+
+
+
+    public function credito(): BelongsTo
     {
-        return $this->belongsTo(Credito::class);
+        return $this->belongsTo(Credito::class, 'credito_id');
     }
 
     public function user()
