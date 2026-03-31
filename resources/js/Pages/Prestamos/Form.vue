@@ -3,33 +3,89 @@ import { ref, toRefs, computed, watch, nextTick, onMounted } from 'vue'
 import useHelper from '@/Helpers'
 import usePersona from '@/Composables/Persona.js'
 import useAsesor from '@/Composables/Asesor.js'
-import usePlazo from '@/Composables/Plazo.js' 
-import useCredito from '@/Composables/Credito.js' 
+import usePlazo from '@/Composables/Plazo.js'
+import useCredito from '@/Composables/Credito.js'
 import useOrigenFinanciamiento from '@/Composables/OrigenFinanciamiento.js'
 
 
 const { asesores, listaAsesores } = useAsesor()
 const { origenes, listaOrigenesFinanciamientos } = useOrigenFinanciamiento()
 const { plazos, listaPlazos } = usePlazo()
-const { agregarCredito, actualizarCredito, respuesta } = useCredito()
+const { agregarCredito, actualizarCredito, respuesta, errors } = useCredito()
 
 const props = defineProps({ form: Object })
 const emit = defineEmits(['onListar'])
 const { form } = toRefs(props)
 const { Toast, soloNumeros, Swal, hideModal, formatoDinero } = useHelper()
 
-/* --- AVAL LOGIC --- */
 const { persona, errors: personaErrors, respuesta: personaRespuesta, obtenerPorDni, agregarPersona } = usePersona()
+
 const aval = ref({
-  dni: '', encontrado: false, loading: false,
-  form: { dni: '', ape_pat: '', ape_mat: '', primernombre: '', otrosnombres: '', celular: '', email: '', genero:'M', fecha_nac:'2000-01-01', direccion: '' },
+  dni: '',
+  encontrado: false,
+  loading: false,
+  form: {
+    dni: '',
+    ape_pat: '',
+    ape_mat: '',
+    primernombre: '',
+    otrosnombres: '',
+    celular: '',
+    email: '',
+    genero:'M',
+    fecha_nac:'2000-01-01',
+    direccion: ''
+  },
   errors: {}
 })
 
-/* --- HELPERS --- */
-const hasError = (name) => form.value.errors?.[name]
-const firstError = (name) => form.value.errors?.[name]?.[0] || ''
-const clearFieldError = (name) => { if (form.value.errors?.[name]) delete form.value.errors[name] }
+const toArr = (v) => (Array.isArray(v) ? v.map(String) : v ? [String(v)] : [])
+
+const normalizeErrors = (payload) => {
+  const out = {}
+  const src = payload?.errors && typeof payload.errors === 'object' ? payload.errors : payload
+
+  if (src && typeof src === 'object') {
+    for (const key of Object.keys(src)) {
+      out[key] = toArr(src[key])
+    }
+  }
+
+  return out
+}
+
+const setErrorsFromComposable = () => {
+  form.value.errors = normalizeErrors(errors.value || respuesta.value?.errors || {})
+}
+
+const clearErrors = () => {
+  form.value.errors = {}
+}
+
+const hasError = (name) => {
+  const errs = form.value.errors?.[name]
+  return Array.isArray(errs) ? errs.length > 0 : !!errs
+}
+
+const firstError = (name) => {
+  const errs = toArr(form.value.errors?.[name])
+  return errs[0] || ''
+}
+
+const clearFieldError = (name) => {
+  if (form.value.errors?.[name]) {
+    delete form.value.errors[name]
+  }
+}
+
+const scrollToFirstInvalid = async () => {
+  await nextTick()
+  const el = document.querySelector('#prestamomodal .is-invalid, #prestamomodal .text-danger')
+  if (el?.scrollIntoView) {
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  }
+}
+
 
 const toNumber = (v) => { const n = Number(String(v ?? '').replace(',', '.')); return Number.isFinite(n) ? n : 0 }
 const toMoney2 = (n) => (Math.round((Number(n) + Number.EPSILON) * 100) / 100).toFixed(2)
@@ -94,7 +150,6 @@ const registrarAval = async () => {
   } catch (e) { console.error(e) }
 }
 
-
 const cerrarModal = () => {
     document.activeElement?.blur()
     hideModal('#prestamomodal');
@@ -103,15 +158,65 @@ const cerrarModal = () => {
 
 const submitForm = async () => {
   const isEdit = form.value.estadoCrud === 'editar'
+
+  clearErrors()
+
   try {
-    if (isEdit) await actualizarCredito(form.value)
-    else await agregarCredito(form.value)
-    
+    if (isEdit) {
+      await actualizarCredito(form.value)
+    } else {
+      await agregarCredito(form.value)
+    }
+
+    if (errors.value && Object.keys(errors.value).length > 0) {
+      setErrorsFromComposable()
+      await scrollToFirstInvalid()
+
+      Toast.fire({
+        icon: 'warning',
+        title: 'Revise los campos obligatorios'
+      })
+      return
+    }
+
     if (respuesta.value?.ok == 1) {
       Swal.fire('Éxito', respuesta.value.mensaje, 'success')
-      cerrarModal();
+      cerrarModal()
+      return
     }
-  } catch (e) { Toast.fire({ icon: 'error', title: 'Error al procesar solicitud' }) }
+
+    if (respuesta.value?.errors) {
+      form.value.errors = normalizeErrors(respuesta.value.errors)
+      await scrollToFirstInvalid()
+
+      Toast.fire({
+        icon: 'warning',
+        title: 'Revise los campos obligatorios'
+      })
+      return
+    }
+
+    Toast.fire({
+      icon: 'warning',
+      title: 'No se pudo procesar la solicitud'
+    })
+  } catch (e) {
+    if (e.response?.status === 422) {
+      form.value.errors = normalizeErrors(e.response.data.errors || {})
+      await scrollToFirstInvalid()
+
+      Toast.fire({
+        icon: 'warning',
+        title: 'Revise los campos obligatorios'
+      })
+      return
+    }
+
+    Toast.fire({
+      icon: 'error',
+      title: 'Error al procesar solicitud'
+    })
+  }
 }
 
 onMounted(() => { listaAsesores(); listaOrigenesFinanciamientos(); listaPlazos() })
@@ -145,16 +250,25 @@ onMounted(() => { listaAsesores(); listaOrigenesFinanciamientos(); listaPlazos()
                                         <div class="row g-3">
                                             <div class="col-md-6">
                                                 <label class="form-label small fw-bold text-muted text-uppercase">Asesor Responsable</label>
-                                                <select v-model="form.asesor_id" class="form-select border-0 bg-light rounded-3 shadow-none">
-                                                    <option value="">Seleccione asesor...</option>
-                                                    <option v-for="a in asesores" :key="a.id" :value="a.id">{{ a.user.name }}</option>
+                                                <select
+                                                v-model="form.asesor_id"
+                                                @change="clearFieldError('asesor_id')"
+                                                class="form-select border-0 bg-light rounded-3 shadow-none"
+                                                :class="{ 'is-invalid': hasError('asesor_id') }"
+                                                >
+                                                <option value="">Seleccione asesor...</option>
+                                                <option v-for="a in asesores" :key="a.id" :value="a.id">{{ a.user.name }}</option>
                                                 </select>
-                                                <div v-if="hasError('asesor_id')" class="text-danger extra-small mt-1">{{ firstError('asesor_id') }}</div>
+                                                <div class="invalid-feedback" v-if="hasError('asesor_id')">
+                                                {{ firstError('asesor_id') }}
+                                                </div>
                                             </div>
                                             <div class="col-md-3">
                                                 <label class="form-label small fw-bold text-muted text-uppercase">Tipo</label>
-                                                <select v-model="form.tipo" class="form-select border-0 bg-light rounded-3 shadow-none">
-                                                    <option value="">Seleccione tipo...</option>
+                                                <select
+                                                 @change="clearFieldError('tipo')"
+                                                 v-model="form.tipo" class="form-select border-0 bg-light rounded-3 shadow-none">
+                                                    <option value="" hidden="">Seleccione tipo...</option>
                                                     <option value="NUEVO">NUEVO</option>
                                                     <option value="RENOVACIÓN">RENOVACIÓN</option>
                                                 </select>
@@ -165,6 +279,7 @@ onMounted(() => { listaAsesores(); listaOrigenesFinanciamientos(); listaPlazos()
                                                     <option value="">Seleccione origen...</option>
                                                     <option v-for="o in origenes" :key="o.id" :value="o.id">{{ o.nombre }}</option>
                                                 </select>
+                                                <div v-if="hasError('origen_financiamiento_id')" class="text-danger extra-small mt-1">{{ firstError('origen_financiamiento_id') }}</div>
                                             </div>
                                             
                                             <div class="col-md-4">
@@ -178,6 +293,9 @@ onMounted(() => { listaAsesores(); listaOrigenesFinanciamientos(); listaPlazos()
                                                 <select v-model="form.plazo" class="form-select border-0 bg-light rounded-3 shadow-none">
                                                     <option v-for="p in plazoOptions" :key="p.value" :value="p.value">{{ p.label }}</option>
                                                 </select>
+                                                <div v-if="hasError('plazo')" class="text-danger extra-small mt-1">
+                                                    {{ firstError('plazo') }}
+                                                </div>
                                             </div>
                                             <div class="col-md-4">
                                                 <label class="form-label small fw-bold text-primary text-uppercase">Monto Solicitado (S/)</label>
@@ -185,6 +303,7 @@ onMounted(() => { listaAsesores(); listaOrigenesFinanciamientos(); listaPlazos()
                                                     <span class="input-group-text border-0 bg-primary text-white rounded-start-3 shadow-none">S/</span>
                                                     <input v-model="form.monto" type="number" step="0.01" class="form-control border-0 bg-light rounded-end-3 shadow-none fw-bold" placeholder="0.00" />
                                                 </div>
+                                                <div v-if="hasError('monto')" class="text-danger extra-small mt-1">{{ firstError('monto') }}</div>
                                             </div>
                                         </div>
                                     </div>
