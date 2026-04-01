@@ -291,6 +291,7 @@ onMounted(() => { listaAsesores(); listaOrigenesFinanciamientos(); listaPlazos()
                                             <div class="col-md-4">
                                                 <label class="form-label small fw-bold text-muted text-uppercase">Plazo</label>
                                                 <select v-model="form.plazo" class="form-select border-0 bg-light rounded-3 shadow-none">
+                                                  <option value="" hidden="">Seleccione plazo...</option>
                                                     <option v-for="p in plazoOptions" :key="p.value" :value="p.value">{{ p.label }}</option>
                                                 </select>
                                                 <div v-if="hasError('plazo')" class="text-danger extra-small mt-1">
