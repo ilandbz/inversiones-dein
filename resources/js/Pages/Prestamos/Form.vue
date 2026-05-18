@@ -302,7 +302,7 @@ onMounted(() => { listaAsesores(); listaOrigenesFinanciamientos(); listaPlazos()
                                                 <label class="form-label small fw-bold text-primary text-uppercase">Monto Solicitado (S/)</label>
                                                 <div class="input-group">
                                                     <span class="input-group-text border-0 bg-primary text-white rounded-start-3 shadow-none">S/</span>
-                                                    <input v-model="form.monto" type="number" step="0.01" class="form-control border-0 bg-light rounded-end-3 shadow-none fw-bold" placeholder="0.00" />
+                                                    <input v-model="form.monto" type="text" step="0.01" class="form-control border-0 bg-light rounded-end-3 shadow-none fw-bold" placeholder="0.00" />
                                                 </div>
                                                 <div v-if="hasError('monto')" class="text-danger extra-small mt-1">{{ firstError('monto') }}</div>
                                             </div>
