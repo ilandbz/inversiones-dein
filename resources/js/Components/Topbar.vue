@@ -351,55 +351,6 @@ const cerrarSesion = async () => {
                                 </div>
                             </div>
                             <div class="dropdown-divider"></div>
-                            <div class="dropdown">
-                                <a href="javascript:void(0);" class="dropdown-item" data-bs-toggle="dropdown">
-                                    <span class="hstack">
-                                        <i class="feather-dollar-sign me-2"></i>
-                                        <span>Subscriptions</span>
-                                    </span>
-                                    <i class="feather-chevron-right ms-auto me-0"></i>
-                                </a>
-                                <div class="dropdown-menu">
-                                    <a href="javascript:void(0);" class="dropdown-item">
-                                        <span class="hstack">
-                                            <i class="wd-5 ht-5 bg-gray-500 rounded-circle me-3"></i>
-                                            <span>Plan</span>
-                                        </span>
-                                    </a>
-                                    <a href="javascript:void(0);" class="dropdown-item">
-                                        <span class="hstack">
-                                            <i class="wd-5 ht-5 bg-gray-500 rounded-circle me-3"></i>
-                                            <span>Billings</span>
-                                        </span>
-                                    </a>
-                                    <a href="javascript:void(0);" class="dropdown-item">
-                                        <span class="hstack">
-                                            <i class="wd-5 ht-5 bg-gray-500 rounded-circle me-3"></i>
-                                            <span>Referrals</span>
-                                        </span>
-                                    </a>
-                                    <a href="javascript:void(0);" class="dropdown-item">
-                                        <span class="hstack">
-                                            <i class="wd-5 ht-5 bg-gray-500 rounded-circle me-3"></i>
-                                            <span>Payments</span>
-                                        </span>
-                                    </a>
-                                    <a href="javascript:void(0);" class="dropdown-item">
-                                        <span class="hstack">
-                                            <i class="wd-5 ht-5 bg-gray-500 rounded-circle me-3"></i>
-                                            <span>Statements</span>
-                                        </span>
-                                    </a>
-                                    <div class="dropdown-divider"></div>
-                                    <a href="javascript:void(0);" class="dropdown-item">
-                                        <span class="hstack">
-                                            <i class="wd-5 ht-5 bg-gray-500 rounded-circle me-3"></i>
-                                            <span>Subscriptions</span>
-                                        </span>
-                                    </a>
-                                </div>
-                            </div>
-                            <div class="dropdown-divider"></div>
                             <RouterLink
                                 to="/perfil"
                                 class="dropdown-item"

@@ -4,11 +4,8 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Models\Agencia;
 use App\Models\Cliente;
 use App\Models\Credito;
-use App\Models\CronogramaPago;
-use App\Models\Desembolso;
 use Carbon\Carbon;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
@@ -33,27 +30,27 @@ class CreditoService
             );
 
             $credito = Credito::create([
-                'cliente_id'              => $datos['cliente_id'],
-                'asesor_id'               => $datos['asesor_id'],
-                'agencia_id'              => $datos['agencia_id'] ?? null,
-                'aval_id'                 => $datos['aval_id'] ?? null,
-                'tipo'                    => $datos['tipo'],
-                'monto'                   => $datos['monto'],
-                'origen_financiamiento_id'=> $datos['origen_financiamiento_id'],
-                'frecuencia'              => strtoupper($datos['frecuencia']),
-                'plazo'                   => $datos['plazo'],
-                'tasainteres'             => $datos['tasainteres'] ?? 0.00,
-                'interes'                 => $datos['interes'] ?? 0.00,
-                'costomora'               => $datos['costomora'] ?? 0.00,
-                'total'                   => $datos['total'] ?? 0.00,
-                'fecha_reg'               => now()->toDateString(),
-                'fecha_inicio'            => now()->toDateString(),
-                'fecha_venc'              => $fechaVenc,
-                'estado'                  => Credito::ESTADO_PENDIENTE,
-                'mencion'                 => $datos['mencion'] ?? null,
+                'cliente_id' => $datos['cliente_id'],
+                'asesor_id' => $datos['asesor_id'],
+                'agencia_id' => $datos['agencia_id'] ?? null,
+                'aval_id' => $datos['aval_id'] ?? null,
+                'tipo' => $datos['tipo'],
+                'monto' => $datos['monto'],
+                'origen_financiamiento_id' => $datos['origen_financiamiento_id'],
+                'frecuencia' => strtoupper($datos['frecuencia']),
+                'plazo' => $datos['plazo'],
+                'tasainteres' => $datos['tasainteres'] ?? 0.00,
+                'interes' => $datos['interes'] ?? 0.00,
+                'costomora' => $datos['costomora'] ?? 0.00,
+                'total' => $datos['total'] ?? 0.00,
+                'fecha_reg' => now()->toDateString(),
+                'fecha_inicio' => now()->toDateString(),
+                'fecha_venc' => $fechaVenc,
+                'estado' => Credito::ESTADO_PENDIENTE,
+                'mencion' => $datos['mencion'] ?? null,
             ]);
 
-            $this->auditoriaService->registrar('CREDITO', 'CREAR', Credito::class, (int) $credito->id, null, $credito->toArray(), "Nueva solicitud registrada");
+            $this->auditoriaService->registrar('CREDITO', 'CREAR', Credito::class, (int) $credito->id, null, $credito->toArray(), 'Nueva solicitud registrada');
 
             Cliente::where('id', $datos['cliente_id'])->update([
                 'estado' => 'PENDIENTE',
@@ -77,23 +74,23 @@ class CreditoService
         );
 
         $credito->fill([
-            'cliente_id'               => $datos['cliente_id'],
-            'asesor_id'                => $datos['asesor_id'],
-            'agencia_id'               => $datos['agencia_id'] ?? $credito->agencia_id,
-            'aval_id'                  => $datos['aval_id'] ?? null,
-            'tipo'                     => $datos['tipo'],
-            'monto'                    => $datos['monto'],
+            'cliente_id' => $datos['cliente_id'],
+            'asesor_id' => $datos['asesor_id'],
+            'agencia_id' => $datos['agencia_id'] ?? $credito->agencia_id,
+            'aval_id' => $datos['aval_id'] ?? null,
+            'tipo' => $datos['tipo'],
+            'monto' => $datos['monto'],
             'origen_financiamiento_id' => $datos['origen_financiamiento_id'],
-            'frecuencia'               => strtoupper($datos['frecuencia']),
-            'plazo'                    => $datos['plazo'],
-            'tasainteres'              => $datos['tasainteres'] ?? 0.00,
-            'interes'                  => $datos['interes'] ?? 0.00,
-            'costomora'                => $datos['costomora'] ?? 0.00,
-            'total'                    => $datos['total'] ?? 0.00,
-            'fecha_reg'                => $datos['fecha_reg'] ?? $credito->fecha_reg,
-            'fecha_inicio'             => $datos['fecha_inicio'] ?? $credito->fecha_inicio,
-            'fecha_venc'               => $fechaVenc,
-            'mencion'                  => $datos['mencion'] ?? $credito->mencion,
+            'frecuencia' => strtoupper($datos['frecuencia']),
+            'plazo' => $datos['plazo'],
+            'tasainteres' => $datos['tasainteres'] ?? 0.00,
+            'interes' => $datos['interes'] ?? 0.00,
+            'costomora' => $datos['costomora'] ?? 0.00,
+            'total' => $datos['total'] ?? 0.00,
+            'fecha_reg' => $datos['fecha_reg'] ?? $credito->fecha_reg,
+            'fecha_inicio' => $datos['fecha_inicio'] ?? $credito->fecha_inicio,
+            'fecha_venc' => $fechaVenc,
+            'mencion' => $datos['mencion'] ?? $credito->mencion,
         ]);
 
         $credito->save();
@@ -112,6 +109,7 @@ class CreditoService
         $anteriores = ['estado' => $credito->estado];
         $credito->update(['estado' => $estado]);
         $this->auditoriaService->registrar('CREDITO', 'CAMBIAR_ESTADO', Credito::class, (int) $credito->id, $anteriores, ['estado' => $estado]);
+
         return $credito->fresh();
     }
 
@@ -151,6 +149,7 @@ class CreditoService
         if (in_array(Credito::ESTADO_FINALIZADO, $estados, true)) {
             return ['Recurrente Sin Saldo'];
         }
+
         return ['Nuevo'];
     }
 
@@ -167,16 +166,16 @@ class CreditoService
             'cliente.persona:id,dni,ape_pat,ape_mat,primernombre,otrosnombres,celular,ruc',
         ]);
 
-        if (!empty($filtros['estado'])) {
+        if (! empty($filtros['estado'])) {
             is_array($filtros['estado'])
                 ? $query->whereIn('estado', $filtros['estado'])
                 : $query->where('estado', $filtros['estado']);
         }
 
-        if (!empty($filtros['buscar'])) {
+        if (! empty($filtros['buscar'])) {
             $buscar = mb_strtoupper($filtros['buscar']);
             $query->where(function ($q) use ($buscar): void {
-                $q->whereHas('cliente.persona', fn($sq) => $sq
+                $q->whereHas('cliente.persona', fn ($sq) => $sq
                     ->whereRaw('UPPER(dni) LIKE ?', ["%$buscar%"])
                     ->orWhereRaw('UPPER(ape_pat) LIKE ?', ["%$buscar%"])
                     ->orWhereRaw('UPPER(ape_mat) LIKE ?', ["%$buscar%"])
@@ -187,11 +186,11 @@ class CreditoService
         }
 
         // Filtro por asesor si rol = ASESOR
-        if (!empty($filtros['asesor_id'])) {
+        if (! empty($filtros['asesor_id'])) {
             $query->where('asesor_id', $filtros['asesor_id']);
         }
 
-        if (!empty($filtros['agencia_id'])) {
+        if (! empty($filtros['agencia_id'])) {
             $query->where('agencia_id', $filtros['agencia_id']);
         }
 
@@ -207,11 +206,11 @@ class CreditoService
     private function calcularFechaVencimiento(Carbon $desde, string $frecuencia, int $plazo): Carbon
     {
         return match (strtoupper($frecuencia)) {
-            'DIARIA'    => $desde->copy()->addDays($plazo),
-            'SEMANAL'   => $desde->copy()->addWeeks($plazo),
+            'DIARIO' => $desde->copy()->addDays($plazo),
+            'SEMANAL' => $desde->copy()->addWeeks($plazo),
             'QUINCENAL' => $desde->copy()->addDays($plazo * 15),
-            'MENSUAL'   => $desde->copy()->addMonths($plazo),
-            default     => throw new \InvalidArgumentException("Frecuencia inválida: $frecuencia"),
+            'MENSUAL' => $desde->copy()->addMonths($plazo),
+            default => throw new \InvalidArgumentException("Frecuencia inválida: $frecuencia"),
         };
     }
 }

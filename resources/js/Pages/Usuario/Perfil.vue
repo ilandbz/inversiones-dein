@@ -52,6 +52,24 @@ const handleFileUpload = async (event) => {
 
     if (file.size > 2048 * 1024) {
         Swal.fire('Error', 'El tamaño máximo permitido es 2MB.', 'error')
+        event.target.value = ''
+        return
+    }
+
+    const checkDimensions = (f) => {
+        return new Promise((resolve) => {
+            const img = new Image()
+            img.src = URL.createObjectURL(f)
+            img.onload = () => {
+                resolve({ width: img.width, height: img.height })
+            }
+        })
+    }
+
+    const dims = await checkDimensions(file)
+    if (dims.width > 2000 || dims.height > 2000) {
+        Swal.fire('Error', 'La imagen supera las dimensiones máximas permitidas (2000x2000px).', 'error')
+        event.target.value = ''
         return
     }
 
