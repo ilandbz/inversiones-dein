@@ -12,6 +12,7 @@ Route::post('/login',[LoginController::class,'login']);
 Route::group(['middleware' => ['auth:sanctum']],function(){
     Route::post('/logout',[LoginController::class,'logout']);
     Route::get('/usuario-session-data',[UserController::class,'mostrarDatoUsuario']);
+    Route::post('/usuario-actualizar-perfil',[UserController::class,'actualizarPerfil']);
     Route::get('/mostrar-role', [RoleController::class, 'obtener']);
     Route::post('/cambiar-role',[LoginController::class,'cambiarRol']);
     Route::get('/obtener-menus-role',[UserController::class,'obtenerMenusPorRole']);

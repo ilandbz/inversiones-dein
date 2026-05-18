@@ -295,7 +295,7 @@ const cerrarSesion = async () => {
                         <div class="dropdown-menu dropdown-menu-end nxl-h-dropdown nxl-user-dropdown">
                             <div class="dropdown-header">
                                 <div class="d-flex align-items-center">
-                                    <img :src="user?.foto || `/storage/fotos/usuarios/${user?.name}.webp`" @error="$event.target.src = '/NEXEL/images/avatar/1.png'" alt="user-image" class="img-fluid user-avtar" />
+                                    <img :src="user?.foto || `/storage/fotos/usuarios/${user?.name}.webp`" @error="$event.target.src = '/imagenes/logo_redondo.png'" alt="user-image" class="img-fluid user-avtar" />
                                     <div>
                                         <h6 class="text-dark mb-0">{{ user?.name || 'Usuario' }} <span class="badge bg-soft-success text-success ms-1">{{ role?.nombre || 'Rol' }}</span></h6>
                                         <span class="fs-12 fw-medium text-muted">{{ user?.dni || '' }}</span>

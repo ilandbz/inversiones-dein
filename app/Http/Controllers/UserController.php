@@ -364,6 +364,41 @@ class UserController extends Controller
 
         return response()->json($asesores->get());
     }
+    public function actualizarPerfil(Request $request)
+    {
+        $user = Auth::user();
+
+        $request->validate([
+            'fecha_nac' => 'nullable|date',
+            'genero' => 'nullable|string|max:20',
+            'estado_civil' => 'nullable|string|max:50',
+            'celular' => 'nullable|string|max:20',
+            'email' => 'nullable|email|max:100',
+            'profesion' => 'nullable|string|max:100',
+            'ocupacion' => 'nullable|string|max:100',
+            'direccion' => 'nullable|string|max:255',
+        ]);
+
+        $persona = Persona::where('dni', $user->dni)->first();
+        if ($persona) {
+            $persona->update([
+                'fecha_nac' => $request->fecha_nac,
+                'genero' => $request->genero,
+                'estado_civil' => $request->estado_civil,
+                'celular' => $request->celular,
+                'email' => $request->email,
+                'profesion' => $request->profesion,
+                'ocupacion' => $request->ocupacion,
+                'direccion' => $request->direccion,
+            ]);
+        }
+
+        return response()->json([
+            'ok' => 1,
+            'mensaje' => 'Perfil actualizado exitosamente'
+        ], 200);
+    }
+
     public function mostrarDatoUsuario(Request $request)
     {
         $usuario = User::with([
