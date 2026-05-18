@@ -2,8 +2,11 @@
 import { computed, ref, watch } from 'vue'
 import AppLayoutDefault from '@/Layouts/AppLayoutDefault.vue'
 import useDatosSession from '@/Composables/session'
+import useHelper from '@/Helpers'
+import axios from 'axios'
 
-const { usuario, roles, role, cambiarRole } = useDatosSession()
+const { usuario, roles, role, cambiarRole, cambiarFoto } = useDatosSession()
+const { Swal, Toast } = useHelper()
 
 const boolToEstado = (v) => (Number(v) === 1 ? 'ACTIVO' : 'INACTIVO')
 
@@ -28,6 +31,56 @@ const onChangeRole = async () => {
   if (!selectedRoleId.value) return
   await cambiarRole(selectedRoleId.value)
 }
+
+const fileInput = ref(null)
+const uploading = ref(false)
+
+const triggerUpload = () => {
+    if (!uploading.value) fileInput.value.click()
+}
+
+const handleFileUpload = async (event) => {
+    const file = event.target.files[0]
+    if (!file) return
+
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp']
+    if (!allowedTypes.includes(file.type)) {
+        Swal.fire('Error', 'Solo se permiten imágenes en formato JPG, PNG o WEBP.', 'error')
+        return
+    }
+
+    if (file.size > 2048 * 1024) {
+        Swal.fire('Error', 'El tamaño máximo permitido es 2MB.', 'error')
+        return
+    }
+
+    const formData = new FormData()
+    formData.append('foto', file)
+    formData.append('username', usuario.value.name)
+
+    uploading.value = true
+    try {
+        const response = await axios.post('/usuario/cambiar-imagen', formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        })
+
+        if (response.data.ok) {
+            Toast.fire({ icon: 'success', title: response.data.mensaje })
+            const newUrl = `/storage/fotos/usuarios/${usuario.value.name}.webp?t=${new Date().getTime()}`
+            cambiarFoto(newUrl)
+        }
+    } catch (error) {
+        console.error(error)
+        Swal.fire('Error', error.response?.data?.errors?.foto?.[0] || 'Ocurrió un problema al subir la imagen.', 'error')
+    } finally {
+        uploading.value = false
+        event.target.value = ''
+    }
+}
+
+const avatarUrl = computed(() => {
+    return usuario.value?.foto || `/storage/fotos/usuarios/${usuario.value?.name}.webp`
+})
 </script>
 
 <template>
@@ -47,8 +100,16 @@ const onChangeRole = async () => {
             <div class="col-12 col-lg-4">
                 <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
                     <div class="card-header bg-primary py-5 text-center position-relative">
-                        <div class="avatar avatar-xl shadow-lg border border-4 border-white mx-auto mb-3">
-                            <img :src="`/storage/fotos/usuarios/${usuario?.name}.webp`" @error="(e) => e.target.src = '/storage/fotos/usuarios/default.png'">
+                        <div class="avatar-wrapper mx-auto mb-3 position-relative" style="width: 100px; height: 100px;">
+                            <div class="avatar avatar-xl shadow-lg border border-4 border-white w-100 h-100 rounded-circle overflow-hidden">
+                                <img :src="avatarUrl" @error="(e) => e.target.src = '/NEXEL/images/avatar/1.png'">
+                            </div>
+                            <button class="btn btn-sm btn-light rounded-circle position-absolute bottom-0 end-0 shadow-sm border" 
+                                    @click="triggerUpload" :disabled="uploading" title="Cambiar Foto"
+                                    style="width: 32px; height: 32px; padding: 0; display: flex; align-items: center; justify-content: center; transform: translate(15%, 15%); z-index: 10;">
+                                <i class="fas" :class="uploading ? 'fa-spinner fa-spin' : 'fa-camera'"></i>
+                            </button>
+                            <input type="file" ref="fileInput" class="d-none" accept="image/jpeg, image/png, image/webp" @change="handleFileUpload">
                         </div>
                         <h5 class="text-white fw-bold mb-0 text-uppercase">{{ usuario?.name }}</h5>
                         <p class="text-white-50 small mb-0">{{ rolActualName }}</p>
