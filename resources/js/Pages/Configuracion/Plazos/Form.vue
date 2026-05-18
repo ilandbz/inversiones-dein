@@ -18,7 +18,7 @@ const sending = ref(false)
 const hasError = (name) => errors.value?.[name]
 const firstError = (name) => errors.value?.[name]?.[0] || ''
 
-const frequencies = ['DIARIO', 'SEMANAL', 'QUINCENAL', 'MENSUAL']
+const frequencies = ['DIARIO', 'INTERDIARIO', 'SEMANAL', 'QUINCENAL', 'MENSUAL']
 
 const submitForm = async () => {
     sending.value = true
