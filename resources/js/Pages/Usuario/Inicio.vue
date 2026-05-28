@@ -32,7 +32,7 @@ const listarUsuarios = async (page = 1) => {
 };
 
 const nuevo = () => {
-    form.value = { id:'', username:'', dni:'', role_id:'', foto: carpetaFotos+'default.png', apepat:'', apemat:'', primernombre:'', otrosnombres:'', celular:'', errors:[], estadoCrud: 'nuevo' };
+    form.value = { id:'', username:'', dni:'', role_id:'', foto: 'imagenes/logo_redondo.png', apepat:'', apemat:'', primernombre:'', otrosnombres:'', celular:'', errors:[], estadoCrud: 'nuevo' };
     openModal('#modalusuario');
 };
 
@@ -43,7 +43,8 @@ const editar = async (id) => {
             id: usuario.value.id, username: usuario.value.name, dni: usuario.value.dni,
             apepat: usuario.value.persona.ape_pat, apemat: usuario.value.persona.ape_mat,
             primernombre: usuario.value.persona.primernombre, otrosnombres: usuario.value.persona.otrosnombres,
-            celular: usuario.value.persona.celular, foto: carpetaFotos+'/'+usuario.value.name+'.webp',
+            celular: usuario.value.persona.celular,
+            foto: carpetaFotos+'/'+usuario.value.name+'.webp',
             estadoCrud: 'editar', errors: []
         };
         openModal('#modalusuario');

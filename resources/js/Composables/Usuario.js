@@ -130,9 +130,10 @@ export default function useUsuario() {
 
         } catch (error) {
             errors.value=""
-            if(error.response.status === 422) {
+            if(error.response && error.response.status === 422) {
                 errors.value = error.response.data.errors
             }
+            throw error;
         }
     }
     const eliminarRole = async(roleid, userid) => {

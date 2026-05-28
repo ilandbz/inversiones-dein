@@ -1,5 +1,5 @@
 <script setup>
-import { toRef } from 'vue'
+import { toRef, onMounted, onBeforeUnmount, ref } from 'vue'
 import MenusRenderer from '@/Components/MenusRenderer.vue'
 import useMenuUI from '@/Composables/useMenuUI'
 
@@ -7,6 +7,28 @@ const props = defineProps({ menus: { type: Array, default: () => [] } })
 const menusRef = toRef(props, 'menus')
 
 const { menuUI, openMenu, submenuRefs, toggleMenu, isActive } = useMenuUI(menusRef)
+
+const navbarContentRef = ref(null)
+let psInstance = null
+
+onMounted(() => {
+  if (typeof window.PerfectScrollbar !== 'undefined' && navbarContentRef.value) {
+    psInstance = new window.PerfectScrollbar(navbarContentRef.value, {
+      wheelSpeed: 0.5,
+      swipeEasing: 0,
+      suppressScrollX: true,
+      wheelPropagation: 1,
+      minScrollbarLength: 40
+    })
+  }
+})
+
+onBeforeUnmount(() => {
+  if (psInstance) {
+    psInstance.destroy()
+    psInstance = null
+  }
+})
 </script>
 
 <template>
@@ -20,7 +42,7 @@ const { menuUI, openMenu, submenuRefs, toggleMenu, isActive } = useMenuUI(menusR
         </RouterLink>
       </div>
 
-      <div class="navbar-content">
+      <div class="navbar-content" ref="navbarContentRef">
         <MenusRenderer
           :menuUI="menuUI"
           :openMenu="openMenu"

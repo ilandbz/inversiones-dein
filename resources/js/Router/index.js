@@ -115,7 +115,6 @@ const routes = [
   { path: '/usuarios', name: 'Usuarios', component: Usuario, meta: { requiresAuth: true, title: 'Usuarios' } },
   { path: '/roles', name: 'Roles', component: Rol, meta: { requiresAuth: true, title: 'Roles' } },
   { path: '/permisos', name: 'Permisos', component: PermisosInicio, meta: { requiresAuth: true, title: 'Permisos' } },
-  { path: '/configuracion', name: 'Configuracion', component: RegistroClientes, meta: { layout: LayoutDefault, requiresAuth: true, title: 'Configuración' } },
   { path: '/configuracion/plazos', name: 'Plazos', component: Plazos, meta: { requiresAuth: true, title: 'Plazos' } },
   { path: '/propiedades', name: 'Propiedades', component: RegistroPropiedades, meta: { requiresAuth: true, title: 'Propiedades' } },
 

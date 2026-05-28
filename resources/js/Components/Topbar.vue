@@ -65,32 +65,7 @@ const cerrarSesion = async () => {
                 </div>
 
 
-                
-                <!-- ESTO FUNCIONA EN MOBILE -->
-                <!-- <div class="nxl-lavel-mega-menu-toggle d-flex d-lg-none">
-                    <a href="javascript:void(0);" id="nxl-lavel-mega-menu-open">
-                        <i class="feather-align-left"></i>
-                    </a>
-                </div> -->
-                <!-- <div class="nxl-drp-link nxl-lavel-mega-menu">
-                    <div class="nxl-lavel-mega-menu-toggle d-flex d-lg-none">
-                        <a href="javascript:void(0)" id="nxl-lavel-mega-menu-hide">
-                            <i class="feather-arrow-left me-2"></i>
-                            <span>Volver</span>
-                        </a>
-                    </div>
-                    <div class="nxl-lavel-mega-menu-wrapper d-flex gap-3">
 
-                            <MenusRenderer
-                                :menuUI="menuUI"
-                                :openMenu="openMenu"
-                                :submenuRefs="submenuRefs"
-                                :toggleMenu="toggleMenu"
-                                :isActive="isActive"
-                            />  
-
-                    </div>
-                </div> -->
             </div>
             <div class="header-right ms-auto">
                 <div class="d-flex align-items-center">
@@ -181,8 +156,8 @@ const cerrarSesion = async () => {
                                                 <img src="/NEXEL/images/avatar/1.png" alt="" class="img-fluid" />
                                             </div>
                                             <div>
-                                                <a href="javascript:void(0);" class="font-body fw-bold d-block mb-1">Alexandra Della</a>
-                                                <p class="fs-11 text-muted mb-0">alex@example.com</p>
+                                                <a href="javascript:void(0);" class="font-body fw-bold d-block mb-1">Usuario Demo</a>
+                                                <p class="fs-11 text-muted mb-0">demo@example.com</p>
                                             </div>
                                         </div>
                                         <a href="javascript:void(0);" class="avatar-text avatar-md">
@@ -315,15 +290,15 @@ const cerrarSesion = async () => {
                     </div>
                     <div class="dropdown nxl-h-item">
                         <a href="javascript:void(0);" data-bs-toggle="dropdown" role="button" data-bs-auto-close="outside">
-                            <img src="/NEXEL/images/avatar/1.png" alt="user-image" class="img-fluid user-avtar me-0" />
+                            <img :src="user?.foto || `/storage/fotos/usuarios/${user?.name}.webp`" @error="$event.target.src = '/NEXEL/images/avatar/1.png'" alt="user-image" class="img-fluid user-avtar me-0" />
                         </a>
                         <div class="dropdown-menu dropdown-menu-end nxl-h-dropdown nxl-user-dropdown">
                             <div class="dropdown-header">
                                 <div class="d-flex align-items-center">
-                                    <img src="/NEXEL/images/avatar/1.png" alt="user-image" class="img-fluid user-avtar" />
+                                    <img :src="user?.foto || `/storage/fotos/usuarios/${user?.name}.webp`" @error="$event.target.src = '/imagenes/logo_redondo.png'" alt="user-image" class="img-fluid user-avtar" />
                                     <div>
-                                        <h6 class="text-dark mb-0">Alexandra Della <span class="badge bg-soft-success text-success ms-1">PRO</span></h6>
-                                        <span class="fs-12 fw-medium text-muted">alex@example.com</span>
+                                        <h6 class="text-dark mb-0">{{ user?.name || 'Usuario' }} <span class="badge bg-soft-success text-success ms-1">{{ role?.nombre || 'Rol' }}</span></h6>
+                                        <span class="fs-12 fw-medium text-muted">{{ user?.dni || '' }}</span>
                                     </div>
                                 </div>
                             </div>
@@ -371,55 +346,6 @@ const cerrarSesion = async () => {
                                         <span class="hstack">
                                             <i class="wd-10 ht-10 border border-2 border-gray-1 bg-primary rounded-circle me-2"></i>
                                             <span>Cutomization</span>
-                                        </span>
-                                    </a>
-                                </div>
-                            </div>
-                            <div class="dropdown-divider"></div>
-                            <div class="dropdown">
-                                <a href="javascript:void(0);" class="dropdown-item" data-bs-toggle="dropdown">
-                                    <span class="hstack">
-                                        <i class="feather-dollar-sign me-2"></i>
-                                        <span>Subscriptions</span>
-                                    </span>
-                                    <i class="feather-chevron-right ms-auto me-0"></i>
-                                </a>
-                                <div class="dropdown-menu">
-                                    <a href="javascript:void(0);" class="dropdown-item">
-                                        <span class="hstack">
-                                            <i class="wd-5 ht-5 bg-gray-500 rounded-circle me-3"></i>
-                                            <span>Plan</span>
-                                        </span>
-                                    </a>
-                                    <a href="javascript:void(0);" class="dropdown-item">
-                                        <span class="hstack">
-                                            <i class="wd-5 ht-5 bg-gray-500 rounded-circle me-3"></i>
-                                            <span>Billings</span>
-                                        </span>
-                                    </a>
-                                    <a href="javascript:void(0);" class="dropdown-item">
-                                        <span class="hstack">
-                                            <i class="wd-5 ht-5 bg-gray-500 rounded-circle me-3"></i>
-                                            <span>Referrals</span>
-                                        </span>
-                                    </a>
-                                    <a href="javascript:void(0);" class="dropdown-item">
-                                        <span class="hstack">
-                                            <i class="wd-5 ht-5 bg-gray-500 rounded-circle me-3"></i>
-                                            <span>Payments</span>
-                                        </span>
-                                    </a>
-                                    <a href="javascript:void(0);" class="dropdown-item">
-                                        <span class="hstack">
-                                            <i class="wd-5 ht-5 bg-gray-500 rounded-circle me-3"></i>
-                                            <span>Statements</span>
-                                        </span>
-                                    </a>
-                                    <div class="dropdown-divider"></div>
-                                    <a href="javascript:void(0);" class="dropdown-item">
-                                        <span class="hstack">
-                                            <i class="wd-5 ht-5 bg-gray-500 rounded-circle me-3"></i>
-                                            <span>Subscriptions</span>
                                         </span>
                                     </a>
                                 </div>

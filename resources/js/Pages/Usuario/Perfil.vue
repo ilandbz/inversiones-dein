@@ -2,8 +2,12 @@
 import { computed, ref, watch } from 'vue'
 import AppLayoutDefault from '@/Layouts/AppLayoutDefault.vue'
 import useDatosSession from '@/Composables/session'
+import useHelper from '@/Helpers'
+import axios from 'axios'
+import { useUsuarioStore } from '@/Store'
 
-const { usuario, roles, role, cambiarRole } = useDatosSession()
+const { usuario, roles, role, cambiarRole, cambiarFoto } = useDatosSession()
+const { Swal, Toast } = useHelper()
 
 const boolToEstado = (v) => (Number(v) === 1 ? 'ACTIVO' : 'INACTIVO')
 
@@ -28,6 +32,121 @@ const onChangeRole = async () => {
   if (!selectedRoleId.value) return
   await cambiarRole(selectedRoleId.value)
 }
+
+const fileInput = ref(null)
+const uploading = ref(false)
+
+const triggerUpload = () => {
+    if (!uploading.value) fileInput.value.click()
+}
+
+const handleFileUpload = async (event) => {
+    const file = event.target.files[0]
+    if (!file) return
+
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp']
+    if (!allowedTypes.includes(file.type)) {
+        Swal.fire('Error', 'Solo se permiten imágenes en formato JPG, PNG o WEBP.', 'error')
+        return
+    }
+
+    if (file.size > 2048 * 1024) {
+        Swal.fire('Error', 'El tamaño máximo permitido es 2MB.', 'error')
+        event.target.value = ''
+        return
+    }
+
+    const checkDimensions = (f) => {
+        return new Promise((resolve) => {
+            const img = new Image()
+            img.src = URL.createObjectURL(f)
+            img.onload = () => {
+                resolve({ width: img.width, height: img.height })
+            }
+        })
+    }
+
+    const dims = await checkDimensions(file)
+    if (dims.width > 2000 || dims.height > 2000) {
+        Swal.fire('Error', 'La imagen supera las dimensiones máximas permitidas (2000x2000px).', 'error')
+        event.target.value = ''
+        return
+    }
+
+    const formData = new FormData()
+    formData.append('foto', file)
+    formData.append('username', usuario.value.name)
+
+    uploading.value = true
+    try {
+        const response = await axios.post('/usuario/cambiar-imagen', formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        })
+
+        if (response.data.ok) {
+            Toast.fire({ icon: 'success', title: response.data.mensaje })
+            const newUrl = `/storage/fotos/usuarios/${usuario.value.name}.webp?t=${new Date().getTime()}`
+            cambiarFoto(newUrl)
+        }
+    } catch (error) {
+        console.error(error)
+        Swal.fire('Error', error.response?.data?.errors?.foto?.[0] || 'Ocurrió un problema al subir la imagen.', 'error')
+    } finally {
+        uploading.value = false
+        event.target.value = ''
+    }
+}
+
+const avatarUrl = computed(() => {
+    return usuario.value?.foto || `/storage/fotos/usuarios/${usuario.value?.name}.webp`
+})
+
+const isEditing = ref(false)
+const saving = ref(false)
+const form = ref({
+    fecha_nac: '',
+    genero: '',
+    estado_civil: '',
+    celular: '',
+    email: '',
+    profesion: '',
+    ocupacion: '',
+    direccion: ''
+})
+
+const toggleEdit = () => {
+    if (!isEditing.value) {
+        const p = usuario.value?.persona || {}
+        form.value = {
+            fecha_nac: p.fecha_nac || '',
+            genero: p.genero || '',
+            estado_civil: p.estado_civil || '',
+            celular: p.celular || '',
+            email: p.email || '',
+            profesion: p.profesion || '',
+            ocupacion: p.ocupacion || '',
+            direccion: p.direccion || ''
+        }
+    }
+    isEditing.value = !isEditing.value
+}
+
+const saveProfile = async () => {
+    saving.value = true
+    try {
+        const response = await axios.post('/usuario-actualizar-perfil', form.value)
+        if (response.data.ok) {
+            Toast.fire({ icon: 'success', title: response.data.mensaje })
+            isEditing.value = false
+            await useUsuarioStore().cargarDatosSession()
+        }
+    } catch (error) {
+        console.error(error)
+        Swal.fire('Error', 'Ocurrió un error al guardar los datos', 'error')
+    } finally {
+        saving.value = false
+    }
+}
 </script>
 
 <template>
@@ -47,8 +166,16 @@ const onChangeRole = async () => {
             <div class="col-12 col-lg-4">
                 <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
                     <div class="card-header bg-primary py-5 text-center position-relative">
-                        <div class="avatar avatar-xl shadow-lg border border-4 border-white mx-auto mb-3">
-                            <img :src="`/storage/fotos/usuarios/${usuario?.name}.webp`" @error="(e) => e.target.src = '/storage/fotos/usuarios/default.png'">
+                        <div class="avatar-wrapper mx-auto mb-3 position-relative" style="width: 100px; height: 100px;">
+                            <div class="avatar avatar-xl shadow-lg border border-4 border-white w-100 h-100 rounded-circle overflow-hidden">
+                                <img :src="avatarUrl" @error="(e) => e.target.src = '/NEXEL/images/avatar/1.png'">
+                            </div>
+                            <button class="btn btn-sm btn-light rounded-circle position-absolute bottom-0 end-0 shadow-sm border" 
+                                    @click="triggerUpload" :disabled="uploading" title="Cambiar Foto"
+                                    style="width: 32px; height: 32px; padding: 0; display: flex; align-items: center; justify-content: center; transform: translate(15%, 15%); z-index: 10;">
+                                <i class="fas" :class="uploading ? 'fa-spinner fa-spin' : 'fa-camera'"></i>
+                            </button>
+                            <input type="file" ref="fileInput" class="d-none" accept="image/jpeg, image/png, image/webp" @change="handleFileUpload">
                         </div>
                         <h5 class="text-white fw-bold mb-0 text-uppercase">{{ usuario?.name }}</h5>
                         <p class="text-white-50 small mb-0">{{ rolActualName }}</p>
@@ -81,11 +208,26 @@ const onChangeRole = async () => {
             <!-- Datos Detallados -->
             <div class="col-12 col-lg-8">
                 <div class="card border-0 shadow-sm rounded-4 p-4">
-                    <div class="d-flex align-items-center mb-4">
-                        <div class="icon-box bg-primary-subtle text-primary rounded-circle me-3">
-                            <i class="fas fa-id-card"></i>
+                    <div class="d-flex align-items-center justify-content-between mb-4">
+                        <div class="d-flex align-items-center">
+                            <div class="icon-box bg-primary-subtle text-primary rounded-circle me-3">
+                                <i class="fas fa-id-card"></i>
+                            </div>
+                            <h5 class="fw-bold mb-0 text-dark">Información Personal</h5>
                         </div>
-                        <h5 class="fw-bold mb-0 text-dark">Información Personal</h5>
+                        <div>
+                            <button v-if="!isEditing" @click="toggleEdit" class="btn btn-light border shadow-sm btn-sm px-3 rounded-pill">
+                                <i class="fas fa-edit me-1"></i> Editar
+                            </button>
+                            <div v-else class="d-flex gap-2">
+                                <button @click="toggleEdit" class="btn btn-light border shadow-sm btn-sm px-3 rounded-pill" :disabled="saving">
+                                    Cancelar
+                                </button>
+                                <button @click="saveProfile" class="btn btn-primary shadow-sm btn-sm px-3 rounded-pill" :disabled="saving">
+                                    <i class="fas" :class="saving ? 'fa-spinner fa-spin' : 'fa-save'"></i> Guardar
+                                </button>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="row g-4 pt-2">
@@ -98,38 +240,57 @@ const onChangeRole = async () => {
 
                         <div class="col-md-4">
                             <label class="text-muted small fw-bold text-uppercase d-block mb-1">Fecha Nac.</label>
-                            <div class="fw-bold text-dark"><i class="fas fa-calendar-day me-2 text-primary opacity-50"></i> {{ usuario?.persona?.fecha_nac || '-' }}</div>
+                            <div v-if="!isEditing" class="fw-bold text-dark"><i class="fas fa-calendar-day me-2 text-primary opacity-50"></i> {{ usuario?.persona?.fecha_nac || '-' }}</div>
+                            <input v-else type="date" v-model="form.fecha_nac" class="form-control form-control-sm">
                         </div>
                         <div class="col-md-4">
                             <label class="text-muted small fw-bold text-uppercase d-block mb-1">Género</label>
-                            <div class="fw-bold text-dark"><i class="fas fa-venus-mars me-2 text-primary opacity-50"></i> {{ usuario?.persona?.genero || '-' }}</div>
+                            <div v-if="!isEditing" class="fw-bold text-dark"><i class="fas fa-venus-mars me-2 text-primary opacity-50"></i> {{ usuario?.persona?.genero || '-' }}</div>
+                            <select v-else v-model="form.genero" class="form-select form-select-sm">
+                                <option value="">Seleccionar</option>
+                                <option value="M">Masculino</option>
+                                <option value="F">Femenino</option>
+                            </select>
                         </div>
                         <div class="col-md-4">
                             <label class="text-muted small fw-bold text-uppercase d-block mb-1">Estado Civil</label>
-                            <div class="fw-bold text-dark"><i class="fas fa-heart me-2 text-primary opacity-50"></i> {{ usuario?.persona?.estado_civil || '-' }}</div>
+                            <div v-if="!isEditing" class="fw-bold text-dark"><i class="fas fa-heart me-2 text-primary opacity-50"></i> {{ usuario?.persona?.estado_civil || '-' }}</div>
+                            <select v-else v-model="form.estado_civil" class="form-select form-select-sm">
+                                <option value="">Seleccionar</option>
+                                <option value="SOLTERO(A)">Soltero(a)</option>
+                                <option value="CASADO(A)">Casado(a)</option>
+                                <option value="DIVORCIADO(A)">Divorciado(a)</option>
+                                <option value="VIUDO(A)">Viudo(a)</option>
+                                <option value="CONVIVIENTE">Conviviente</option>
+                            </select>
                         </div>
 
                         <div class="col-md-6">
                             <label class="text-muted small fw-bold text-uppercase d-block mb-1">Celular Principal</label>
-                            <div class="fw-bold text-dark"><i class="fas fa-phone-alt me-2 text-primary opacity-50"></i> {{ usuario?.persona?.celular || '-' }}</div>
+                            <div v-if="!isEditing" class="fw-bold text-dark"><i class="fas fa-phone-alt me-2 text-primary opacity-50"></i> {{ usuario?.persona?.celular || '-' }}</div>
+                            <input v-else type="text" v-model="form.celular" class="form-control form-control-sm" placeholder="Ej: 999888777">
                         </div>
                         <div class="col-md-6">
                             <label class="text-muted small fw-bold text-uppercase d-block mb-1">Correo Electrónico</label>
-                            <div class="fw-bold text-dark"><i class="fas fa-envelope me-2 text-primary opacity-50"></i> {{ usuario?.persona?.email || '-' }}</div>
+                            <div v-if="!isEditing" class="fw-bold text-dark"><i class="fas fa-envelope me-2 text-primary opacity-50"></i> {{ usuario?.persona?.email || '-' }}</div>
+                            <input v-else type="email" v-model="form.email" class="form-control form-control-sm" placeholder="correo@ejemplo.com">
                         </div>
 
                         <div class="col-md-6">
                             <label class="text-muted small fw-bold text-uppercase d-block mb-1">Profesión</label>
-                            <div class="fw-bold text-dark"><i class="fas fa-user-graduate me-2 text-primary opacity-50"></i> {{ usuario?.persona?.profesion || '-' }}</div>
+                            <div v-if="!isEditing" class="fw-bold text-dark"><i class="fas fa-user-graduate me-2 text-primary opacity-50"></i> {{ usuario?.persona?.profesion || '-' }}</div>
+                            <input v-else type="text" v-model="form.profesion" class="form-control form-control-sm">
                         </div>
                         <div class="col-md-6">
                             <label class="text-muted small fw-bold text-uppercase d-block mb-1">Ocupación</label>
-                            <div class="fw-bold text-dark"><i class="fas fa-tools me-2 text-primary opacity-50"></i> {{ usuario?.persona?.ocupacion || '-' }}</div>
+                            <div v-if="!isEditing" class="fw-bold text-dark"><i class="fas fa-tools me-2 text-primary opacity-50"></i> {{ usuario?.persona?.ocupacion || '-' }}</div>
+                            <input v-else type="text" v-model="form.ocupacion" class="form-control form-control-sm">
                         </div>
 
                         <div class="col-12">
                             <label class="text-muted small fw-bold text-uppercase d-block mb-1">Dirección de Domicilio</label>
-                            <div class="fw-bold text-dark"><i class="fas fa-map-marker-alt me-2 text-primary opacity-50"></i> {{ usuario?.persona?.direccion || '-' }}</div>
+                            <div v-if="!isEditing" class="fw-bold text-dark"><i class="fas fa-map-marker-alt me-2 text-primary opacity-50"></i> {{ usuario?.persona?.direccion || '-' }}</div>
+                            <input v-else type="text" v-model="form.direccion" class="form-control form-control-sm">
                         </div>
                     </div>
                 </div>

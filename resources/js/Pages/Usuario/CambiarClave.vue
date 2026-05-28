@@ -9,9 +9,9 @@ const { respuesta, cambiarClave } = useUsuario()
 
 const loading = ref(false)
 const form = ref({
-  clave_actual: '',
-  clave_nueva: '',
-  clave_nueva_confirmacion: ''
+  current_password: '',
+  password: '',
+  password_confirmation: ''
 })
 
 const show = ref({
@@ -26,16 +26,16 @@ const clearErrors = () => {
   errors.value = {}
 }
 
-const minOk = computed(() => (form.value.clave_nueva || '').length >= 8)
-const matchOk = computed(() => form.value.clave_nueva === form.value.clave_nueva_confirmacion && form.value.clave_nueva !== '')
+const minOk = computed(() => (form.value.password || '').length >= 8)
+const matchOk = computed(() => form.value.password === form.value.password_confirmation && form.value.password !== '')
 
 const validateClient = () => {
   const e = {}
-  if (!form.value.clave_actual) e.clave_actual = ['Ingresa tu clave actual.']
-  if (!form.value.clave_nueva) e.clave_nueva = ['Ingresa la nueva clave.']
-  else if (!minOk.value) e.clave_nueva = ['Mínimo 8 caracteres.']
-  if (!form.value.clave_nueva_confirmacion) e.clave_nueva_confirmacion = ['Confirma la nueva clave.']
-  else if (!matchOk.value) e.clave_nueva_confirmacion = ['Las claves no coinciden.']
+  if (!form.value.current_password) e.current_password = ['Ingresa tu clave actual.']
+  if (!form.value.password) e.password = ['Ingresa la nueva clave.']
+  else if (!minOk.value) e.password = ['Mínimo 8 caracteres.']
+  if (!form.value.password_confirmation) e.password_confirmation = ['Confirma la nueva clave.']
+  else if (!matchOk.value) e.password_confirmation = ['Las claves no coinciden.']
   errors.value = e
   return Object.keys(e).length === 0
 }
@@ -48,7 +48,7 @@ const submit = async () => {
   try {
     const res = await cambiarClave(form.value)
 
-    form.value = { clave_actual: '', clave_nueva: '', clave_nueva_confirmacion: '' }
+    form.value = { current_password: '', password: '', password_confirmation: '' }
 
     if (Swal) {
       Swal.fire({
@@ -103,21 +103,21 @@ const submit = async () => {
                     <form @submit.prevent="submit" class="row g-3">
                         <div class="col-12">
                             <label class="form-label text-muted small fw-bold text-uppercase px-1">Clave Actual</label>
-                            <div class="input-group bg-light rounded-pill px-3 overflow-hidden border" :class="{ 'border-danger': errors.clave_actual }">
+                            <div class="input-group bg-light rounded-pill px-3 overflow-hidden border" :class="{ 'border-danger': errors.current_password }">
                                 <span class="input-group-text bg-transparent border-0 text-muted"><i class="fas fa-lock"></i></span>
-                                <input v-model="form.clave_actual" :type="show.actual ? 'text' : 'password'" class="form-control bg-transparent border-0 shadow-none py-2" placeholder="Digite su clave vigente">
+                                <input v-model="form.current_password" :type="show.actual ? 'text' : 'password'" class="form-control bg-transparent border-0 shadow-none py-2" placeholder="Digite su clave vigente">
                                 <button class="btn btn-transparent border-0 text-muted" type="button" @click="show.actual = !show.actual">
                                     <i class="fas" :class="show.actual ? 'fa-eye-slash' : 'fa-eye'"></i>
                                 </button>
                             </div>
-                            <div v-if="errors.clave_actual" class="text-danger small px-4 mt-1">{{ errors.clave_actual[0] }}</div>
+                            <div v-if="errors.current_password" class="text-danger small px-4 mt-1">{{ errors.current_password[0] }}</div>
                         </div>
 
                         <div class="col-md-6 mt-4">
                             <label class="form-label text-muted small fw-bold text-uppercase px-1">Nueva Clave</label>
-                            <div class="input-group bg-light rounded-pill px-3 overflow-hidden border" :class="{ 'border-danger': errors.clave_nueva, 'border-success': minOk }">
+                            <div class="input-group bg-light rounded-pill px-3 overflow-hidden border" :class="{ 'border-danger': errors.password, 'border-success': minOk }">
                                 <span class="input-group-text bg-transparent border-0 text-muted"><i class="fas fa-shield-alt"></i></span>
-                                <input v-model="form.clave_nueva" :type="show.nueva ? 'text' : 'password'" class="form-control bg-transparent border-0 shadow-none py-2" placeholder="Mínimo 8 caracteres">
+                                <input v-model="form.password" :type="show.nueva ? 'text' : 'password'" class="form-control bg-transparent border-0 shadow-none py-2" placeholder="Mínimo 8 caracteres">
                                 <button class="btn btn-transparent border-0 text-muted" type="button" @click="show.nueva = !show.nueva">
                                     <i class="fas" :class="show.nueva ? 'fa-eye-slash' : 'fa-eye'"></i>
                                 </button>
@@ -127,13 +127,14 @@ const submit = async () => {
                                     <i class="fas me-1" :class="minOk ? 'fa-check-circle' : 'fa-circle opacity-25'"></i> Longitud segura
                                 </span>
                             </div>
+                            <div v-if="errors.password" class="text-danger small px-4 mt-1">{{ errors.password[0] }}</div>
                         </div>
 
                         <div class="col-md-6 mt-4">
                             <label class="form-label text-muted small fw-bold text-uppercase px-1">Confirmar Clave</label>
-                            <div class="input-group bg-light rounded-pill px-3 overflow-hidden border" :class="{ 'border-danger': errors.clave_nueva_confirmacion, 'border-success': matchOk && minOk }">
+                            <div class="input-group bg-light rounded-pill px-3 overflow-hidden border" :class="{ 'border-danger': errors.password_confirmation, 'border-success': matchOk && minOk }">
                                 <span class="input-group-text bg-transparent border-0 text-muted"><i class="fas fa-check-double"></i></span>
-                                <input v-model="form.clave_nueva_confirmacion" :type="show.confirm ? 'text' : 'password'" class="form-control bg-transparent border-0 shadow-none py-2" placeholder="Repita la nueva clave">
+                                <input v-model="form.password_confirmation" :type="show.confirm ? 'text' : 'password'" class="form-control bg-transparent border-0 shadow-none py-2" placeholder="Repita la nueva clave">
                                 <button class="btn btn-transparent border-0 text-muted" type="button" @click="show.confirm = !show.confirm">
                                     <i class="fas" :class="show.confirm ? 'fa-eye-slash' : 'fa-eye'"></i>
                                 </button>
@@ -143,10 +144,11 @@ const submit = async () => {
                                     <i class="fas me-1" :class="matchOk ? 'fa-check-circle' : 'fa-circle opacity-25'"></i> Coinciden
                                 </span>
                             </div>
+                            <div v-if="errors.password_confirmation" class="text-danger small px-4 mt-1">{{ errors.password_confirmation[0] }}</div>
                         </div>
 
                         <div class="col-12 text-end mt-5 pt-3 border-top">
-                            <button type="button" class="btn btn-light rounded-pill px-4 text-muted border me-2" @click="form = { clave_actual: '', clave_nueva: '', clave_nueva_confirmacion: '' }; clearErrors()">
+                            <button type="button" class="btn btn-light rounded-pill px-4 text-muted border me-2" @click="form = { current_password: '', password: '', password_confirmation: '' }; clearErrors()">
                                 <i class="fas fa-eraser me-1"></i> LIMPIAR
                             </button>
                             <button type="submit" class="btn btn-primary rounded-pill px-5 fw-bold shadow" :disabled="loading">
