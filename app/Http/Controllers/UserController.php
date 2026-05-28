@@ -15,6 +15,7 @@ use App\Models\Role;
 use App\Models\User;
 use App\Http\Traits\UserFilters;
 use App\Models\Agencia;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
