@@ -239,7 +239,7 @@ class UserController extends Controller
     public function habilitados(Request $request)
     {
         $filters = $this->getUserFilters();
-        $buscar = mb_strtoupper($request->buscar);
+        $buscar = mb_strtoupper($request->buscar ?? '');
         $paginacion = $request->paginacion;
         $usuarios = User::query()
             ->whereRaw("upper(name) like ?", ['%' . $buscar . '%'])
@@ -258,7 +258,7 @@ class UserController extends Controller
     public function inactivos(Request $request)
     {
         $filters = $this->getUserFilters();
-        $buscar = mb_strtoupper($request->buscar);
+        $buscar = mb_strtoupper($request->buscar ?? '');
         $paginacion = $request->paginacion;
         $usuarios = User::query()
             ->whereRaw("upper(name) like ?", ['%' . $buscar . '%'])
@@ -277,7 +277,7 @@ class UserController extends Controller
     public function todos(Request $request)
     {
         $filters = $this->getUserFilters();
-        $buscar = mb_strtoupper($request->buscar);
+        $buscar = mb_strtoupper($request->buscar ?? '');
         $paginacion = $request->paginacion;
         $usuarios = User::query()
             ->whereRaw("upper(name) like ?", ['%' . $buscar . '%'])
