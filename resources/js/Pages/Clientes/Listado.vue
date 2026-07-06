@@ -351,35 +351,37 @@ onMounted(() => {
     />
 
     <!-- Modal Asignar Asesor -->
-    <div class="modal fade" id="modalasignar" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 shadow-lg rounded-4">
-                <div class="modal-header border-0 pb-0">
-                    <h5 class="modal-title fw-bold">Asignar Asesor</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body py-4">
-                    <div class="mb-3">
-                        <label class="form-label text-muted small fw-bold text-uppercase">Seleccione Asesor <span class="text-danger">*</span></label>
-                        <select class="form-select bg-light border-0" v-model="modalAsignacion.asesor_id">
-                            <option value="">-- Seleccionar --</option>
-                            <option v-for="a in asesores" :key="a.id" :value="a.id">{{ a.name }}</option>
-                        </select>
+    <teleport to="body">
+        <div class="modal fade" id="modalasignar" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+                    <div class="modal-header border-0 pb-0">
+                        <h5 class="modal-title fw-bold">Asignar Asesor</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <div class="form-check form-switch mb-0">
-                        <input class="form-check-input" type="checkbox" role="switch" id="checkvigentes" v-model="modalAsignacion.convigentes">
-                        <label class="form-check-label ms-2 text-dark" for="checkvigentes">
-                            ¿Reasignar también todos los créditos vigentes de estos clientes?
-                        </label>
+                    <div class="modal-body py-4">
+                        <div class="mb-3">
+                            <label class="form-label text-muted small fw-bold text-uppercase">Seleccione Asesor <span class="text-danger">*</span></label>
+                            <select class="form-select bg-light border-0" v-model="modalAsignacion.asesor_id">
+                                <option value="">-- Seleccionar --</option>
+                                <option v-for="a in asesores" :key="a.id" :value="a.id">{{ a.name }}</option>
+                            </select>
+                        </div>
+                        <div class="form-check form-switch mb-0">
+                            <input class="form-check-input" type="checkbox" role="switch" id="checkvigentes" v-model="modalAsignacion.convigentes">
+                            <label class="form-check-label ms-2 text-dark" for="checkvigentes">
+                                ¿Reasignar también todos los créditos vigentes de estos clientes?
+                            </label>
+                        </div>
                     </div>
-                </div>
-                <div class="modal-footer border-0 pt-0">
-                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-primary rounded-pill px-4" @click="guardarAsignacion">Guardar Asignación</button>
+                    <div class="modal-footer border-0 pt-0">
+                        <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn btn-primary rounded-pill px-4" @click="guardarAsignacion">Guardar Asignación</button>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
+    </teleport>
   </AppLayoutDefault>
 </template>
 
