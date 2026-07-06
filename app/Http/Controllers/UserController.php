@@ -15,6 +15,7 @@ use App\Models\Role;
 use App\Models\User;
 use App\Http\Traits\UserFilters;
 use App\Models\Agencia;
+use App\Models\Asesor;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
@@ -28,36 +29,99 @@ class UserController extends Controller
 {
     use UserFilters;
 
+    // public function store(StoreUserRequest $request)
+    // {
+    //     $file = $request->file('foto');
+
+    //     // 1) Validar foto ANTES de registrar
+    //     if ($file) {
+    //         $errores = [];
+
+    //         // peso
+    //         if ($file->getSize() > 3072 * 1024) {
+    //             $errores['foto'][] = 'El tamaño máximo permitido es 3MB.';
+    //         }
+
+    //         // opcional: validar que sea imagen real
+    //         if (!$file->isValid()) {
+    //             $errores['foto'][] = 'El archivo de foto es inválido.';
+    //         }
+
+    //         // opcional: validar mime
+    //         $allowed = ['image/jpeg', 'image/png', 'image/webp'];
+    //         if (!in_array($file->getMimeType(), $allowed)) {
+    //             $errores['foto'][] = 'Formato permitido: JPG, PNG o WEBP.';
+    //         }
+
+    //         if (!empty($errores)) {
+    //             return response()->json(['errors' => $errores], 422);
+    //         }
+    //     }
+
+    //     // 2) Transacción: si falla algo, NO se guarda nada
+    //     return DB::transaction(function () use ($request, $file) {
+
+    //         Persona::firstOrCreate(
+    //             ['dni' => $request->dni],
+    //             [
+    //                 'ape_pat'      => $request->apepat,
+    //                 'ape_mat'      => $request->apemat,
+    //                 'primernombre' => $request->primernombre,
+    //                 'otrosnombres' => $request->otrosnombres,
+    //                 'celular'      => $request->celular,
+    //             ]
+    //         );
+
+    //         $usuario = User::create([
+    //             'name'     => $request->username,
+    //             'dni'      => $request->dni,
+    //             'password' => Hash::make($request->username),
+    //         ]);
+
+    //         // Guardar foto (solo si existe y ya pasó validación)
+    //         if ($file) {
+    //             $manager = new ImageManager(new Driver());
+    //             $image = $manager->read($file);
+
+    //             if ($image->width() > 800 || $image->height() > 1000) {
+    //                 $image->resize(800, 1000, function ($constraint) {
+    //                     $constraint->aspectRatio();
+    //                     $constraint->upsize();
+    //                 });
+    //             }
+
+    //             $nombre_archivo = $request->username . ".webp";
+    //             Storage::disk('fotos')->makeDirectory('usuarios');
+
+    //             // IMPORTANTE: si quieres que realmente sea WEBP,
+    //             // guarda el resultado convertido (no el $file original)
+    //             $webp = (string) $image->toWebp(80);
+    //             Storage::disk('fotos')->put('usuarios/' . $nombre_archivo, $webp);
+    //         }
+
+    //         $usuario->roles()->sync([$request->role_id]);
+
+    //         if ($request->role_id == 3) {
+    //             Asesor::create([
+    //                 'user_id' => $usuario->id,
+    //             ]);
+    //         }
+
+    //         return response()->json([
+    //             'ok' => 1,
+    //             'mensaje' => 'Usuario Registrado satisfactoriamente'
+    //         ], 200);
+    //     });
+    // }
+
     public function store(StoreUserRequest $request)
     {
         $file = $request->file('foto');
 
-        // 1) Validar foto ANTES de registrar
-        if ($file) {
-            $errores = [];
-
-            // peso
-            if ($file->getSize() > 3072 * 1024) {
-                $errores['foto'][] = 'El tamaño máximo permitido es 3MB.';
-            }
-
-            // opcional: validar que sea imagen real
-            if (!$file->isValid()) {
-                $errores['foto'][] = 'El archivo de foto es inválido.';
-            }
-
-            // opcional: validar mime
-            $allowed = ['image/jpeg', 'image/png', 'image/webp'];
-            if (!in_array($file->getMimeType(), $allowed)) {
-                $errores['foto'][] = 'Formato permitido: JPG, PNG o WEBP.';
-            }
-
-            if (!empty($errores)) {
-                return response()->json(['errors' => $errores], 422);
-            }
+        if ($response = $this->validarFoto($file)) {
+            return $response;
         }
 
-        // 2) Transacción: si falla algo, NO se guarda nada
         return DB::transaction(function () use ($request, $file) {
 
             Persona::firstOrCreate(
@@ -77,34 +141,77 @@ class UserController extends Controller
                 'password' => Hash::make($request->username),
             ]);
 
-            // Guardar foto (solo si existe y ya pasó validación)
             if ($file) {
-                $manager = new ImageManager(new Driver());
-                $image = $manager->read($file);
-
-                if ($image->width() > 800 || $image->height() > 1000) {
-                    $image->resize(800, 1000, function ($constraint) {
-                        $constraint->aspectRatio();
-                        $constraint->upsize();
-                    });
-                }
-
-                $nombre_archivo = $request->username . ".webp";
-                Storage::disk('fotos')->makeDirectory('usuarios');
-
-                // IMPORTANTE: si quieres que realmente sea WEBP,
-                // guarda el resultado convertido (no el $file original)
-                $webp = (string) $image->toWebp(80);
-                Storage::disk('fotos')->put('usuarios/' . $nombre_archivo, $webp);
+                $this->guardarFoto($file, $request->username);
             }
 
             $usuario->roles()->sync([$request->role_id]);
 
+            if ((int) $request->role_id === 3) {
+                Asesor::create([
+                    'user_id' => $usuario->id,
+                ]);
+            }
+
             return response()->json([
-                'ok' => 1,
-                'mensaje' => 'Usuario Registrado satisfactoriamente'
-            ], 200);
+                'ok'      => 1,
+                'mensaje' => 'Usuario registrado satisfactoriamente.'
+            ]);
         });
+    }
+
+    private function validarFoto($file)
+    {
+        if (!$file) {
+            return null;
+        }
+
+        $errores = [];
+
+        if (!$file->isValid()) {
+            $errores['foto'][] = 'El archivo de foto es inválido.';
+        }
+
+        if ($file->getSize() > 3 * 1024 * 1024) {
+            $errores['foto'][] = 'El tamaño máximo permitido es 3 MB.';
+        }
+
+        if (!in_array($file->getMimeType(), [
+            'image/jpeg',
+            'image/png',
+            'image/webp'
+        ])) {
+            $errores['foto'][] = 'Formato permitido: JPG, PNG o WEBP.';
+        }
+
+        if (!empty($errores)) {
+            return response()->json([
+                'errors' => $errores
+            ], 422);
+        }
+
+        return null;
+    }
+
+    private function guardarFoto($file, $nombre)
+    {
+        $manager = new ImageManager(new Driver());
+
+        $image = $manager->read($file);
+
+        if ($image->width() > 800 || $image->height() > 1000) {
+            $image->resize(800, 1000, function ($constraint) {
+                $constraint->aspectRatio();
+                $constraint->upsize();
+            });
+        }
+
+        Storage::disk('fotos')->makeDirectory('usuarios');
+
+        Storage::disk('fotos')->put(
+            "usuarios/{$nombre}.webp",
+            (string) $image->toWebp(80)
+        );
     }
 
     public function cambiarclaveperfil(UpdatePasswordRequest $request)
@@ -191,68 +298,138 @@ class UserController extends Controller
             'mensaje' => 'Imagen Cambiado con Exito'
         ], 200);
     }
+    // public function update(UpdateUserRequest $request)
+    // {
+    //     $file = $request->file('foto');
+
+    //     $user = User::findOrFail($request->id);
+
+    //     // Guardar el DNI anterior
+    //     $dniAnterior = $user->dni;
+
+    //     // Actualizar usuario
+    //     $user->update([
+    //         'name' => $request->username,
+    //         'dni'  => $request->dni,
+    //     ]);
+
+    //     // Buscar la persona por el DNI anterior
+    //     $persona = Persona::where('dni', $dniAnterior)->first();
+
+    //     if ($persona) {
+    //         $persona->update([
+    //             'dni'           => $request->dni,
+    //             'ape_pat'       => $request->apepat,
+    //             'ape_mat'       => $request->apemat,
+    //             'primernombre'  => $request->primernombre,
+    //             'otrosnombres'  => $request->otrosnombres,
+    //             'celular'       => $request->celular,
+    //         ]);
+    //     } else {
+    //         Persona::create([
+    //             'dni'           => $request->dni,
+    //             'ape_pat'       => $request->apepat,
+    //             'ape_mat'       => $request->apemat,
+    //             'primernombre'  => $request->primernombre,
+    //             'otrosnombres'  => $request->otrosnombres,
+    //             'celular'       => $request->celular,
+    //         ]);
+    //     }
+    //     if ($file) {
+    //         $errores = [];
+    //         if ($file->getSize() > 2048 * 1024) {
+    //             $errores['foto'][] = 'El tamaño máximo permitido es 2MB.';
+    //         }
+    //         $manager = new ImageManager(new Driver());
+    //         $image = $manager->read($file);
+    //         if ($image->width() > 800 || $image->height() > 1000) {
+    //             $image->resize(800, 1000, function ($constraint) {
+    //                 $constraint->aspectRatio();
+    //                 $constraint->upsize();
+    //             });
+    //         }
+    //         if (!empty($errores)) {
+    //             return response()->json(['errors' => $errores], 422);
+    //         }
+    //         $nombre_archivo = $request->username . ".webp";
+    //         Storage::disk('fotos')->makeDirectory('usuarios');
+    //         Storage::disk('fotos')->put('usuarios/' . $nombre_archivo, File::get($file));
+    //     }
+    //     return response()->json([
+    //         'ok' => 1,
+    //         'mensaje' => 'Se guardo Exito'
+    //     ], 200);
+    // }
+
     public function update(UpdateUserRequest $request)
     {
         $file = $request->file('foto');
 
-        $user = User::findOrFail($request->id);
-
-        // Guardar el DNI anterior
-        $dniAnterior = $user->dni;
-
-        // Actualizar usuario
-        $user->update([
-            'name' => $request->username,
-            'dni'  => $request->dni,
-        ]);
-
-        // Buscar la persona por el DNI anterior
-        $persona = Persona::where('dni', $dniAnterior)->first();
-
-        if ($persona) {
-            $persona->update([
-                'dni'           => $request->dni,
-                'ape_pat'       => $request->apepat,
-                'ape_mat'       => $request->apemat,
-                'primernombre'  => $request->primernombre,
-                'otrosnombres'  => $request->otrosnombres,
-                'celular'       => $request->celular,
-            ]);
-        } else {
-            Persona::create([
-                'dni'           => $request->dni,
-                'ape_pat'       => $request->apepat,
-                'ape_mat'       => $request->apemat,
-                'primernombre'  => $request->primernombre,
-                'otrosnombres'  => $request->otrosnombres,
-                'celular'       => $request->celular,
-            ]);
+        if ($response = $this->validarFoto($file)) {
+            return $response;
         }
-        if ($file) {
-            $errores = [];
-            if ($file->getSize() > 2048 * 1024) {
-                $errores['foto'][] = 'El tamaño máximo permitido es 2MB.';
+
+        return DB::transaction(function () use ($request, $file) {
+
+            $user = User::findOrFail($request->id);
+
+            $dniAnterior = $user->dni;
+
+            // Actualizar usuario
+            $user->update([
+                'name' => $request->username,
+                'dni'  => $request->dni,
+            ]);
+
+            // Actualizar o crear la persona
+            $persona = Persona::where('dni', $dniAnterior)->first();
+
+            if ($persona) {
+                $persona->update([
+                    'dni'           => $request->dni,
+                    'ape_pat'       => $request->apepat,
+                    'ape_mat'       => $request->apemat,
+                    'primernombre'  => $request->primernombre,
+                    'otrosnombres'  => $request->otrosnombres,
+                    'celular'       => $request->celular,
+                ]);
+            } else {
+                Persona::create([
+                    'dni'           => $request->dni,
+                    'ape_pat'       => $request->apepat,
+                    'ape_mat'       => $request->apemat,
+                    'primernombre'  => $request->primernombre,
+                    'otrosnombres'  => $request->otrosnombres,
+                    'celular'       => $request->celular,
+                ]);
             }
-            $manager = new ImageManager(new Driver());
-            $image = $manager->read($file);
-            if ($image->width() > 800 || $image->height() > 1000) {
-                $image->resize(800, 1000, function ($constraint) {
-                    $constraint->aspectRatio();
-                    $constraint->upsize();
-                });
+
+            // Guardar foto
+            if ($file) {
+                $this->guardarFoto($file, $request->username);
             }
-            if (!empty($errores)) {
-                return response()->json(['errors' => $errores], 422);
+
+            // Actualizar rol
+            $user->roles()->sync([$request->role_id]);
+
+            // Mantener sincronizada la tabla asesores
+            if ((int) $request->role_id === 3) {
+
+                Asesor::firstOrCreate([
+                    'user_id' => $user->id,
+                ]);
+            } else {
+
+                Asesor::where('user_id', $user->id)->delete();
             }
-            $nombre_archivo = $request->username . ".webp";
-            Storage::disk('fotos')->makeDirectory('usuarios');
-            Storage::disk('fotos')->put('usuarios/' . $nombre_archivo, File::get($file));
-        }
-        return response()->json([
-            'ok' => 1,
-            'mensaje' => 'Se guardo Exito'
-        ], 200);
+
+            return response()->json([
+                'ok'      => 1,
+                'mensaje' => 'Usuario actualizado satisfactoriamente.'
+            ]);
+        });
     }
+
     public function habilitados(Request $request)
     {
         $filters = $this->getUserFilters();

@@ -362,6 +362,9 @@ onMounted(() => {
                     <div class="modal-body py-4">
                         <div class="mb-3">
                             <label class="form-label text-muted small fw-bold text-uppercase">Seleccione Asesor <span class="text-danger">*</span></label>
+
+
+                            <pre>{{ asesores }}</pre>
                             <select class="form-select bg-light border-0" v-model="modalAsignacion.asesor_id">
                                 <option value="">-- Seleccionar --</option>
                                 <option v-for="a in asesores" :key="a.id" :value="a.id">{{ a.name }}</option>
