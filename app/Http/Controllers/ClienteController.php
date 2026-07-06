@@ -11,6 +11,7 @@ use App\Models\Cliente;
 use App\Models\Credito;
 use App\Models\Negocio;
 use App\Models\Persona;
+use App\Models\Ahorro;
 use Illuminate\Http\Request;
 use Intervention\Image\ImageManager;
 use Illuminate\Support\Facades\DB;
@@ -154,6 +155,12 @@ class ClienteController extends Controller
             if ($convigentes) {
                 Credito::where('cliente_id', $row['id'])
                     ->where('estado', 'DESEMBOLSADO')
+                    ->update([
+                        'asesor_id' => $nuevo_asesor_id
+                    ]);
+
+                Ahorro::where('cliente_id', $row['id'])
+                    ->where('estado', 'ACTIVO')
                     ->update([
                         'asesor_id' => $nuevo_asesor_id
                     ]);
