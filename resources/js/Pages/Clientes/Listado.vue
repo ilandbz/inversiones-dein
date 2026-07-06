@@ -243,7 +243,7 @@ onMounted(() => {
                             <thead class="bg-light">
                                 <tr class="text-muted small text-uppercase fw-bold">
                                     <th class="ps-4 py-3" style="width: 80px;">
-                                        <div class="d-flex align-items-center gap-2" v-if="['SUPER USUARIO', 'ADMINISTRADOR', 'GERENTE', 'GERENTE AGENCIA'].includes(role)">
+                                        <div class="d-flex align-items-center gap-2" v-if="['SUPER USUARIO', 'ADMINISTRADOR', 'GERENTE', 'GERENTE AGENCIA'].includes(role?.nombre)">
                                             <input class="form-check-input mt-0" type="checkbox" v-model="seleccionarTodos" @change="toggleSeleccionarTodos">
                                             <span>#</span>
                                         </div>
@@ -272,7 +272,7 @@ onMounted(() => {
                                 <tr v-for="(c, index) in clientes.data" :key="c.id" class="transition-all" :class="{'bg-primary-subtle': seleccionados.includes(c.id)}">
                                     <td class="ps-4">
                                         <div class="d-flex align-items-center gap-2">
-                                            <input v-if="['SUPER USUARIO', 'ADMINISTRADOR', 'GERENTE', 'GERENTE AGENCIA'].includes(role)" 
+                                            <input v-if="['SUPER USUARIO', 'ADMINISTRADOR', 'GERENTE', 'GERENTE AGENCIA'].includes(role?.nombre)" 
                                                    class="form-check-input mt-0" type="checkbox" :value="c.id" v-model="seleccionados">
                                             <span class="small text-muted">{{ index + clientes.from }}</span>
                                         </div>
