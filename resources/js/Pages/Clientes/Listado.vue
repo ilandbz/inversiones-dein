@@ -3,6 +3,8 @@ import { ref, onMounted, nextTick } from 'vue'
 import AppLayoutDefault from '@/Layouts/AppLayoutDefault.vue'
 import useCliente from '@/Composables/Cliente.js'
 import useHelper from '@/Helpers'
+import useDatosSession from '@/Composables/session.js'
+import useAsesor from '@/Composables/Asesor.js'
 import FormCliente from './FormCliente.vue'
 
 const { openModal, Toast, Swal } = useHelper()
@@ -13,8 +15,12 @@ const {
   eliminarCliente,
   respuesta,
   cliente,
-  errors
+  errors,
+  asignarAsesorMasivo
 } = useCliente()
+
+const { role } = useDatosSession()
+const { listaAsesores, asesores } = useAsesor()
 
 const dato = ref({
     page: 1,
@@ -23,6 +29,50 @@ const dato = ref({
 });
 const modalTitle = ref('')
 const loading = ref(false)
+
+const seleccionados = ref([])
+const seleccionarTodos = ref(false)
+
+const toggleSeleccionarTodos = () => {
+    if (seleccionarTodos.value) {
+        seleccionados.value = clientes.value.data.map(c => c.id)
+    } else {
+        seleccionados.value = []
+    }
+}
+
+const modalAsignacion = ref({
+    asesor_id: '',
+    convigentes: false
+})
+
+const abrirModalAsignacion = () => {
+    listaAsesores()
+    modalAsignacion.value = { asesor_id: '', convigentes: false }
+    openModal('#modalasignar')
+}
+
+const guardarAsignacion = async () => {
+    if (!modalAsignacion.value.asesor_id) {
+        Toast.fire({ icon: 'warning', title: 'Seleccione un asesor' })
+        return
+    }
+    
+    let data = {
+        asesor_id: modalAsignacion.value.asesor_id,
+        selected: seleccionados.value.map(id => ({id: id})),
+        convigentes: modalAsignacion.value.convigentes
+    }
+    
+    await asignarAsesorMasivo(data)
+    if (respuesta.value?.ok == 1) {
+        Toast.fire({ icon: 'success', title: 'Clientes asignados correctamente' })
+        useHelper().closeModal('#modalasignar')
+        seleccionados.value = []
+        seleccionarTodos.value = false
+        listarClientes(dato.value.page)
+    }
+}
 
 const NEGOCIO_DEFAULT = () => ({
   id: '', razonsocial: '', ruc: '', celular: '', actividad_negocio_id: '',
@@ -148,7 +198,12 @@ onMounted(() => {
                     <h3 class="fw-bold text-dark mb-1">Listado de Clientes</h3>
                     <p class="text-muted small mb-0">Gestión centralizada de socios e información de contacto</p>
                 </div>
-                <div class="col-auto">
+                <div class="col-auto d-flex align-items-center">
+                    <button class="btn btn-warning shadow-sm rounded-pill px-4 py-2 fw-bold me-2 transition-all" 
+                            v-if="seleccionados.length > 0" 
+                            @click="abrirModalAsignacion">
+                        <i class="fas fa-exchange-alt me-2"></i> Asignar Asesor ({{ seleccionados.length }})
+                    </button>
                     <button class="btn btn-primary shadow-sm rounded-pill px-4 py-2 fw-bold" @click="nuevoCliente">
                         <i class="fas fa-user-plus me-2"></i> Nuevo Cliente
                     </button>
@@ -187,7 +242,13 @@ onMounted(() => {
                         <table class="table table-hover align-middle mb-0">
                             <thead class="bg-light">
                                 <tr class="text-muted small text-uppercase fw-bold">
-                                    <th class="ps-4 py-3">#</th>
+                                    <th class="ps-4 py-3" style="width: 80px;">
+                                        <div class="d-flex align-items-center gap-2" v-if="['SUPER USUARIO', 'GERENTE', 'GERENTE AGENCIA'].includes(role)">
+                                            <input class="form-check-input mt-0" type="checkbox" v-model="seleccionarTodos" @change="toggleSeleccionarTodos">
+                                            <span>#</span>
+                                        </div>
+                                        <span v-else>#</span>
+                                    </th>
                                     <th>Documento</th>
                                     <th>Nombres y Apellidos</th>
                                     <th>Contacto</th>
@@ -208,8 +269,14 @@ onMounted(() => {
                                         No se encontraron resultados.
                                     </td>
                                 </tr>
-                                <tr v-for="(c, index) in clientes.data" :key="c.id" class="transition-all">
-                                    <td class="ps-4 small text-muted">{{ index + clientes.from }}</td>
+                                <tr v-for="(c, index) in clientes.data" :key="c.id" class="transition-all" :class="{'bg-primary-subtle': seleccionados.includes(c.id)}">
+                                    <td class="ps-4">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <input v-if="['SUPER USUARIO', 'GERENTE', 'GERENTE AGENCIA'].includes(role)" 
+                                                   class="form-check-input mt-0" type="checkbox" :value="c.id" v-model="seleccionados">
+                                            <span class="small text-muted">{{ index + clientes.from }}</span>
+                                        </div>
+                                    </td>
                                     <td>
                                         <div class="fw-bold text-dark">{{ c.persona.dni }}</div>
                                         <div class="small text-muted" v-if="c.persona.ruc">{{ c.persona.ruc }}</div>
@@ -282,6 +349,37 @@ onMounted(() => {
       :modalTitle="modalTitle"
       @onListar="listarClientes"
     />
+
+    <!-- Modal Asignar Asesor -->
+    <div class="modal fade" id="modalasignar" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg rounded-4">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold">Asignar Asesor</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body py-4">
+                    <div class="mb-3">
+                        <label class="form-label text-muted small fw-bold text-uppercase">Seleccione Asesor <span class="text-danger">*</span></label>
+                        <select class="form-select bg-light border-0" v-model="modalAsignacion.asesor_id">
+                            <option value="">-- Seleccionar --</option>
+                            <option v-for="a in asesores" :key="a.id" :value="a.id">{{ a.name }}</option>
+                        </select>
+                    </div>
+                    <div class="form-check form-switch mb-0">
+                        <input class="form-check-input" type="checkbox" role="switch" id="checkvigentes" v-model="modalAsignacion.convigentes">
+                        <label class="form-check-label ms-2 text-dark" for="checkvigentes">
+                            ¿Reasignar también todos los créditos vigentes de estos clientes?
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary rounded-pill px-4" @click="guardarAsignacion">Guardar Asignación</button>
+                </div>
+            </div>
+        </div>
+    </div>
   </AppLayoutDefault>
 </template>
 
