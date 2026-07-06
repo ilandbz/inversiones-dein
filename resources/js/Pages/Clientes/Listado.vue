@@ -373,10 +373,10 @@ onMounted(() => {
     <option
         v-for="a in asesores"
         :key="a.id"
-        :value="a.id"
+        :value="a.user.name"
         style="color:#212529;background:white;"
     >
-        {{ a.name }}
+        {{ a.user.name }}
     </option>
 </select>
                         </div>
