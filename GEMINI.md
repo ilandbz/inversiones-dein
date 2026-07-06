@@ -186,3 +186,20 @@ Se integrará API de DNI/RUC (configuración externa ya resuelta).
 Se busca arquitectura modular, mantenible, escalable y enfocada en operación real, no un panel genérico.
 
 ---
+
+
+## 🔄 Workflow de Git (obligatorio)
+
+Al finalizar cualquier tarea de código (crear, editar o eliminar archivos), el agente DEBE:
+
+1. Ejecutar `git add .`
+2. Ejecutar `git commit -m "tipo: descripción corta"` usando Conventional Commits:
+   - `feat:` nueva funcionalidad
+   - `fix:` corrección de bug
+   - `refactor:` refactorización sin cambio de comportamiento
+   - `style:` cambios de estilo/CSS
+   - `docs:` documentación
+3. Ejecutar `git push origin main`
+
+No preguntar confirmación salvo que el cambio sea destructivo (eliminar módulos, migraciones que borran datos, etc).
+Si hay conflictos o el push falla, detenerse y reportar el error, no forzar.

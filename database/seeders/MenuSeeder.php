@@ -131,7 +131,16 @@ class MenuSeeder extends Seeder
             ];
 
             $allProcessedMenuIds = [];
-            $role = Role::where('nombre', 'SUPER USUARIO')->first();
+            $roleSuper = Role::where('nombre', 'SUPER USUARIO')->first();
+            $roleAsesor = Role::where('nombre', 'ASESOR')->first();
+
+            // Menús específicos para el ASESOR (basado en slugs)
+            $menusAsesor = [
+                '/', 'clientes', 'registro-de-clientes', 'listado-de-clientes', 'historial-del-cliente',
+                'asesores', 'metas', 'cartilla-de-cobranza', 'historico-del-asesor',
+                'prestamos', 'simulacion', 'cronograma-de-pagos',
+                'ahorros', 'apertura-de-cuenta', 'estado-de-cuenta'
+            ];
 
             foreach ($data as $grupoData) {
                 $grupo = GrupoMenu::firstOrCreate(['titulo' => $grupoData['titulo']]);
@@ -150,8 +159,11 @@ class MenuSeeder extends Seeder
 
                     $allProcessedMenuIds[] = $menu->id;
 
-                    if ($role) {
-                        $role->menus()->syncWithoutDetaching([$menu->id]);
+                    if ($roleSuper) {
+                        $roleSuper->menus()->syncWithoutDetaching([$menu->id]);
+                    }
+                    if ($roleAsesor && in_array($menu->slug, $menusAsesor)) {
+                        $roleAsesor->menus()->syncWithoutDetaching([$menu->id]);
                     }
 
                     if (!empty($itemData['submenu'])) {
@@ -169,8 +181,11 @@ class MenuSeeder extends Seeder
 
                             $allProcessedMenuIds[] = $subMenu->id;
 
-                            if ($role) {
-                                $role->menus()->syncWithoutDetaching([$subMenu->id]);
+                            if ($roleSuper) {
+                                $roleSuper->menus()->syncWithoutDetaching([$subMenu->id]);
+                            }
+                            if ($roleAsesor && in_array($subMenu->slug, $menusAsesor)) {
+                                $roleAsesor->menus()->syncWithoutDetaching([$subMenu->id]);
                             }
                         }
                     }
