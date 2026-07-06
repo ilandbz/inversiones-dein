@@ -363,12 +363,22 @@ onMounted(() => {
                         <div class="mb-3">
                             <label class="form-label text-muted small fw-bold text-uppercase">Seleccione Asesor <span class="text-danger">*</span></label>
 
+<select
+    class="form-select"
+    style="color:#212529;background:white;"
+    v-model="modalAsignacion.asesor_id"
+>
+    <option value="">-- Seleccionar --</option>
 
-                            <pre>{{ asesores }}</pre>
-                            <select class="form-select bg-light border-0" v-model="modalAsignacion.asesor_id">
-                                <option value="">-- Seleccionar --</option>
-                                <option v-for="a in asesores" :key="a.id" :value="a.id">{{ a.name }}</option>
-                            </select>
+    <option
+        v-for="a in asesores"
+        :key="a.id"
+        :value="a.id"
+        style="color:#212529;background:white;"
+    >
+        {{ a.name }}
+    </option>
+</select>
                         </div>
                         <div class="form-check form-switch mb-0">
                             <input class="form-check-input" type="checkbox" role="switch" id="checkvigentes" v-model="modalAsignacion.convigentes">
