@@ -171,7 +171,6 @@ onMounted(() => {
                             inputmode="numeric"
                             @keypress="onlyNumbers"
                             @change="buscarPersona(form.dni)"
-                            :readonly="form.estadoCrud=='editar'"
                           />
                         </div>
                         <div v-if="form.errors.dni" class="invalid-feedback d-block">
@@ -191,7 +190,6 @@ onMounted(() => {
                             @input="form.apepat = form.apepat.toUpperCase()"
                             :class="{ 'is-invalid': form.errors.apepat }"
                             placeholder="PATERNO"
-                            :readonly="form.estadoCrud=='editar'"
                           />
                           <div v-if="form.errors.apepat" class="invalid-feedback d-block">
                             <div v-for="error in form.errors.apepat" :key="error">{{ error }}</div>
@@ -208,7 +206,6 @@ onMounted(() => {
                             @input="form.apemat = form.apemat.toUpperCase()"
                             :class="{ 'is-invalid': form.errors.apemat }"
                             placeholder="MATERNO"
-                            :readonly="form.estadoCrud=='editar'"
                           />
                           <div v-if="form.errors.apemat" class="invalid-feedback d-block">
                             <div v-for="error in form.errors.apemat" :key="error">{{ error }}</div>
@@ -225,7 +222,6 @@ onMounted(() => {
                             @input="form.primernombre = form.primernombre.toUpperCase()"
                             :class="{ 'is-invalid': form.errors.primernombre }"
                             placeholder="NOMBRE"
-                            :readonly="form.estadoCrud=='editar'"
                           />
                           <div v-if="form.errors.primernombre" class="invalid-feedback d-block">
                             <div v-for="error in form.errors.primernombre" :key="error">{{ error }}</div>
@@ -242,7 +238,6 @@ onMounted(() => {
                             @input="form.otrosnombres = form.otrosnombres.toUpperCase()"
                             :class="{ 'is-invalid': form.errors.otrosnombres }"
                             placeholder="OTROS"
-                            :readonly="form.estadoCrud=='editar'"
                           />
                           <div v-if="form.errors.otrosnombres" class="invalid-feedback d-block">
                             <div v-for="error in form.errors.otrosnombres" :key="error">{{ error }}</div>

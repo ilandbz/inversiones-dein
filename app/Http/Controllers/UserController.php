@@ -194,23 +194,40 @@ class UserController extends Controller
     public function update(UpdateUserRequest $request)
     {
         $file = $request->file('foto');
+
         $user = User::findOrFail($request->id);
+
+        // Guardar el DNI anterior
+        $dniAnterior = $user->dni;
+
+        // Actualizar usuario
         $user->update([
-            'name'      => $request->username,
-            'dni'       => $request->dni,
-        ]);
-        $user->save();
-        Persona::updateOrCreate([
-            'dni'           => $request->dni,
-        ], [
-            'ape_pat'       => $request->apepat,
-            'ape_mat'       => $request->apemat,
-            'primernombre'  => $request->primernombre,
-            'otrosnombres'  => $request->otrosnombres,
-            'celular'       => $request->celular,
+            'name' => $request->username,
+            'dni'  => $request->dni,
         ]);
 
+        // Buscar la persona por el DNI anterior
+        $persona = Persona::where('dni', $dniAnterior)->first();
 
+        if ($persona) {
+            $persona->update([
+                'dni'           => $request->dni,
+                'ape_pat'       => $request->apepat,
+                'ape_mat'       => $request->apemat,
+                'primernombre'  => $request->primernombre,
+                'otrosnombres'  => $request->otrosnombres,
+                'celular'       => $request->celular,
+            ]);
+        } else {
+            Persona::create([
+                'dni'           => $request->dni,
+                'ape_pat'       => $request->apepat,
+                'ape_mat'       => $request->apemat,
+                'primernombre'  => $request->primernombre,
+                'otrosnombres'  => $request->otrosnombres,
+                'celular'       => $request->celular,
+            ]);
+        }
         if ($file) {
             $errores = [];
             if ($file->getSize() > 2048 * 1024) {
@@ -368,7 +385,6 @@ class UserController extends Controller
     public function actualizarPerfil(Request $request)
     {
         $user = Auth::user();
-
         $request->validate([
             'fecha_nac' => 'nullable|date',
             'genero' => 'nullable|string|max:20',
@@ -379,7 +395,6 @@ class UserController extends Controller
             'ocupacion' => 'nullable|string|max:100',
             'direccion' => 'nullable|string|max:255',
         ]);
-
         $persona = Persona::where('dni', $user->dni)->first();
         if ($persona) {
             $persona->update([
@@ -393,7 +408,6 @@ class UserController extends Controller
                 'direccion' => $request->direccion,
             ]);
         }
-
         return response()->json([
             'ok' => 1,
             'mensaje' => 'Perfil actualizado exitosamente'
