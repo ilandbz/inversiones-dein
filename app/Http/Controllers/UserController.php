@@ -436,11 +436,16 @@ class UserController extends Controller
         $buscar = mb_strtoupper($request->buscar ?? '');
         $paginacion = $request->paginacion;
         $usuarios = User::query()
-            ->whereRaw("upper(name) like ?", ['%' . $buscar . '%'])
+            ->where(function ($query) use ($buscar) {
+                $query->whereRaw("upper(name) like ?", ['%' . $buscar . '%'])
+                    ->orWhereHas('persona', function ($q) use ($buscar) {
+                        $q->whereRaw("upper(concat(ape_pat, ' ', ape_mat, ' ', primernombre, ' ', coalesce(otrosnombres, ''))) like ?", ['%' . $buscar . '%']);
+                    });
+            })
             ->when(is_numeric($buscar), function ($query) use ($buscar) {
                 return $query->orWhere('dni', $buscar);
             })
-            ->with(['roles'])
+            ->with(['roles', 'persona'])
             ->where('es_activo', 1);
         if ($filters['role'] === 'GERENTE AGENCIA') {
             $usuarios->whereHas('agencias', function ($query) use ($filters) {
@@ -455,11 +460,16 @@ class UserController extends Controller
         $buscar = mb_strtoupper($request->buscar ?? '');
         $paginacion = $request->paginacion;
         $usuarios = User::query()
-            ->whereRaw("upper(name) like ?", ['%' . $buscar . '%'])
+            ->where(function ($query) use ($buscar) {
+                $query->whereRaw("upper(name) like ?", ['%' . $buscar . '%'])
+                    ->orWhereHas('persona', function ($q) use ($buscar) {
+                        $q->whereRaw("upper(concat(ape_pat, ' ', ape_mat, ' ', primernombre, ' ', coalesce(otrosnombres, ''))) like ?", ['%' . $buscar . '%']);
+                    });
+            })
             ->when(is_numeric($buscar), function ($query) use ($buscar) {
                 return $query->orWhere('dni', $buscar);
             })
-            ->with(['roles'])
+            ->with(['roles', 'persona'])
             ->where('es_activo', 0);
         if ($filters['role'] === 'GERENTE AGENCIA') {
             $usuarios->whereHas('agencias', function ($query) use ($filters) {
@@ -474,11 +484,16 @@ class UserController extends Controller
         $buscar = mb_strtoupper($request->buscar ?? '');
         $paginacion = $request->paginacion;
         $usuarios = User::query()
-            ->whereRaw("upper(name) like ?", ['%' . $buscar . '%'])
+            ->where(function ($query) use ($buscar) {
+                $query->whereRaw("upper(name) like ?", ['%' . $buscar . '%'])
+                    ->orWhereHas('persona', function ($q) use ($buscar) {
+                        $q->whereRaw("upper(concat(ape_pat, ' ', ape_mat, ' ', primernombre, ' ', coalesce(otrosnombres, ''))) like ?", ['%' . $buscar . '%']);
+                    });
+            })
             ->when(is_numeric($buscar), function ($query) use ($buscar) {
                 return $query->orWhere('dni', $buscar);
             })
-            ->with(['roles']);
+            ->with(['roles', 'persona']);
         if ($filters['role'] === 'GERENTE AGENCIA') {
             $usuarios->whereHas('agencias', function ($query) use ($filters) {
                 $query->where('agencia_id', $filters['agencia_id']);
