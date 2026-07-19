@@ -45,6 +45,7 @@ const editar = async (id) => {
             primernombre: usuario.value.persona.primernombre, otrosnombres: usuario.value.persona.otrosnombres,
             celular: usuario.value.persona.celular,
             foto: carpetaFotos+'/'+usuario.value.name+'.webp',
+            role_id: usuario.value.role_id,
             estadoCrud: 'editar', errors: []
         };
         openModal('#modalusuario');
