@@ -23,6 +23,7 @@ const formPlazo = ref({
     plazo: '',
     tasainteres: '',
     costomora: '',
+    gastos_administrativos: 5.00,
     estadoCrud: 'nuevo'
 })
 
@@ -54,6 +55,7 @@ const nuevoPlazo = () => {
         plazo: '',
         tasainteres: '',
         costomora: '',
+        gastos_administrativos: 5.00,
         estadoCrud: 'nuevo'
     }
     openModal('#plazomodal')
@@ -142,6 +144,7 @@ onMounted(() => {
                                         <th>Plazo</th>
                                         <th>Tasa Interés</th>
                                         <th>Mora Diaria</th>
+                                        <th>Gastos Admin.</th>
                                         <th class="pe-4 text-end">Acciones</th>
                                     </tr>
                                 </thead>
@@ -173,6 +176,9 @@ onMounted(() => {
                                         </td>
                                         <td>
                                             <span class="text-danger fw-bold">S/ {{ p.costomora }}</span>
+                                        </td>
+                                        <td>
+                                            <span class="text-info fw-bold">S/ {{ p.gastos_administrativos }}</span>
                                         </td>
                                         <td class="pe-4 text-end">
                                             <div class="btn-group gap-2">

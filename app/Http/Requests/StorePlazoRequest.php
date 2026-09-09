@@ -28,6 +28,7 @@ class StorePlazoRequest extends FormRequest
             'plazo'       => 'required|integer|min:1',
             'tasainteres' => 'required|numeric|min:0',
             'costomora'   => 'required|numeric|min:0',
+            'gastos_administrativos' => 'nullable|numeric|min:0',
         ];
     }
 }

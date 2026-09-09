@@ -113,6 +113,7 @@ watch(() => form.value.frecuencia, () => { form.value.plazo = plazoOptions.value
 watch(() => form.value.plazo, () => {
     form.value.tasainteres = toMoney2(toNumber(selectedPlazo.value?.tasainteres ?? 0))
     form.value.costomora   = toMoney2(toNumber(selectedPlazo.value?.costomora ?? 0))
+    form.value.gastos_administrativos = toMoney2(toNumber(selectedPlazo.value?.gastos_administrativos ?? 0))
 })
 
 const totalCalc = computed(() => {
@@ -271,6 +272,8 @@ onMounted(() => { listaAsesores(); listaOrigenesFinanciamientos(); listaPlazos()
                                                     <option value="" hidden="">Seleccione tipo...</option>
                                                     <option value="NUEVO">NUEVO</option>
                                                     <option value="RENOVACIÓN">RENOVACIÓN</option>
+                                                    <option value="PARALELO">PARALELO</option>
+                                                    <option value="REFINANCIADO">REFINANCIADO</option>
                                                 </select>
                                             </div>
                                             <div class="col-md-3">
@@ -365,6 +368,10 @@ onMounted(() => { listaAsesores(); listaOrigenesFinanciamientos(); listaPlazos()
                                             <div class="d-flex justify-content-between mb-2">
                                                 <span class="text-muted small">Monto Base:</span>
                                                 <span class="fw-bold">S/ {{ form.monto || '0.00' }}</span>
+                                            </div>
+                                            <div class="d-flex justify-content-between mb-2">
+                                                <span class="text-muted small">Gastos Admin.:</span>
+                                                <span class="fw-bold text-info">+ S/ {{ form.gastos_administrativos || '0.00' }}</span>
                                             </div>
                                             <div class="d-flex justify-content-between mb-2">
                                                 <span class="text-muted small">Interés ({{ form.tasainteres }}%):</span>

@@ -93,13 +93,22 @@ const submitForm = async () => {
                                 <div v-if="hasError('tasainteres')" class="text-danger extra-small mt-1">{{ firstError('tasainteres') }}</div>
                             </div>
 
-                            <div class="col-12">
+                            <div class="col-md-6">
                                 <label class="form-label small fw-bold text-muted text-uppercase">Costo Mora Diario (S/)</label>
                                 <div class="input-group">
                                     <span class="input-group-text border-0 bg-warning text-dark fw-bold rounded-start-3">S/</span>
                                     <input v-model="form.costomora" type="number" step="0.01" class="form-control border-0 bg-light rounded-end-3 shadow-none" placeholder="0.00" :class="{'is-invalid': hasError('costomora')}">
                                 </div>
                                 <div v-if="hasError('costomora')" class="text-danger extra-small mt-1">{{ firstError('costomora') }}</div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-muted text-uppercase">Gastos Administrativos (S/)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text border-0 bg-info text-white fw-bold rounded-start-3">S/</span>
+                                    <input v-model="form.gastos_administrativos" type="number" step="0.01" class="form-control border-0 bg-light rounded-end-3 shadow-none" placeholder="5.00" :class="{'is-invalid': hasError('gastos_administrativos')}">
+                                </div>
+                                <div v-if="hasError('gastos_administrativos')" class="text-danger extra-small mt-1">{{ firstError('gastos_administrativos') }}</div>
                             </div>
                         </form>
                     </div>

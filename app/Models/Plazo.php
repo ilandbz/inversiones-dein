@@ -15,5 +15,6 @@ class Plazo extends Model
         'plazo',
         'tasainteres',
         'costomora',
+        'gastos_administrativos',
     ];
 }
