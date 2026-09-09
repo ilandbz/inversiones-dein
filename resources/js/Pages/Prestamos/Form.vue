@@ -370,12 +370,12 @@ onMounted(() => { listaAsesores(); listaOrigenesFinanciamientos(); listaPlazos()
                                                 <span class="fw-bold">S/ {{ form.monto || '0.00' }}</span>
                                             </div>
                                             <div class="d-flex justify-content-between mb-2">
-                                                <span class="text-muted small">Gastos Admin.:</span>
-                                                <span class="fw-bold text-info">+ S/ {{ form.gastos_administrativos || '0.00' }}</span>
-                                            </div>
-                                            <div class="d-flex justify-content-between mb-2">
                                                 <span class="text-muted small">Interés ({{ form.tasainteres }}%):</span>
                                                 <span class="fw-bold text-success">+ S/ {{ toMoney2(toNumber(form.monto) * (toNumber(form.tasainteres)/100)) }}</span>
+                                            </div>
+                                            <div class="d-flex justify-content-between mb-2">
+                                                <span class="text-muted small">Gastos Admin.:</span>
+                                                <span class="fw-bold text-info">+ S/ {{ form.gastos_administrativos || '0.00' }}</span>
                                             </div>
                                             <hr class="my-3 opacity-25">
                                             <div class="d-flex justify-content-between mb-1">
@@ -387,7 +387,7 @@ onMounted(() => { listaAsesores(); listaOrigenesFinanciamientos(); listaPlazos()
 
                                         <div class="bg-light p-3 rounded-4 mb-4 text-center">
                                             <div class="text-uppercase small fw-bold text-muted mb-1">Estimación de Cuotas</div>
-                                            <div class="fs-4 fw-bold text-dark">S/ {{ toMoney2(toNumber(totalCalc) / (toNumber(form.plazo) || 1)) }}</div>
+                                            <div class="fs-4 fw-bold text-dark">S/ {{ toMoney2((toNumber(totalCalc) / (toNumber(form.plazo) || 1)) + toNumber(form.gastos_administrativos)) }}</div>
                                             <div class="small text-muted">Aprox. por cuota</div>
                                         </div>
 
