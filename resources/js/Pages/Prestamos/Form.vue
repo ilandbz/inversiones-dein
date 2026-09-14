@@ -247,7 +247,7 @@ onMounted(() => { listaAsesores(); listaOrigenesFinanciamientos(); listaPlazos()
                             <div class="col-lg-8">
                                 <div class="card border-0 shadow-sm rounded-4 mb-4">
                                     <div class="card-body p-4">
-                                        <h6 class="fw-bold text-primary text-uppercase small mb-4"><i class="fas fa-file-invoice-dollar me-2"></i>Condiciones del Préstamo</h6>
+                                        <h6 class="fw-bold text-primary text-uppercase small mb-4"><i class="fas fa-info-circle me-2"></i>Datos Generales del Crédito</h6>
                                         <div class="row g-3">
                                             <div class="col-md-6">
                                                 <label class="form-label small fw-bold text-muted text-uppercase">Asesor Responsable</label>
@@ -284,7 +284,15 @@ onMounted(() => { listaAsesores(); listaOrigenesFinanciamientos(); listaPlazos()
                                                 </select>
                                                 <div v-if="hasError('origen_financiamiento_id')" class="text-danger extra-small mt-1">{{ firstError('origen_financiamiento_id') }}</div>
                                             </div>
-                                            
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Condiciones del Préstamo (Visible al seleccionar origen) -->
+                                <div class="card border-0 shadow-sm rounded-4 mb-4" v-if="form.origen_financiamiento_id">
+                                    <div class="card-body p-4">
+                                        <h6 class="fw-bold text-primary text-uppercase small mb-4"><i class="fas fa-sliders-h me-2"></i>Condiciones por Origen</h6>
+                                        <div class="row g-3">
                                             <div class="col-md-4">
                                                 <label class="form-label small fw-bold text-muted text-uppercase">Frecuencia</label>
                                                 <select v-model="form.frecuencia" class="form-select border-0 bg-light rounded-3 shadow-none">

@@ -186,3 +186,17 @@ Se integrará API de DNI/RUC (configuración externa ya resuelta).
 Se busca arquitectura modular, mantenible, escalable y enfocada en operación real, no un panel genérico.
 
 ---
+
+## 🚀 Estado Actual y Progreso
+
+- **Módulo de Préstamos:**
+  - Formulario (`Form.vue`) implementado con cálculo en tiempo real de intereses, moras y gastos administrativos.
+  - Integración funcional de búsqueda y registro de **Aval** mediante DNI, directamente en el modal de Préstamo.
+  - Arquitectura limpia mediante Vue Composables (`useCredito`, `usePlazo`, `usePersona`, `useOrigenFinanciamiento`, `useAsesor`) para aislar la lógica y las llamadas a la API.
+  - Manejo eficiente de errores de validación desde Laravel (422) con scroll automático hacia el campo inválido (`scrollToFirstInvalid`).
+- **UI / UX Financiera:**
+  - Modales enriquecidos con tarjetas (`card`) y diseño moderno utilizando utilidades de Bootstrap (bg-light, shadow-sm, rounded-4).
+  - Alertas interactivas y notificaciones (Toast) manejadas con SweetAlert2.
+  - Uso de colores corporativos e indicadores visuales (badges, iconos de Font Awesome).
+
+---
