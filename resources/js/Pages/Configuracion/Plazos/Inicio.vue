@@ -2,14 +2,18 @@
 import { ref, onMounted, watch } from 'vue'
 import AppLayoutDefault from '@/Layouts/AppLayoutDefault.vue'
 import useHelper from '@/Helpers'
+import useOrigenFinanciamiento from '@/Composables/OrigenFinanciamiento'
 import axios from 'axios'
 import FormPlazo from './Form.vue'
 
 const { Toast, Swal, openModal, hideModal, formatoDinero, truncate } = useHelper()
+const { origenes, listaOrigenesFinanciamientos } = useOrigenFinanciamiento()
 
 const plazos = ref([])
 const loading = ref(false)
 const buscar = ref('')
+const origenSeleccionado = ref(null)
+
 const paginacion = ref({
     current_page: 1,
     last_page: 1,
@@ -19,6 +23,7 @@ const paginacion = ref({
 
 const formPlazo = ref({
     id: null,
+    origen_financiamiento_id: null,
     frecuencia: '',
     plazo: '',
     tasainteres: '',
@@ -34,7 +39,8 @@ const listarPlazos = async (page = 1) => {
             params: {
                 buscar: buscar.value,
                 paginacion: paginacion.value.per_page,
-                page: page
+                page: page,
+                origen_financiamiento_id: origenSeleccionado.value
             }
         })
         plazos.value = data.data
@@ -48,9 +54,18 @@ const listarPlazos = async (page = 1) => {
     }
 }
 
+const seleccionarOrigen = (id) => {
+    origenSeleccionado.value = id
+    listarPlazos(1)
+}
+
 const nuevoPlazo = () => {
+    if (!origenSeleccionado.value) {
+        return Toast.fire({ icon: 'warning', title: 'Seleccione un Origen primero' })
+    }
     formPlazo.value = {
         id: null,
+        origen_financiamiento_id: origenSeleccionado.value,
         frecuencia: '',
         plazo: '',
         tasainteres: '',
@@ -97,7 +112,11 @@ watch(buscar, () => {
     listarPlazos(1)
 })
 
-onMounted(() => {
+onMounted(async () => {
+    await listaOrigenesFinanciamientos()
+    if (origenes.value.length > 0) {
+        origenSeleccionado.value = origenes.value[0].id
+    }
     listarPlazos()
 })
 </script>
@@ -119,10 +138,10 @@ onMounted(() => {
                     </div>
                 </div>
 
-                <!-- Filters & Search -->
+                <!-- Filters & Tabs -->
                 <div class="card border-0 shadow-sm rounded-4 mb-4">
                     <div class="card-body p-4">
-                        <div class="row g-3 align-items-center">
+                        <div class="row g-3 align-items-center mb-3">
                             <div class="col-md-4">
                                 <div class="input-group bg-light rounded-pill border-0 px-3">
                                     <span class="input-group-text bg-transparent border-0"><i class="fas fa-search text-muted"></i></span>
@@ -130,6 +149,18 @@ onMounted(() => {
                                 </div>
                             </div>
                         </div>
+                        
+                        <!-- Tabs de Orígenes -->
+                        <ul class="nav nav-pills gap-2">
+                            <li class="nav-item" v-for="o in origenes" :key="o.id">
+                                <button 
+                                    class="nav-link rounded-pill px-4 fw-bold shadow-none" 
+                                    :class="origenSeleccionado === o.id ? 'active' : 'bg-light text-dark'"
+                                    @click="seleccionarOrigen(o.id)">
+                                    {{ o.nombre }}
+                                </button>
+                            </li>
+                        </ul>
                     </div>
                 </div>
 

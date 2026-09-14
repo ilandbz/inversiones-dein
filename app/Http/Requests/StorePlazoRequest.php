@@ -24,6 +24,7 @@ class StorePlazoRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'origen_financiamiento_id' => 'required|exists:origen_financiamientos,id',
             'frecuencia'  => 'required|string|max:50',
             'plazo'       => 'required|integer|min:1',
             'tasainteres' => 'required|numeric|min:0',
