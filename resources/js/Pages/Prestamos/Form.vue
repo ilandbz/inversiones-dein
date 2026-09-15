@@ -92,13 +92,13 @@ const toMoney2 = (n) => (Math.round((Number(n) + Number.EPSILON) * 100) / 100).t
 
 const frecuenciaOptions = computed(() => {
   const arr = Array.isArray(plazos.value) ? plazos.value : []
-  return [...new Set(arr.map(x => x.frecuencia))].filter(Boolean)
+  return [...new Set(arr.filter(x => !form.value.origen_financiamiento_id || String(x.origen_financiamiento_id) === String(form.value.origen_financiamiento_id)).map(x => x.frecuencia))].filter(Boolean)
 })
 
 const plazoOptions = computed(() => {
   const f = form.value.frecuencia
   const arr = Array.isArray(plazos.value) ? plazos.value : []
-  return arr.filter(x => x.frecuencia === f).map(x => ({
+  return arr.filter(x => x.frecuencia === f && (!form.value.origen_financiamiento_id || String(x.origen_financiamiento_id) === String(form.value.origen_financiamiento_id))).map(x => ({
       value: x.plazo, label: f === 'DIARIA' ? `${x.plazo} días` : f === 'SEMANAL' ? `${x.plazo} sem.` : `${x.plazo} cuotas`,
       tasa: x.tasainteres, mora: x.costomora,
     })).sort((a, b) => Number(a.value) - Number(b.value))
@@ -106,9 +106,12 @@ const plazoOptions = computed(() => {
 
 const selectedPlazo = computed(() => {
   const arr = Array.isArray(plazos.value) ? plazos.value : []
-  return arr.find(x => x.frecuencia === form.value.frecuencia && String(x.plazo) === String(form.value.plazo)) || null
+  return arr.find(x => x.frecuencia === form.value.frecuencia && String(x.plazo) === String(form.value.plazo) && (!form.value.origen_financiamiento_id || String(x.origen_financiamiento_id) === String(form.value.origen_financiamiento_id))) || null
 })
 
+watch(() => form.value.origen_financiamiento_id, () => {
+    form.value.frecuencia = frecuenciaOptions.value?.[0] ?? ''
+})
 watch(() => form.value.frecuencia, () => { form.value.plazo = plazoOptions.value?.[0]?.value ?? '' }, { immediate: true })
 watch(() => form.value.plazo, () => {
     form.value.tasainteres = toMoney2(toNumber(selectedPlazo.value?.tasainteres ?? 0))
