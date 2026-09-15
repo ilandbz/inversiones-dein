@@ -62,13 +62,13 @@ class PlazoController extends Controller
     {
         $buscar = mb_strtoupper((string) $request->buscar);
         $paginacion = $request->paginacion ?? 10;
-        
+
         $query = Plazo::whereRaw('UPPER(frecuencia) LIKE ?', ['%' . $buscar . '%']);
-        
+
         if ($request->has('origen_financiamiento_id') && $request->origen_financiamiento_id !== '') {
             $query->where('origen_financiamiento_id', $request->origen_financiamiento_id);
         }
-        
-        return $query->paginate((int) $paginacion);
+
+        return $query->orderBy('plazo', 'asc')->paginate((int) $paginacion);
     }
 }
